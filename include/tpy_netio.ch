@@ -16,9 +16,7 @@
  
 #define CRLF   hb_eol()
 
-#define NETSERVER  "69.55.54.230" //"localhost"
-#define NETPORT    2941
-#define NETPASSWD  "topsecret"
+#include "connect.ch"
 
 #xtranslate net:<!func!>([<params,...>]) => ;
             netio_funcexec( #<func> [,<params>] )
