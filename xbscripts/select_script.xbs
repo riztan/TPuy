@@ -1,0 +1,75 @@
+/*
+ *  Proyecto Tepuy.
+ *
+ *  Programa Inicial. Genera Menu, Fondo de Pantalla y un 
+ *  Expander para colocar algunos logs.
+ */
+
+#include "gclass.ch"
+#include "proandsys.ch"
+#include "tepuy.ch"
+
+#xtranslate :: => oForm:
+
+Function Select_Script()
+
+   local cRes, oForm
+
+   DEFINE PUBLIC oForm
+
+   ::cResFile  := oTpuy:cResources+"select_script.ui"
+   ::cIconFile := oTpuy:cImages+"orseit-icon.png"
+
+   if !File( ::cResFile ) 
+      MsgStop("No es posible localizar el recurso "+::cResFile, "Atención" ) 
+      return nil
+   endif
+
+   SET RESOURCES ::oRes FROM FILE ::cResFile
+
+   DEFINE WINDOW ::oWnd                 ;
+          TITLE "Ejecutar Script"       ;
+          ICON_FILE ::cIconFile         ;
+          ID "window1" RESOURCE ::oRes  ;
+          OF oTpuy:oWnd
+
+      DEFINE IMAGE ::oImage FILE oTpuy:cImages+"script.png" ;
+             ID "image1" RESOURCE ::oRes
+   
+             ::oImage:Adjust( 80, 100 )
+
+
+      DEFINE ENTRY ::oScriptName  VAR ::cScriptName  ;
+             ID "oScriptName" ;
+             RESOURCE ::oRes
+
+      DEFINE BUTTON ::oBtnEjecutar  ;
+             ACTION Ejecutar(oForm) ;
+             ID "btnEjecutar" RESOURCE ::oRes
+
+   ACTIVATE WINDOW ::oWnd 
+
+Return .t.
+
+
+PROCEDURE Ejecutar(oForm)
+
+   local cScriptName:= ::oScriptName:GetText()
+   local cScriptFile := oTpuy:cXBScript+cScriptName
+
+   If FILE( cScriptFile+".xbs" )
+
+      DESTROY WINDOW ::oWnd
+      oTpuy:RunXBS( ::cScriptName )
+      oForm := NIL
+   
+   Else
+
+      MsgStop("No existe el programa "+cScriptName )
+
+   EndIf
+
+   RETURN
+
+
+//eof

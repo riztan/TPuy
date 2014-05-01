@@ -1,0 +1,488 @@
+
+#include "gclass.ch"
+#include "xhb.ch"
+#include "tpy_netio.ch"
+#include "tepuy.ch"
+
+
+
+/*
+#xcommand TRY        => BEGIN SEQUENCE WITH { |e| break( e ) }
+#xcommand CATCH [<!oErr!>] => RECOVER [USING <oErr>] <-oErr->
+#xcommand FINALLY          => ALWAYS
+*/
+
+#xtranslate ::<exp>  =>  oForm:<exp>
+
+function netio_registro()
+
+   Local lConnect:=.f.
+   Local rQry, cQry
+   Local oMQuery
+   Local lResp
+   Local cResFile := oTpuy:cResources+"registro.ui"
+   Local oForm 
+   Local oResource
+
+   DEFINE PUBLIC oForm
+
+   oTpuy:RunXBS("netio_Check")
+
+   ::lCheckEntry := .f.
+
+   rQry := ~GetUserStru()
+
+   ::cConfirm := ""  // Codigo de Confirmacion.
+   ::cPass2   := ""  // Confirmacion de contraseña.
+   ::cMail2   := ""  // Confirmacion de Correo.
+
+   ::cIdFiscal := ""
+
+   ::lValidLogin := .f. // Para verificar si el login ya ha sido validado.
+
+
+   SET RESOURCES ::cResource FROM FILE cResFile
+
+   DEFINE WINDOW ::oWnd TITLE "" ; 
+          ID "wnd_registro" RESOURCE ::cResource ;
+          OF oTpuy:oWnd
+
+   DEFINE BOX ::oBox ID "hbox17" RESOURCE ::cResource
+
+   DEFINE IMAGE ::oImage FILE oTpuy:cImages+"man_and_girl.png" ;
+          ID "image3" RESOURCE ::cResource
+          ::oImage:Adjust( 128, 128 )
+
+
+   DEFINE ENTRY ::ent_id_fiscal VAR ::cIdFiscal ID "entry1" RESOURCE ::cResource
+   DEFINE TOOLTIP WIDGET ::ent_id_fiscal TEXT 'Ejemplo: "V-12345678-5"'
+          ::ent_id_fiscal:bValid := {|oEntry| ValidNFiscal( oForm, oEntry )   }
+
+
+   DEFINE ENTRY ::oLogin VAR ::cLogin ID "entry2" RESOURCE ::cResource
+          ::oLogin:bValid := {|oEntry| ValidLogin(oForm, oEntry) }
+
+
+   DEFINE ENTRY ::oPassword VAR ::cPassword ID "entry5" RESOURCE ::cResource
+          ::oPassword:bValid := {|oEntry| Check_Entry(oForm, oEntry:GetText(),.t.),.t. }
+
+
+   DEFINE ENTRY ::oMail VAR ::cMail ID "entry3" RESOURCE ::cResource
+          ::oMail:bValid := {|oEntry| ValidEMail(oForm, oEntry) }
+
+
+   DEFINE ENTRY ::oName VAR ::cName ID "entry4" RESOURCE ::cResource
+
+   DEFINE ENTRY ::oShortName VAR ::cShortName ID "entry6" RESOURCE ::cResource
+/*
+   DEFINE ENTRY ::ent_doc_id_pers VAR ::cIdPerson ID "entry1" RESOURCE ::cResource
+   DEFINE TOOLTIP WIDGET ::ent_doc_id_pers TEXT 'Ejemplo: "V-12345678"'
+          ::ent_doc_id_pers:bValid := {|oEntry| ValidNPersonal( oForm, oEntry )   }
+*/
+
+   DEFINE COMBOBOX ::oTipPer VAR ::cTipPer ITEMS {"Natural","Juridica","Gubernamental"} ;
+          OF ::oBox
+
+   DEFINE BUTTON ::oSave ID "btn_save" RESOURCE ::cResource ;
+            ACTION ( End( oForm, rQry, .t. ),.t. )
+//          ACTION ( PreSave(oForm), .t. )  
+//                      ( ::oABM:Save(), ::oABM:End() ) , ;
+//                      .f. )
+
+   DEFINE BUTTON ::oCancel ID "btn_cancel" RESOURCE ::cResource;
+            ACTION ( End( oForm, rQry, .f. ),.t. )
+//          ACTION (::oWnd:End(),nil)
+
+
+   ACTIVATE WINDOW ::oWnd
+
+//   ~oServer:ObjFree( rQry )
+
+Return .t.
+
+
+Function End( oForm, rQry, lSave )
+  if lSave
+    PreSave(oForm) 
+  endif
+
+  ~oServer:ObjFree( rQry )
+  ::End()
+
+return .t.
+
+
+
+Function PreSave( oForm )
+   Local lResult := .f.
+   Local cPass, cMail
+   Local oDatos
+
+   if hb_ISNIL(oForm) ; return .f. ; endif
+
+   DEFINE PUBLIC oDatos
+
+   cPass := ::oPassword:GetText()
+   cMail := ::oMail:GetText()
+
+   if !::lValidLogin
+      ValidLogin(oForm, ::oLogin, .t.)
+   endif
+
+   If Empty(::cConfirm)
+      MsgAlert( "No hay código de confirmación." )
+      return .f.
+   Else
+      // Verificar codigo de confirmación.
+      if !net:tpy_IsCode( ::cConfirm, ::oLogin:GetText() )
+         MsgAlert( "Intente volver a validar su correo electrónico.",;
+                   "Codigo de confirmación errado." )
+         return .f.
+      endif
+
+      if ( Empty(cMail) .or. Empty(cPass) ) .or. ;
+         !( cMail = ::cMail2 ) .or. ;
+         !( cPass = ::cPass2)  //.or. Empty( ::ent_name )
+
+         MsgAlert( "Porfavor vuelva a introducir la información del formulario",;
+                   "Problemas con algunos datos" )
+
+         if hb_IsBlock( ::oPassword:bValid) 
+            Eval( ::oPassword:bValid, ::oPassword ) 
+         endif
+
+         if hb_IsBlock( ::oMail:bValid) 
+            Eval( ::oMail:bValid, ::oMail ) 
+         endif
+
+         return .f.
+      endif
+
+      lResult := .t.
+
+   EndIf
+
+   /* Aqui la rutina para almacenar los datos. */
+   oDatos:Add("ent_name_abrev", ::oShortName:GetText() )
+   oDatos:Add("ent_name_abrev", ::oShortName:GetText(),)
+   oDatos:Add("ent_name",       ::oName:GetText())
+   oDatos:Add("ent_id_fiscal"  ,::ent_id_fiscal:GetText())
+   oDatos:Add("ent_person_type",Left( ::oTipPer:GetText(), 1 ))
+   oDatos:Add("usr_email"      ,cMail)
+   oDatos:Add("usr_login"      ,::oLogin:GetText())
+   oDatos:Add("usr_passwd"     ,cPass)
+
+   ~AddUser( oDatos:hVars ) 
+
+Return lResult
+
+
+/*
+ *  Validacion de Identificacion Fiscal
+ */
+Function ValidNFiscal( oForm, oEntry)
+   local cValue:= (oEntry:GetText())
+   local cRegexp := "^[JGVEP]+[-]+[0-9]{8}+[-]+[0-9]"
+   local cSql, oMQry
+
+   if Empty( cValue ) ; return .f. ; endif
+
+   if !hb_RegExMatch( cRegExp, cValue ) 
+      MsgAlert("El valor <b>"+cValue+"</b> es incorrrecto."+CRLF+;
+               "Utilice la máscara de datos correcta. "+CRLF+;
+               "<i>Ejemplo. <b>V-12345678-5</b></i>", "Entrada Incorrecta"  MARKUP )
+      return .f.
+   endif
+
+
+//   cSql := StrTran(::cQry, "limit 1", "where ent_id_fiscal=" + DataToSql( cValue ) )
+  
+return .t.
+
+
+/*
+ *  Validacion de Identificacion Personal
+ */
+Function ValidNPersonal( oForm, oEntry)
+   local cPrevio:= oEntry:GetText()
+   local cRegexp := "[0-9]"
+
+   if Empty( cPrevio ) ; return .f. ; endif
+
+   if !hb_RegExMatch( cRegExp, cPrevio ) 
+      MsgAlert("El valor <b>"+cPrevio+"</b> es incorrrecto."+CRLF+;
+               "Utilice la máscara de datos correcta. "+CRLF+;
+               "<i>Ejemplo. <b>V-12345678</b></i>", "Entrada Incorrecta"  MARKUP )
+      return .f.
+   endif
+
+return .t.
+      
+
+
+/*
+ *   Validación del Login
+ */
+Function ValidLogin( oForm, oLogin, lForce )
+   Local lResp := .f.
+   Local cSql, oMQry
+   Local cLogin
+
+   Default lForce := .f.
+   
+   cLogin := oLogin:GetText()
+
+   if !lForce .and. Empty(cLogin)
+      Return .t.
+   endif
+
+   if !net:tpy_IsLogin( cLogin )
+      MsgAlert( "El valor de usuario '<b>" + cLogin + "</b>'. " + ;
+                "No es válido. "+CRLF+;
+                "Si está utilizando mayúsculas, debe sustituirlas", "Valor Incorrecto" MARKUP )
+      oLogin:SetFocus()
+      Return lResp
+   endif
+
+   if !~ExistLogin( cLogin )
+      ::lValidLogin := .t.
+      lResp := .t.
+   else
+      MsgAlert("El(la) Usuario(a) '<b>" + cLogin + "</b>'. " + ;
+               "Ya esta registrado(a). " + hb_eol() + ;
+               "Intente cambiar el valor o verifique si "+ ;
+               "efectivamente Ud. ya está registrado(a). " ,;
+               "Usuario(a) Ya Registrado(a)." MARKUP)
+      oLogin:SetFocus()
+   endif
+
+Return .t.
+
+
+/*
+ *   Validación del Correo Electrónico
+ */
+Function ValidEMail( oForm, oMail, lForce )
+   Local lResp := .f.
+   Local cSql, oMQry
+   Local cMail
+
+   Default lForce := .f.
+   
+   cMail := oMail:GetText()
+
+   if !lForce .and. Empty(cMail)
+      Return .t.
+   endif
+
+   if !net:tpy_IsMail( cMail )
+      MsgAlert( "El valor de Correo Electrónico '<b>" + cMail + "</b>'. " + ;
+                "No es válido. ", "Valor Incorrecto" MARKUP )
+      oMail:SetFocus()
+      Return lResp
+   endif
+
+   if !( ~ExistMail( cMail ) )
+      lResp := Check_Entry(oForm, cMail,.f.)
+      if lResp
+         ::lValidMail := .t.
+      endif
+   else
+      MsgAlert("El Correo Electrónico '<b>" + cMail + "</b>'. " + ;
+               "Ya esta registrado. " + hb_eol() + ;
+               "Intente cambiar el valor o verifique si "+ ;
+               "efectivamente Ud. ya está registrado(a). " ,;
+               "Correo Ya Registrado." MARKUP)
+      oMail:SetFocus()
+   endif
+
+Return lResp
+
+
+
+Function Check_Entry(oForm, cValue, lPass)
+   Local lResult := .f., lExit := .f.
+   Local oWnd, oBox, oLabel, oEntry, cEntry, oBtn, oBtnCancel
+   Local oBox2
+   Local cCadena := "Contraseña"
+
+   Default lPass := .t.
+
+   If !lPass
+      cCadena := "Correo"
+   EndIf
+
+   If empty(cValue)
+      //MsgInfo("No ha especificado "+cCadena,"Introduzca un valor.")
+      ::oPassword:SetFocus()
+      return .t.
+   Else
+      if lPass
+         if ::oPassword:GetText() == ::cPass2 ; return .t. ; endif
+      else
+         if ::oMail:GetText() == ::cMail2 ; return .t. ; endif
+      endif
+   Endif
+
+
+   If ::lCheckEntry ; return .t. ; endif
+
+   ::lCheckEntry := .t.
+
+   DEFINE WINDOW oWnd TITLE "Verificación de " + cCadena OF ::oWnd
+          //OF oTpuy:oWnd
+
+      DEFINE BOX oBox VERTICAL SPACING 8 OF oWnd
+
+      DEFINE LABEL oLabel ;
+             TEXT "Indique nuevamente "+iif(lPass,"la "," el ")+cCadena; 
+             OF oBox
+
+      if lPass
+         DEFINE ENTRY oEntry PASSWORD VAR cEntry OF oBox
+      else
+         DEFINE ENTRY oEntry VAR cEntry OF oBox
+      endif
+
+      DEFINE BOX oBox2 HOMO OF oBox
+
+      DEFINE BUTTON oBtn TEXT "Continuar" ;
+             ACTION (lResult := Confirmar( lPass, oWnd, oForm, oEntry, cValue ), ChkEntry(oForm,oWnd)) ;
+             OF oBox2 
+
+      DEFINE BUTTON oBtnCancel TEXT "Cancelar" ;
+             ACTION ( ChkEntry(oForm,oWnd), lResult := .f., lExit:=.t. ) ;
+             OF oBox2
+
+   ACTIVATE WINDOW oWnd MODAL CENTER ;
+            VALID (lResult .or. lExit)
+
+return lResult
+
+
+
+Function ChkEntry(oForm,oWnd)
+   ::lCheckEntry := .f.
+   DESTROY WINDOW oWnd
+return .t.
+
+
+Function Confirmar( lPass, oParent, oForm, oEntry, cCompare )
+   Local lResult := .t.
+   Local oWnd, oImage, cResource
+   Local oCodigo, cCodigo
+   Local oContinue, oCancel, oNewCode
+   Local cValue
+
+   if (!hb_IsObject(oForm) .or. ValType(lPass)!="L") .or. !hb_IsObject(oEntry) 
+      Return .f. 
+   endif
+
+   cValue := oEntry:GetText()
+
+   if !( cValue = cCompare )
+      MsgInfo( "El valor no corresponde. ", "Reintentar" )
+      return .f.
+   endif
+
+   if lPass 
+      ::cPass2 := cValue
+      return .t.
+   endif
+
+   ::cMail2 := cValue
+   SendMsg(oForm)
+
+   SET RESOURCES cResource FROM FILE oTpuy:cResources+"registro.ui"
+
+   DEFINE WINDOW oWnd OF ::oWnd ; 
+          ID "wnd_confirmar" RESOURCE cResource
+
+//? file(oTpuy:cImages+"nube_seguridad.jpg")
+
+   DEFINE IMAGE oImage FILE oTpuy:cImages+"nube_seguridad.jpg" ;
+          ID "image4" RESOURCE cResource
+
+   DEFINE ENTRY oCodigo VAR cCodigo ;
+          ID "entry_code" RESOURCE cResource
+
+   DEFINE BUTTON oContinue ; //TEXT "Continuar" ;
+          ACTION (lResult := ValidCode( oCodigo, oForm ), iif(lResult, oWnd:End(),.f.) )  ;
+          ID "btn_continue" RESOURCE cResource
+
+   DEFINE BUTTON oCancel ; //TEXT "Continuar" ;
+          ACTION ( oWnd:End() ) ;
+          ID "btn_cancel1" RESOURCE cResource
+
+   DEFINE BUTTON oNewCode ;
+          ACTION SendMsg(oForm) ;
+          ID "btn_newcode" RESOURCE cResource
+
+
+   ACTIVATE WINDOW oWnd CENTER MODAL
+
+Return lResult
+
+
+
+
+Function ValidCode( oEntry, oForm )
+   Local lResp := .f.
+   Local cCode, cLogin
+
+   cCode := oEntry:GetText()
+   cLogin := ::oLogin:GetText() //::oABM:usr_login:GetText()
+   
+   if net:tpy_IsCode( cCode, cLogin )
+      MsgInfo("Código Confirmado!","puede continuar")
+      ::cConfirm := cCode
+      lResp := .t.
+   else
+      MsgAlert("Código Inválido", "debe reintentar.")
+   endif
+return lResp
+
+
+
+#define CRLF  CHR(10)+CHR(13)
+Function SendMsg(oForm)
+   Local lResp := .f.
+   Local cMsg
+   Local cLogin, cMail, cName, cCode
+
+   if hb_IsNIL(oForm) .or. Empty(oForm)
+      return lResp
+   endif
+
+   cLogin := oForm:oLogin:GetText()
+   cMail  := oForm:oMail:GetText()
+   cName  := oForm:oName:GetText()
+
+   if !net:tpy_IsMail( cMail )
+      MsgAlert( "El correo indicado no es válido." )
+   endif
+
+   if Empty( cLogin )
+      MsgAlert("No se ha indicado <b>login</b>","faltan datos" MARKUP )
+      Return lResp
+   endif
+
+   cCode := net:tpy_GenCode(cLogin)
+
+   if cCode == "0000" ; return lResp ; endif
+
+   cMsg := "Estimado(a) " + cName + ". "
+   cMsg += CRLF + CRLF
+   cMsg += "A continuación se presenta el código requerido para "
+   cMsg += "validar su solicitud de creación de usuario en nuestro "
+   cMsg += "Sistema. " + CRLF + CRLF 
+   cMsg += "Código de Confirmación: " + cCode
+
+   MsgRun( "<i>solicitando envio de correo... </i>", ; 
+           {|| net:tpy_SendMail( cMail ,;
+                                "Confirmación de Correo", cMsg ) } )
+   
+Return lResp
+
+
+//EOF

@@ -1,0 +1,219 @@
+/*
+ *  Proyecto Tepuy.
+ *
+ *  Script para Generar Menu Utilizando Archivos .ini
+ *
+ */
+
+#xcommand MENU_ROOT [<oMenuItem>] ;
+                   [<lSub: CHILDS>];
+                   ID <cId> ;
+                   TITLE <cTitle> ;
+	           [ IMAGE_FILE <cImage> ];
+	           [ ACTION <bAction> ];
+	           OF  <oMenu> ;
+  	      => ;
+	       MenuAddRoot( <oMenuItem>,<oMenu>,<cId>,<cTitle>,[<cImage>],[ \{|o| <bAction> \} ],<.lSub.>)
+
+
+
+#include "gclass.ch"
+#include "proandsys.ch"
+#include "xhb.ch"
+#include "tpy_netio.ch"
+
+
+Function menu(oMenuBar)
+
+   Local hMenu, hItem
+   Local oImage,cMenu
+   Local oFont, oMenu,oMenuItem
+
+
+   If hb_ISNIL(oMenuBar)
+      MsgStop("Problemas")
+      Return
+   Endif
+
+   IF HB_ISNIL(oTpuy:cMenuDir)
+      oTpuy:cMenuDir:="./menu/"
+   ENDIF
+
+   hMenu := GetMenu( "main" )
+
+   DEFINE FONT oFont NAME "Verdana 12" 
+
+   DEFINE IMAGE oImage FILE "../../images/gnome-logo.png"
+
+   FOR EACH hItem IN hMenu
+
+     IF hItem:__EnumIndex()>1
+
+        MENU_ROOT oMenuBar ;
+             ID hItem TITLE hItem ["title"] ;
+             IMAGE_FILE hItem ["image"] ;
+             OF oTpuy:oMenu
+
+     ENDIF
+
+   NEXT
+
+Return .t.
+
+
+
+
+/** Funcion para crear un Menu en la Barra a partir de los Modulos en
+ *  en la base de datos.
+ *
+ */
+Function MenuAddRoot( oMnuParent, oMenu, hId, cDescri, cImage, cAction, lSub )
+
+   Local oImage
+   Local hSubMenu,hItem
+
+   Default lSub := .F.
+
+   cImage := oTpuy:cImages+Alltrim(cImage)
+   cDescri := Alltrim(cDescri)
+
+   IF !Empty(cDescri)
+
+      MENUBAR oMenu OF oMnuParent
+
+      IF !Empty(cImage)
+
+         DEFINE IMAGE oImage FILE cImage
+         oImage:Adjust(48,48)
+
+         IF Empty(cAction)
+
+            MENUITEM IMAGE ROOT TITLE cDescri ;
+                        IMAGE oImage ;
+                        MNEMONIC OF oMenu
+         ELSE
+            MENUITEM IMAGE ROOT TITLE cDescri ;
+                        IMAGE oImage ;
+                        ACTION &cAction ;
+                        MNEMONIC OF oMenu
+         ENDIF
+
+      ELSE
+  
+         IF !Empty(cAction)
+            MENUITEM IMAGE ROOT TITLE cDescri ;
+                 ACTION &cAction MNEMONIC OF oMenu
+         ELSE
+            MENUITEM IMAGE ROOT TITLE cDescri MNEMONIC OF oMenu
+         ENDIF
+
+      ENDIF
+
+      If !Empty(hId ["submenu"])
+
+         hSubMenu := GetMenu( hId["submenu"] )
+
+         FOR EACH hItem IN hSubMenu
+
+           IF hItem:__EnumIndex()>1
+
+              MenuAddItem( oMenu, hItem )
+
+           ENDIF
+        NEXT
+
+      EndIf
+
+
+      ACTIVATE MENUBAR oMenu
+
+   ENDIF
+
+Return NIL
+
+
+
+/** Funcion para crear un Menu en la Barra a partir de los Modulos en
+ *  en la base de datos.
+ *
+ */
+Function MenuAddItem( oParent, hId )
+
+   Local oImage, oSubMenu, oItem
+   Local hSubMenu, hItem
+
+   cImage := oTpuy:cImages+Alltrim(hId["image"])
+   cDescri := Alltrim(hId["title"])
+   cAction := hId["action"]
+
+   IF !Empty(cDescri)
+
+      IF !Empty(cImage)
+
+         DEFINE IMAGE oImage FILE cImage
+         oImage:Adjust(32,32)
+
+         IF Empty(cAction)
+
+            MENUITEM IMAGE oItem TITLE cDescri ;
+                        IMAGE oImage ;
+                        MNEMONIC OF oParent
+         ELSE
+            MENUITEM IMAGE oItem TITLE cDescri ;
+                        IMAGE oImage ;
+                        ACTION &cAction ;
+                        MNEMONIC OF oParent
+         ENDIF
+
+      ELSE
+  
+         IF !Empty(cAction)
+            MENUITEM IMAGE oItem TITLE cDescri ;
+                 ACTION &cAction MNEMONIC OF oParent
+         ELSE
+            MENUITEM IMAGE oItem TITLE cDescri MNEMONIC OF oParent
+         ENDIF
+
+      ENDIF
+
+      If !Empty(hId ["submenu"])
+
+        hSubMenu := GetMenu( hId["submenu"] )
+
+        SUBMENU oSubMenu OF oItem
+
+        FOR EACH hItem IN hSubMenu
+
+          IF hItem:__EnumIndex()>1
+
+             MenuAddItem( oSubMenu, hItem )
+
+          ENDIF
+
+        NEXT
+
+      EndIf
+
+
+   ENDIF
+
+Return NIL
+
+
+/*
+ // Ejemplo de menu en JSON
+ {"menu": {
+   "id": "file",
+   "value": "File",
+   "popup": {
+     "menuitem": [
+       {"value": "New", "onclick": "CreateNewDoc()"},
+       {"value": "Open", "onclick": "OpenDoc()"},
+       {"value": "Close", "onclick": "CloseDoc()"}
+     ]
+   }
+ }}
+*/
+
+
+//eof

@@ -1,0 +1,146 @@
+/*
+ * sendscript: Envia Script al Servidor.
+ */
+
+#include "tpy_xbs.ch"
+
+PROCEDURE SendScript( cScript, cDescri )
+
+   Local oWnd,oBox,oLabel,oBtn
+   Local oDescri
+   Local oScript
+
+   DEFAULT cScript:="", cDescri:=""
+
+   oTpuy:RunXBS("netio_check")
+
+   if !Empty(cScript)
+      __Send( cScript, cDescri, .t. )
+      return 
+   endif
+
+   DEFINE WINDOW oWnd  TITLE "Actualización de Script en el Servidor" 
+
+     DEFINE BOX oBox OF oWnd
+
+     DEFINE LABEL oLabel TEXT "Script a Enviar " OF oBox
+
+     DEFINE ENTRY oScript VAR cScript OF oBox
+
+     DEFINE ENTRY oDescri VAR cDescri OF oBox
+
+     DEFINE BUTTON oBtn TEXT "Enviar" ;
+            ACTION iif( __Send( oScript:GetText(), oDescri:GetText() ),;
+                        oWnd:End() , .f. ) OF oBox
+
+
+   ACTIVATE WINDOW oWnd
+
+RETURN
+
+
+FUNCTION __Send( cScriptName, cDescri, lForze )
+   local lRes := .f., lUpdate := .f., lEmpty := .t.
+   local cSql, oQry, hValues:=Hash()
+   local cScriptFile, oMsgRun, oErr
+   local cSource, cMD5
+
+   default lForze := .f.
+
+   cScriptName := AllTrim( cScriptName )
+   if left( cScriptName,4 ) != ".xbs"
+      cScriptFile := oTpuy:cXBScript+cScriptName+".xbs"
+   endif
+
+   if !FILE( cScriptFile )
+      MsgAlert( "No Existe el script " + cScriptFile ,"Fichero no existe" )
+      return .f.
+   endif
+
+
+   TRY
+      oMsgRun := MsgRunStart("Actualizando "+cScriptName )
+
+      cSql := "select xbs_name,xbs_source,xbs_description,xbs_md5 "
+      cSql += "from tpuy.base_scripts where xbs_name="+DataToSql(cScriptName)
+      DEFINE MODEL_QUERY oQry REMOTE MUTE ;
+             QUERY cSql SCHEMA "tpuy"
+
+      if !Empty( oQry:Value('xbs_name') ) 
+         lEmpty := .f.
+         if !lForze
+            if MsgNoYes( "El Script <b>'"+cScriptName+"'</b> ya existe."+hb_osNewLine()+;
+                         "¿Desea Actualizar?" )
+            endif
+         endif
+         lUpdate := .t.
+      endif
+
+      //cSource := utf_8( MemoRead( cScriptFile ) )
+      /* Colocar casilla para aactivar Utf_8 */
+      cSource := ( MemoRead( cScriptFile ) )
+      cMD5 := hb_MD5( cSource )
+
+      if Empty( cDescri )
+         cDescri := __getDescri( cScriptName, cSource ) //"Sin Descripción..."  //__GetDescri()
+      endif
+
+      hValues["xbs_name"]        := cScriptName
+      hValues["xbs_source"]      := cSource
+      hValues["xbs_description"] := cDescri
+
+      if lEmpty
+         lRes := oQry:Insert( hValues )
+      endif
+      if oQry:Value("xbs_md5") != cMD5 .OR. cDescri != oQry:Value("xbs_description")
+         if lUpdate
+
+            MsgRun( "Actualizando "+cScriptName ,;
+                    {|| lRes := oQry:Update( "xbs_source", cSource ),;
+                        iif( !Empty(cDescri), oQry:Update("xbs_description", cDescri), nil) } )
+         endif
+      endif
+
+   CATCH oErr
+      MsgAlert("Problemas!!")
+      MsgRunStop(oMsgRun)
+      Return lRes
+   END
+
+   MsgRunStop(oMsgRun)
+
+RETURN lRes
+
+
+/* 
+ * Funcion que intenta localizar descripción dentro del fuente del script 
+ */
+Function __GetDescri( cScriptName, cSource )
+   local cDescri := "Sin Descripcion", aTokens, cLin
+   local cString, cMsg
+
+   aTokens := hb_aTokens( cSource, CRLF ) 
+
+   cString := " * "+cScriptName+": "
+
+   for each cLin in aTokens
+      if ( cString $ cLin )
+         cDescri := STRTRAN( cLin, cString, "" )
+         return cDescri
+      endif
+   next
+   
+   cMsg := "<b>No fue posible encontrar una descripción del Script. "+CRLF
+   cMsg += "se sugiere incluir un comentario inicial con la descripción "
+   cMsg += "incluyendo como se indica a continuación: </b>"+CRLF+CRLF
+   cMsg += "<i>/* "+CRLF
+   cMsg += " * "+cScriptName+": Descripción del Script "+CRLF
+   cMsg += " */ </i>"+CRLF
+
+   MsgAlert( cMsg, "Sugerencia ["+cScriptName+"]" MARKUP )
+
+return cDescri 
+
+
+
+//eof

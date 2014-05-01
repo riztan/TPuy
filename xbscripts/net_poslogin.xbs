@@ -1,0 +1,91 @@
+/*
+ * Proyecto TPuy
+ *
+ * net_poslogin: Formulario para definir entorno luego de hacer login.
+ *
+ */
+#include "gclass.ch"
+#include "xhb.ch"
+#include "tpy_netio.ch"
+#include "tepuy.ch"
+
+#xtranslate ::<exp>  =>  oForm:<exp>
+
+/*
+#xcommand TRY        => BEGIN SEQUENCE WITH { |e| break( e ) }
+#xcommand CATCH [<!oErr!>] => RECOVER [USING <oErr>] <-oErr->
+#xcommand FINALLY          => ALWAYS
+*/
+
+
+function net_poslogin()
+
+   Local oForm := TPublic():new()
+
+   if !oTpuy:IsDef("oUser") .AND. !IsObject(oTpuy:oUser) ; return nil ; endif
+
+   if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
+
+   /*
+      si el usuario tiene empresa registrada, puede proceder a seleccionarla...
+      de lo contrario... debe invocar un asistente para registrar la empresa
+    */
+
+   ::aApps := ~oServer:GetApplications()
+   ::aComboApps := {}
+   AEVAL( ::aApps, { |a| AADD( ::aComboApps, a[5] ) } )
+   
+
+   SET RESOURCES ::cResource FROM FILE oTpuy:cResources+"emp_select.ui"
+   
+   DEFINE WINDOW ::oWnd ;
+          TITLE "Completando Información" ;
+          SIZE 360,320 ;
+          OF oTpuy:oWnd ;
+          ID "window1" RESOURCE ::cResource 
+
+   DEFINE BOX ::oBoxApp ID "box_combo1" RESOURCE ::cResource
+
+   DEFINE IMAGE ::imgTitle FILE oTpuy:cImages+"tepuyes.png" ;
+          ID "ititle" RESOURCE ::cResource
+
+   DEFINE IMAGE ::imgIdent FILE oTpuy:cImages+"ident_96.png" ;
+          ID "image1" RESOURCE ::cResource
+
+          ::imgIdent:Adjust(38,38)
+
+   ::cComboBox := "nada"
+   DEFINE COMBOBOX ::oComboBox VAR ::cComboBox ITEMS ::aComboApps ;
+          ON CHANGE _options(oForm) ;
+          OF ::oBoxApp
+//          ID "combo1" RESOURCE ::cResource --- no esta funcionando ---
+
+   
+
+   DEFINE BUTTON ::oBtnCancel ;
+          ACTION log2_exit(oForm) ;
+          ID "button2" RESOURCE ::cResource
+
+
+   ACTIVATE WINDOW ::oWnd CENTER
+
+Return .t.
+
+procedure _options(oForm)
+   local nPos, cApp
+
+   npos := ::oComboBox:GetPos()
+   cApp := ::aApps[nPos,4]
+
+   ~oServer:SetApplication( ::aApps[nPos,4] )
+
+   oTpuy:RunXBS( cApp+"/test", oForm )
+return
+
+function log2_exit( oForm )
+   DESTROY WINDOW ::oWnd
+   ::End()
+return .t.
+
+
+//EOF
