@@ -1,6 +1,6 @@
 /* $Id: main.prg,v 1.0 2008/10/23 14:44:02 riztan Exp $*/
 /*
-	Copyright © 2008  Riztan Gutierrez <riztang@gmail.com>
+   Copyright © 2008-2014  Riztan Gutierrez <riztang@gmail.com>
 
    Este programa es software libre: usted puede redistribuirlo y/o modificarlo 
    conforme a los términos de la Licencia Pública General de GNU publicada por
@@ -127,9 +127,13 @@ REQUEST Directory
 
    #define THREAD_GT "WVT"
 
+   #define HOMEPATH  GetEnv("HOMEPATH")
+
 #else
    REQUEST HB_GT_STD_DEFAULT
    #define THREAD_GT "XWC"
+   
+   #define HOMEPATH  GetEnv("HOME")
 
 #endif
 
@@ -226,12 +230,10 @@ Function Main( ... )
    oTpuy:cXBScripts := "./xbscripts/"
    oTpuy:cSQLScr    := "./sql/"
    oTpuy:cDocs      := "./doc/"
-   oTpuy:cTempDir   := GetEnv("HOMEPATH")+"/.tpuy_tmp/"
+   oTpuy:cHomePath  := HOMEPATH
+   oTpuy:cTempDir   := oTpuy:cHomePath+"/.tpuy_tmp/"
 
    oTpuy:cTemps     := oTpuy:cTempDir
-   If !File(oTpuy:cTempDir)
-      DirMake(oTpuy:cTempDir)
-   Endif
 
    oTpuy:cResource  := ""
    oTpuy:cIconMain  := oTpuy:cImages+"logo_gnome_64x64.png"
@@ -250,6 +252,9 @@ Function Main( ... )
      MsgStop("Hay problemas para leer el archivo <b>'init.conf'</b>","Finalizado.") 
      RETURN NIL
    END
+   If !File(oTpuy:cTempDir)
+      DirMake(oTpuy:cTempDir)
+   Endif
 
 //netio_main()
 //return
