@@ -21,7 +21,7 @@ Function PosLogin()
   
 //View( ::aApps )
 
-  SET RESOURCES ::cRes FROM FILE oTpuy:cResources+"tpy_example1.ui"
+//  SET RESOURCES ::cRes FROM FILE oTpuy:cResources+"tpy_example1.ui"
 
   if hb_IsObject(oTpuy:oFondo)
      oTpuy:oFondo:End()
