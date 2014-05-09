@@ -1,7 +1,7 @@
 /*
  * Proyecto TPuy
  *
- * poslogin.xbs: Formulario para definir entorno luego de hacer login.
+ * poslogin: Formulario para definir entorno luego de hacer login.
  *
  */
 #include "tpy_xbs.ch"
@@ -63,7 +63,7 @@ STATIC FUNCTION __Create_Model( oForm )
   /* Creamos Arreglo con Datos para el Modelo */
   FOR EACH aApp IN ::aApps
      if !FILE( oTpuy:cImages+aApp[3]+"_"+aApp[4]+".png" )
-        AADD( aFiles, {"logo_gnome_128x128.png", aApp[5], aApp[6]  } )
+        AADD( aFiles, {"software_sticker.png", aApp[5], aApp[6]  } )
      else
         AADD( aFiles, {aApp[3]+"_"+aApp[4]+".png", aApp[5], aApp[6] } )
      endif
