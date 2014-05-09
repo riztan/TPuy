@@ -134,6 +134,10 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
         If oTpuy:oWnd:ClassName()="GWINDOW"
            oParent := oTpuy:oWnd
            lParent := .t.
+        else
+           DEFINE WINDOW ::oWnd SIZE nWidth,nHeight TITLE cTitle
+           DEFINE BOX oParent VERTICAL OF ::oWnd
+           lParent := .f.
         EndIf
    EndCase
 
@@ -340,8 +344,8 @@ METHOD Active( bAction, bInit ) CLASS TPY_LISTBOX
          ACTIVATE WINDOW ::oWnd
       ENDIF
 
-//   Else
-//      MsgAlert("No hay Ventana Definida... ","Error")
+   Else
+      MsgAlert("No hay Ventana Definida... ","Error")
    EndIf
 
 
