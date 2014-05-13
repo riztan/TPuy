@@ -174,7 +174,9 @@ procedure __upload( oForm )
    ::oHeaders:oListBox:ForEach( bHead )
    ::oImgns:oListBox:ForEach( bImgns )
 
+
    FOR EACH oObject IN { ::oXBS, ::oUI, ::oHeaders, ::oImgns }
+      IF !Empty( oObject:aFiles )
 
       FOR EACH aFiles IN { oObject:aFiles } //, ::oUI:aFiles, ::oHeaders:aFiles, ::oImgns:aFiles }
          nFiles := LEN( aFiles )
@@ -192,9 +194,12 @@ procedure __upload( oForm )
          
             ::oPBar:SetValue( cFile:__EnumIndex() )
             ::oPBar:SetText( cText )
+
          NEXT
+
       NEXT
 
+      ENDIF
    NEXT
 
 return .t.

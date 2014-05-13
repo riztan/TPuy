@@ -1,0 +1,121 @@
+/*
+ *  Proyecto Tpuy.
+ *  Fuente a Interpretar y ejecutar.
+ */
+
+//#include "gclass.ch"
+//#include "proandsys.ch"
+#include "tpy_xbs.ch"
+
+
+Procedure DpPrint( cCrystalFile )
+
+  oTpuy:RunXBS("get_env")
+
+  DEFAULT cCrystalFile := ""
+
+  oTpuy:cFilePrint := cCrystalFile
+
+  PDFCREATOR()
+  WaitRun("DPCRPE")
+  PDFCREATOR("RESTORE")
+
+RETURN
+
+
+/* 
+  Manipulacion de Opciones en PDFCreator
+  cAction -- "SET" / "RESTORE"
+ */
+PROCEDURE PDFCREATOR( cAction )
+
+   LOCAL cKey
+
+   DEFAULT cAction := "SET"  
+
+   cKey := "HKCU\Software\PDFCreator\Program\"
+
+   IF UPPER(cAction)="RESTORE"
+
+      win_regWrite(cKey+"AutosaveFilename",;
+                oTpuy:cPdfC_cFilename)
+
+      win_regWrite(cKey+"RunProgramAfterSavingProgramname",;
+                oTpuy:cPdfC_cProgAfterSaving)
+
+      win_regWrite(cKey+"UseAutosave",;
+                oTpuy:cPdfC_lUseAutoSave)
+
+      win_regWrite(cKey+"UseAutosaveDirectory",;
+                oTpuy:cPdfC_nUseAutoSaveDir)
+
+      win_regWrite(cKey+"AutosaveDirectory",;
+                oTpuy:cPdfC_cAutoSaveDir)
+
+      win_regWrite(cKey+"EditWithPDFArchitect",;
+                oTpuy:cPdfC_lEdit)
+
+      win_regWrite(cKey+"OpenOutputFile",;
+                oTpuy:cPdfC_lOpenFile)
+
+      win_regWrite(cKey+"RunProgramAfterSaving",;
+                oTpuy:cPdfC_lRunProg)
+
+      win_regWrite(cKey+"RunProgramAfterSavingProgramParameters",;
+                oTpuy:cPdfC_cParam)
+
+      win_regWrite(cKey+"RunProgramAfterSavingProgramname",;
+                oTpuy:cPdfC_cRun)
+
+
+   ELSE
+
+      oTpuy:cPdfC_cFilename := ;
+          win_regRead(cKey+"AutosaveFilename")
+
+      oTpuy:cPdfC_cProgAfterSaving := ;
+          win_regRead(cKey+"RunProgramAfterSavingProgramname")
+
+      oTpuy:cPdfC_lUseAutoSave := ;
+          win_regRead(cKey+"UseAutosave")
+
+      oTpuy:cPdfC_nUseAutoSaveDir := ;
+          win_regRead(cKey+"UseAutosaveDirectory")
+
+      oTpuy:cPdfC_cAutoSaveDir := ;
+          win_regRead(cKey+"AutosaveDirectory")
+
+      oTpuy:cPdfC_lEdit := ;
+          win_regRead(cKey+"EditWithPDFArchitect")
+
+      oTpuy:cPdfC_lOpenFile := ;
+          win_regRead(cKey+"OpenOutputFile")
+
+      oTpuy:cPdfC_lRunProg := ;
+          win_regRead(cKey+"RunProgramAfterSaving")
+
+      oTpuy:cPdfC_cParam := ;
+          win_regRead(cKey+"RunProgramAfterSavingProgramParameters")
+
+      oTpuy:cPdfC_cRun := ;
+          win_regRead(cKey+"RunProgramAfterSavingProgramname")
+
+
+      /* Colocamos los valores temporales */
+      win_regWrite(cKey+"AutosaveFilename","DP<DateTime>")
+      win_regWrite(cKey+"UseAutosave","1")
+      win_regWrite(cKey+"UseAutosaveDirectory","1")
+      win_regWrite(cKey+"AutosaveDirectory","<TEMP>")
+      win_regWrite(cKey+"RunProgramAfterSaving","1")
+      win_regWrite(cKey+"EditWithPDFArchitect","0")
+      win_regWrite(cKey+"OpenOutputFile","0")
+      win_regWrite(cKey+"RunProgramAfterSavingProgramParameters","ms <OutputFilename> "+ALLTRIM(oTpuy:cFilePrint))
+      win_regWrite(cKey+"RunProgramAfterSavingProgramname",CURDRIVE()+":\"+CURDIR()+"\tepuy.bat")
+
+   ENDIF
+
+RETURN
+
+
+
+//EOF

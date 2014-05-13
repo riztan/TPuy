@@ -1,0 +1,311 @@
+/*
+ *  Proyecto Tepuy.
+ *  Fuente a Interpretar y ejecutar.
+ */
+/*
+#include "gclass.ch"
+#include "proandsys.ch"
+*/
+#include "tpy_xbs.ch"
+
+#define MAIL     AllTrim( oMS:aMailData[1] )
+#define PASS     AllTrim( oMS:aMailData[2] )
+#define NAME     AllTrim( oMS:aMailData[3] )
+#define MSERVER  AllTrim( oMS:aMailData[4] )
+#define PORT     AllTrim( oMS:aMailData[5] )
+#define TTLS     AllTrim( oMS:aMailData[6] )
+
+#define  SERVER      oTpuy:aConnection[1]
+
+#xtranslate  ::  =>  oMS:
+
+Function MS( cFile, cReport )
+
+  LOCAL oMS:=TPUBLIC():NEW()
+  LOCAL cResFile := oTpuy:cResources+"sendmail.ui", cTitle
+  LOCAL cFileTmp,aMailData,aListas:=ARRAY()
+ 
+  DEFAULT cReport := ""
+
+  cFileTmp := GETENV("TEMP")+"\"+cReport+".arr"
+
+  If Empty(cReport)
+     Return NIL
+  EndIf
+
+
+  If !File(cFileTmp)
+     MsgStop("No se puede enviar correo...")
+     Return .t.
+  EndIf
+
+  aMailData := hb_aTokens( MemoRead(cFileTmp),"|;|" )
+
+  If !File(cFile)
+     Return .F.
+  EndIf
+
+  IF !oTpuy:RunXBS('initialize','connect')
+     RETURN .F.
+  ENDIF
+
+  cTitle := "Envio de Informe por Correo Electrónico"
+  oTpuy:cIconMain := "bitmaps/orseit-icon.png"
+
+  ::cFile     := cFile
+  ::aMailData := aMailData
+
+//  ::oEmpresa := oTpuy:RunXBS("model_empresa",oTpuy:cEmpCod)
+
+  ::oMLists := oTpuy:RunXBS("model_maillist")
+  ::oReport := TDolphinQry():New( "select rep_descri from "+dp_Sys(oTpuy:cPath)+".dpreportes where rep_codigo='"+;
+                                  AllTrim(cReport)+"' LIMIT 1", ;
+                                  SERVER ) 
+
+  if ::oReport:RecCount()>0
+     ::cAsunto := UTF_8( "Informe. "+AllTrim(::oReport:REP_DESCRI) )
+  endif
+  ::oReport:=NIL
+
+  if !hb_IsObject(::oMLists) 
+     MsgInfo("No hay Listas de Correo definidas..",UTF_8("Información"))
+  else
+     aListas := ARRAY(::oMLists:RecCount(),1)
+     ::oMLists:Gotop()
+     Do While !::oMLists:Eof()
+        aListas[::oMLists:RecNo()] := AllTrim(::oMLists:ML_NOMBRE)
+        ::oMLists:Skip()
+     EndDo
+  endif
+
+//? aListas
+
+  /* Verificamos la existencia del recurso */
+  IF !File(cResFile)
+     MsgStop("No se encuentra el archivo "+oTpuy:cResources+;
+             "<b>"+cResFile+"</b>",;
+             "Problemas")
+     Return NIL
+  ENDIF
+
+
+  SET RESOURCES ::cResource FROM FILE cResFile 
+
+  DEFINE WINDOW ::oWnd ID "window1" RESOURCE ::cResource ;
+         TITLE UTF_8(cTitle) ;
+         ICON_FILE oTpuy:cIconMain ;
+         SIZE 500,300
+
+  DEFINE STATUSBAR ::oBar ;
+         TEXT "--Desarrollado por ORSEIT, C.A.--";
+         ID "statusbar" RESOURCE ::cResource
+
+  DEFINE IMAGE ::oLogo FILE "bitmaps/emaillista.png" ;
+         ID "logo" RESOURCE ::cResource
+
+         ::oLogo:Adjust(52,52)  //Ajustamos el tamaño de la imagen.
+
+
+  DEFINE ENTRY ::oTo VAR ::cTo COMPLETION aListas ;
+         ACTION VALLISTA( oMS, .t.) ;   //IIF(Empty(::cTo),.t.,.f.) ) ;
+         VALID  !Empty(::cTo) ; // Intente crear la lista si esta en blanco pero da problemas.
+         ID "cTo" RESOURCE ::cResource
+
+
+  DEFINE ENTRY ::oAsunto VAR ::cAsunto ;
+         ID "cAsunto" RESOURCE ::cResource
+
+
+  DEFINE TEXTVIEW ::oBody VAR ::cBody ;
+         ID "cBody" RESOURCE ::cResource
+
+
+  DEFINE BUTTON ::oEnviar ;
+         ACTION ( PreEnvio(oMS),;
+                  MsgInfo("Finalizado","Envio de Correo"),;
+                  ::oWnd:End() ) ;
+         ID "bSend" RESOURCE ::cResource
+
+  DEFINE BUTTON ::oCancel ;
+         ACTION (::oWnd:End(),;
+                 FIN(oMs))  ;
+         ID "bCancel" RESOURCE ::cResource
+
+  ACTIVATE WINDOW ::oWnd CENTER VALID FIN(oMS)
+
+/*
+     SendMail(MAIL,                   ;  
+              "riztan@gmail.com",     ;  
+              NAME,                   ;
+              hb_aTokens(MAIL,"@")[1],;
+              PASS,                   ;
+              IIF(TTLS="T",.T.,.F.),  ;  
+              MSERVER,                 ;
+              "Titulo del Correo",    ;
+              "Texto del Correo",     ;
+              .f.,                    ;
+              PORT,              ;
+              cFile)
+*/
+RETURN .T.
+
+FUNCTION VALLISTA(oMS,lEmpty)
+
+   Local oSQL, cSQL
+   Local oListore,oListBox,aItems,aStruct
+
+   cSQL := "select * from "+oTpuy:cDsnData+".dpmaillistas "
+   if !lEmpty
+      cSQL += "where ML_NOMBRE='"+AllTrim(::cTo)+"'"
+   endif
+
+   IF ::IsDef("ListBox") ; RETURN .T. ; ENDIF
+
+   oSQL := TDolphinQry():New( cSQL, SERVER ) //Server
+
+   if lEmpty
+      aStruct := { ;
+                 {("Identificacion"),"C",10,0},;
+                 {("Descripcion"   ),"C",50,0};
+                 }
+      aItems := ARRAY( oSQL:RecCount(), 2 )
+      oSQL:GoTop()
+      Do While !oSQL:Eof()
+         aItems[oSQL:RecNo(),1] := oSQL:ML_NOMBRE 
+         aItems[oSQL:RecNo(),2] := oSQL:ML_DESCRI 
+         oSql:Skip()
+      EndDo
+
+      DEFINE MODEL oListore ;
+             STRUCT aStruct ;
+             DATA   aItems
+      
+      DEFINE LISTBOX ::oListBox ;
+             MODEL oListore ;
+             TITLE "Listas de Correo" ;
+             SIZE 300,400 
+
+      ::oListBox:lBar:=.f.
+
+      ::oListBox:bEdit := {|| ::oTo:SetText(aItems[oListore:GetPosRow(),1]),::oListBox:End() }
+
+//      ::oListBox:oWnd:SetSkipTaskBar(.t.)  // Esto en Windows no quiere caminar.
+
+      ::oListBox:oWnd:Modal(.t.)
+      ::oListBox:Active()
+//      ::oListore:Destroy() 
+
+   endif
+
+   oSQL := NIL
+RETURN .T.
+
+
+FUNCTION PREENVIO(oMS,cTo)
+
+   Local oSQL,cSQL
+   Local cMField,cNField
+
+   DEFAULT cTo := AllTrim( ::oTo:GetText() )
+
+   IF Empty(cTo) 
+      RETURN .F. 
+   ENDIF
+
+   // Verificamos si hay 'coma' para dividir los valores, pues debe ser una lista improvisada..
+   IF ("," $ cTo )
+
+      //MsgInfo( "Enviando los elementos de la lista improvisada" )
+      AEVAL( hb_ATokens(cTo,","),{|cVal| PreEnvio(oMS,cVal) } )
+
+   ELSE
+      IF ("@" $ cTo) .AND. ("." $ cTo )
+
+         ENVIANDO(oMS,cTo)
+
+      ELSE
+
+          //En este caso.. debemos ver si el valor coincide con una lista.
+          //MsgInfo( "verificando si ["+cTo+"] es una lista" )
+
+          cSQL := "select * from "+oTpuy:cDsnData+".dpmaillistas "
+          cSQL += "where ML_NOMBRE='"+AllTrim(cTo)+"'"+" LIMIT 1"
+
+          oSQL := TDolphinQry():New( cSQL, SERVER ) 
+
+          If oSQL:RecCount() > 0 
+             oSQL:GoTop()
+
+//             If oSQL:ML_ESTABLA
+                cMField := AllTrim(oSQL:ML_MCAMPO)
+                cNField := AllTrim(oSQL:ML_MNOMBRE)
+                cSQL := "select *,"+AllTrim(oSQL:ML_MCAMPO)+","+AllTrim(oSQL:ML_MNOMBRE)+" from "
+                cSQL += oTpuy:cDsnData+"."+AllTrim(oSQL:ML_TABVIEW)+" "
+                If !Empty(oSQL:ML_CONDIC)
+                   cSQL += "where "+AllTrim(oSQL:ML_CONDIC)
+                EndIf
+
+                oSQL := TDolphinQry():New( cSQL, SERVER )
+
+                If oSQL:RecCount()> 0
+                   oSQL:GoTop()
+                   Do While !oSQL:Eof()
+                      ENVIANDO( oMS, oSQL:FieldGet(cMField) )
+                      oSQL:Skip()
+                   EndDo
+                EndIf
+
+                oSQL:=NIL
+//             EndIf
+          Else
+             MsgAlert( "["+AllTrim(cTo)+"] No corresponde con una lista de correos.",UTF_8("Atención") )
+          Endif
+
+          oSQL:=NIL
+
+      ENDIF
+
+   ENDIF
+
+
+RETURN .T.
+
+
+PROCEDURE ENVIANDO(oMS,cTo,cText)
+   Local cBody
+   Local cUser := MAIL
+
+   DEFAULT cText := ""
+
+   If !Empty(cText)
+      cBody:= cText // Aqui hacer tratamiento al cuerpo para hacer la sustitucion correspondiente de campos.
+   Else
+      cBody := AllTrim( ::oBody:GetText() )
+   EndIf
+
+   if ( "gmail" $ MAIL ) .AND. ("gmail" $ MSERVER )
+      cUser := hb_aTokens(MAIL,"@")[1]
+   endif
+
+   MsgRun( "Enviando Correo a ..."+AllTrim(MAIL),{||;
+       SendMail(MAIL,                            ;  // From
+              cTo,                               ;  // To
+              NAME,                              ;
+              cUser,                             ;  // Cuenta de Usuario
+              PASS,                              ;
+              IIF(TTLS="T",.T.,.F.),             ;  // TTLS
+              MSERVER,                           ;
+              AllTrim( ::oAsunto:GetText() ),    ;
+              cBody,                             ;
+              .f.,                               ;
+              PORT,                              ;
+              ::cFile) })
+RETURN
+
+
+FUNCTION FIN( oMS )
+   oMS:=NIL
+RETURN .t.
+
+
+//EOF

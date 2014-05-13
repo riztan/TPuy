@@ -1,0 +1,151 @@
+/* 
+ * Proyecto TPUY 
+ * Licencia: GPL-3  visite http://www.gnu.org/licenses/
+ * Programa: initialize.xbs
+ * Copyright 2011  Riztan Gutierrez <riztan at gmail.com>
+ */
+
+#include "gclass.ch"
+#include "proandsys.ch"
+
+FUNCTION Initialize(cAction,lSilencio)
+
+  LOCAL cFileConn := oTpuy:cTempDir+FILE_CONNECTIONS
+  LOCAL bRun
+
+  DEFAULT cAction     TO ''
+  DEFAULT oTpuy:lInit TO .f.
+  DEFAULT lSilencio   TO .f.
+
+  IF oTpuy:lInit 
+     RETURN .T. 
+  ENDIF
+
+  IF !lSilencio
+     bRun := {|| MsgRun("Conectando Base de Datos.",{||oTpuy:RunXBS('autologin')} ) }
+  ELSE
+     bRun := {|| oTpuy:RunXBS('autologin') }
+  ENDIF
+
+  oTpuy:cImages    := "./bitmaps/"
+  oTpuy:cIconMain  := ATREPL("./images/",oTpuy:cIconMain,oTpuy:cImages)
+
+  oTpuy:RunXBS('get_env')
+
+  IF upper(cAction)='CONNECT'
+
+//View({"palabra",hb_deCrypt( hb_Crypt("palabra",oTpuy:cPassWord), oTpuy:cPassWord )})
+//View({"xyz",hb_Crypt("xyz",oTpuy:cPassWord)})
+
+    IF !File( cFileConn )
+       GenFileConn()
+    ENDIF
+
+
+    IF !HB_ISARRAY(oTpuy:aConnection)
+
+      oTpuy:aConnection := {}
+      IF HB_ISNIL( oTpuy:oXmlConnections )
+//View( {oTpuy:cIpconfig, oTpuy:cIpLocal, oTpuy:cLogin, oTpuy:cPass, oTpuy:cDSNDATA} )
+         IF !File( cFileConn )
+            MsgStop("No es posible localizar "+CRLF+"<b>[</b>"+cFileConn+"<b>]</b>", "Fichero no Encontrado.")
+            RETURN .F.
+         ENDIF
+
+         oTpuy:oXmlConnections := LoadXML( cFileConn )
+
+         IF !HB_ISNIL( oTpuy:oXmlConnections )
+   
+            /* Realizar Apertura de Conexiones Configuradas... */
+//            MsgRun( "Ejecutando Conexiones a BD" , {|| oTpuy:RunXBS('autologin') } )
+            Eval(bRun)
+      
+         ENDIF
+      ELSE
+//         MsgRun("Conectando Base de Datos.",{||oTpuy:RunXBS('autologin')})
+         Eval(bRun)
+         IF Empty( oTpuy:aConnection )
+            IF !MsgNoYes("No hay conexion disponible, Continuar?")
+               RETURN .F.
+            ENDIF
+         ENDIF
+      ENDIF
+
+    ENDIF
+  ENDIF
+
+  oTpuy:lInit:=.t.
+
+RETURN .T.
+
+
+
+FUNCTION GenFileConn()
+
+   Local cFile := oTpuy:cTempDir+FILE_CONNECTIONS
+
+
+//View( {oTpuy:cIpconfig, oTpuy:cIpLocal, oTpuy:cLogin, oTpuy:cPass, oTpuy:cDSNDATA} )
+
+/*
+   oXmlLogin := TXmlNode():new( , "lastlogin", { ;
+                                  "nombre"     => oTpuy:cSystem_Name ,;
+                                  "host"       => oTpuy:cHost        ,;
+                                  "port"       => Alltrim(CStr(oTpuy:nPort)) ,;
+                                  "database"   => oTpuy:cDB          ,;
+                                  "user"       => oTpuy:cUser        ,;
+                                  "password"   => cPass               ,;
+                                  "save_pass"  => oTpuy:cSavePass     ;
+                                } )
+*/
+
+  oTpuy:cHost := oTpuy:cIp
+  oTpuy:nPort := "3306"
+  oTpuy:cDB   := oTpuy:cDSNDATA
+  oTpuy:cUser := oTpuy:cLogin
+  oTpuy:cSavePass := ".T."
+
+DpToXML( )
+
+Return .T.
+
+
+
+FUNCTION DPToXML()
+
+   LOCAL nFileHandle
+   LOCAL oXmlDoc, oXmlConnection, oXmlDatabase,oXmlLogin
+   LOCAL cPass := oTpuy:cPass
+
+   IF !("t" IN lower(oTpuy:cSavePass))
+      cPass := "xyz"
+   ELSE
+      cPass := hb_Crypt( oTpuy:cPass+"xyz",oTpuy:cPassWord)
+   ENDIF
+
+   oXmlDoc := TXmlDocument():new( '<?xml version="1.0"?>' )
+
+   oXmlConnection := TXmlNode():new( , "connection", { "nombre" => "datapro" } )
+
+   oXmlDoc:oRoot:AddBelow( oXmlConnection )
+
+   oXmlLogin := TXmlNode():new( , "MySQL", { ;
+                                  "nombre"     => oTpuy:cSystem_Name ,;
+                                  "host"       => oTpuy:cHost        ,;
+                                  "port"       => Alltrim(CStr(oTpuy:nPort)) ,;
+                                  "database"   => oTpuy:cDB          ,;
+                                  "user"       => oTpuy:cUser        ,;
+                                  "password"   => cPass              ,;
+                                  "save_pass"  => oTpuy:cSavePass     ;
+                                } )
+
+   oXmlConnection:AddBelow( oXmlLogin )
+
+   nFileHandle := FCreate( oTpuy:cTemps+"connections.xml" )
+
+   oXmlDoc:write( nFileHandle, HBXML_STYLE_INDENT )
+   // close files
+   FClose( nFileHandle )
+
+RETURN NIL
+

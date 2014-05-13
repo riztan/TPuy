@@ -1,0 +1,181 @@
+/* 
+ *  Proyecto Tpuy.
+ *
+ *  Edición de Propiedades de una Columna o Campo
+ *  perteneciente a una tabla.
+ *
+ *  autor: Riztan Gutierrez. <riztan at gmail dot com>
+ *  fecha: 2014-01-24
+ */
+
+/*
+#include "gclass.ch"
+#include "xhb.ch"
+#include "tpy_netio.ch"
+#include "tepuy.ch"
+*/
+#include "tpy_xbs.ch"
+
+
+function netio_Columns( oParent, cTable )
+
+   Local lConnect:=.f.
+   Local oForm := TPublic():new()
+
+   default cTable := "v_base_columns"
+
+   oTpuy:RunXBS('netio_check')
+
+   ::oListParent := oParent
+   ::cTable := cTable
+   ::cSchema := "tpuy"
+
+   ::cQry := "select col_schema, col_table, " 
+   ::cQry += ~oServer:GetSColumns( "base_columns" ) + " "
+/*
+   ::cQry := "select " 
+   ::cQry += "col_table_id, "
+   ::cQry += "col_schema, "
+   ::cQry += "col_table, "
+   ::cQry += "col_name, "
+   ::cQry += "col_description "
+*/
+   ::cQry += "from " + ::cSchema + "." + "v_base_columns"
+   if !Empty( cTable )
+      ::cQry += " where col_table="+DataToSQl(cTable)
+   endif
+
+
+   DEFINE MODEL_QUERY ::oMQuery REMOTE ; //MUTE ;
+          QUERY ::cQry                      ;
+          SCHEMA ::cSchema
+
+   if ::oMQuery = NIL 
+      MsgStop("problemas")
+      ::End()
+      return nil
+   endif
+
+   ::oMQuery:col_schema:Editable:=.f.
+   ::oMQuery:col_schema:Viewable:=.t.
+   ::oMQuery:col_schema:Navigable:=.f.
+
+   ::oMQuery:col_table:Editable:=.f.
+   ::oMQuery:col_table:Viewable:=.t.
+   ::oMQuery:col_table:Navigable:=.f.
+
+   if Empty( ::oMQuery:aData )
+      if MsgYesNo("¿Desea ingresar información? ","No hay Datos")
+         //oTpuy:RunXBS( "netio_table", ::oMQuery, "add" )
+         columns_Editar( oForm, .t. )  //-- Ingresar valores.
+         //::oMQuery:Refresh()
+
+      else
+         oTpuy:oScript:netio_tables:End()
+         return nil
+      endif
+   endif
+
+
+   DEFINE LISTBOX ::oListbox ;
+          MODEL ::oMQuery    ;
+          TITLE "Definición de Columnas."     ;
+          SIZE  600,300 OF oParent 
+  
+          //::oListBox:bNew  := {|| columns_Editar( oForm, .t. ) }
+          ::oListBox:bNew  := {|| oTpuy:RunXBS( "tpy_column",oForm, .t. ) }
+
+          //::oListBox:bEdit := {|| columns_Editar( oForm ) }
+          ::oListBox:bEdit := {|| oTpuy:RunXBS( "tpy_column", oForm ) }
+
+          ::oListBox:bDel  := {|| ::oMQuery:Delete(), ::oMQuery:Refresh() }
+
+          DEFINE BOX ::oLin1  OF ::oListBox:oBox SPACING 10
+          DEFINE BOX ::oLin2  OF ::oListBox:oBox SPACING 10
+
+          DEFINE LABEL TEXT "<b>Esquema:</b>" OF ::oLin1 MARKUP VALIGN 1 
+          DEFINE LABEL TEXT "tpuy" OF ::oLin1
+
+          DEFINE LABEL TEXT "<b>Tabla:</b>" OF ::oLin2 MARKUP VALIGN 1 
+          DEFINE LABEL TEXT cTable OF ::oLin2
+   
+
+   ::oListBox:Active()
+   //::oMQuery:Refresh()
+      
+
+return .t.
+
+
+
+
+/* Edición de Datos en Formulario tipo ABM */
+FUNCTION columns_Editar( oForm, lAdd )
+
+   local aTables := {}
+
+   default lAdd := .f.
+
+if lAdd
+   ::oABM := Tpy_ABM2():New(,::oMQuery,"Propiedades de Columna",,,,,,,)
+
+   ::oABM:col_table_id := ::oABM:hWidget["col_table_id"]
+   ::oABM:col_table_id:SetText( ::oListParent:GetValue("tab_id") )
+
+   ::oABM:col_schema := ::oABM:hWidget["col_schema"]
+   ::oABM:col_schema:SetText( ::cSchema )
+
+   ::oABM:col_table := ::oABM:hWidget["col_table"]
+   ::oABM:col_table:SetText( ::cTable )
+
+   ::oABM:hWidGet["col_name"]:SetFocus()
+else
+   ::oABM := Tpy_ABM2():New( ::oListBox, ::oListBox, "Valores en Columna.", ,,,,,,,lAdd )
+endif
+
+   if !IsObject( ::oABM ) 
+      return .f.
+   endif
+
+   ::oABM:lButton := .t.
+   ::oABM:lBarBtn := .f.
+
+/*
+   ::oEntry_schema := ::oABM:hWidget["tab_schema"]
+
+   ::oEntry_schema:SetAction({|| oTpuy:RunXBS("lbx_esquemas", ::oABM) })
+   ::oEntry_schema:Set_Property("activates-default",.t.)
+
+   ::oEntry_schema:bValid := {|oEntry| ValSchema(oEntry, ::oABM ) }
+*/
+   ::oABM:Active()
+
+RETURN .t.
+
+
+
+FUNCTION ValSchema(oEntry, oABM)
+   Local lResult := .f.
+   Local cValue
+
+   cValue := oEntry:GetText()
+
+   if oABM:hPreValues["tab_schema"] == cValue
+      return .t.
+   endif
+
+   ? oEntry:ClassName(), hb_IsBlock( oEntry:bAction )
+   if Empty( oEntry:GetText() ) .and. hb_IsBlock( oEntry:bAction )
+//      ? "script ", valtype(oEntry:bAction)
+      lResult := Eval( oEntry:bAction, oABM )
+   endif
+
+   if !lResult
+      oABM:hPreValues["tab_schema"] := cValue
+   endif
+
+RETURN lResult
+
+
+//eof
+

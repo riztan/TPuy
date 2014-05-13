@@ -1,0 +1,269 @@
+#include "gclass.ch"
+#include "tepuy.ch"
+#include "tpy_netio.ch"
+
+#xtranslate ::  => oTpuy:oUser:oForm:
+
+function riztan2(...)
+  local cScript,cQry,oMQry,cWhere, rUser
+  local hNewValues, rUsr, tTime, User
+
+  //netio_connect( NETSERVER,NETPORT,,NETPASSWD )
+
+  net:tpy_respal("tpuy")
+  msgrun( "Restaurando respaldo ", {||net:tpy_restore()} )
+return nil
+
+  cQry := "select datname,usename,procid,application_name,current_query "
+  cQry += "from pg_stat_activity "
+  cWhere := "where application_name like 'tpuy%' "
+
+  //rUser :=  ~ServerLogin( "riztan",hb_md5("1234") )
+  View( ~oServer:CanSelect('base_entity','tpuy') )
+//  view( ~oServer:cUser )
+//  view( ~oServer:cConnDefault )
+  //rQry := ~oServer:Execute(cQry)
+  //rQry := ~ViewStat( cWhere )
+//? rQry
+//  view( ~~rQry:aData )
+
+//? "no puede ser"
+  //~ObjFree( rQry )
+  //~ObjFree( rUser )
+
+  ~ServerLogout("ivan")
+
+
+return nil
+
+  User := oTpuy:oUser:cHandle
+  View( r:User:cUserName )
+
+
+tTime := hb_DateTime()
+
+  if oTpuy:IsDef("oUser")
+     DEFINE oTpuy:oUser:oForm PUBLIC
+
+     DEFINE WINDOW ::oWnd TITLE oTpuy:oUser:cUserName ;
+            SIZE 300,300 ;
+            OF oTpuy:oWnd
+
+        DEFINE BOX ::oBox VERTICAL OF ::oWnd
+
+        DEFINE LABEL ::oName TEXT oTpuy:oUser:cUserName OF ::oBox
+        DEFINE LABEL ::oMail TEXT oTpuy:oUser:cEMail OF ::oBox
+
+     ACTIVATE WINDOW ::oWnd
+
+     inkey(1)
+     oTpuy:RunXBS("netio_login")
+     
+
+
+//     ~ObjFree( "riztan" )
+//     ~ObjFree( "orseit" )
+  endif
+
+  TpyLog( hb_DateTime()-tTime, ProcName()  )
+
+return
+
+  rUsr := ~oServer:UserLogin("riztan",hb_MD5("1234"))
+//  rUsr := ~oServer:UserLogin("riztan",hb_MD5("1234"))
+//  View( ~~rUsr:cName )
+
+//  ~oServer:UserLogout("riztan")
+  View( ~~rUsr:cName )
+
+  ~oServer:ObjFree( rUsr )
+
+//  View( ~~rUsr:cName )
+
+
+return .t.
+  ~~RunXBS("hola2")
+/*
+  FERASE( oTpuy:cXBScript+"test02.xbs" )
+  ~~RunXBS("test02" MUTE )
+  FERASE( oTpuy:cXBScript+"test02.xbs" )
+*/
+
+  cScript := '#include "gclass.ch"  '+CRLF
+  cScript += 'function hola2( cValor )  '     +CRLF
+  cScript += '  local oWnd,oBox,oBtn '+CRLF
+  cScript += '  default cValor := "nada" '   +CRLF
+  cScript += '  MsgInfo( "hola!! "+ cValor )  ' +CRLF
+  cScript += ' DEFINE WINDOW oWnd TITLE "Mi Ventana" SIZE 400,400  '+CRLF
+  cScript += '   DEFINE BOX oBOX OF oWnd'+CRLF
+  cScript += '   DEFINE BUTTON oBtn TEXT "prueba" ACTION prueba() OF oBox  '+CRLF
+  cScript += ' ACTIVATE WINDOW oWnd '+CRLF
+
+  cScript += 'return .t. '           +CRLF
+  cScript += 'function prueba()  '+CRLF
+  cScript += ' MsgInfo("prueba")'+CRLF
+  cScript += 'return nil'+CRLF
+  cScript += ''+CRLF
+  cScript += ''+CRLF
+
+  cQry := "select xbs_name,xbs_source from tpuy.base_scripts "
+//  cQry += " where xbs_name='hola2' limit 1"
+
+  DEFINE MODEL_QUERY oMQry REMOTE MUTE ;
+         QUERY cQry SCHEMA "tpuy"
+
+//View( oMQry:aData )
+
+
+/*
+  oMQry:GoTop()
+  While .t.
+     ? oMQry:GetValue("xbs_name")
+     if !oMQry:Next() ; exit ; endif
+  EndDo
+*/
+  oMQry:Eval( {|o| View( o:GetValue("xbs_name") )} )
+
+
+/*
+     oMQry:Update("xbs_source",cScript) 
+
+
+ */ 
+     hNewValues := Hash()
+
+     hNewValues[ "xbs_name" ] := "nuevo"
+     hNewValues[ "xbs_source" ] := cScript
+     oMQry:Insert( hNewValues )
+  oMQry := NIL
+
+
+return .t.
+
+function otramas()
+
+  local cScript
+  local oScript
+  local cQry,rQry
+  local cScriptName, cScriptFile
+  local cValCode
+
+  cScript := '#include "gclass.ch"  '+CRLF
+  cScript += 'function hola( cValor )  '     +CRLF
+  cScript += '  local oWnd,oBox,oBtn '+CRLF
+  cScript += '  default cValor := "nada" '   +CRLF
+  cScript += '  MsgInfo( "hola!! "+ cValor )  ' +CRLF
+  cScript += ' DEFINE WINDOW oWnd TITLE "pruebas"  '+CRLF
+  cScript += '   DEFINE BOX oBOX OF oWnd'+CRLF
+  cScript += '   DEFINE BUTTON oBtn TEXT "prueba" ACTION prueba() OF oBox  '+CRLF
+  cScript += ' ACTIVATE WINDOW oWnd '+CRLF
+
+  cScript += 'return .t. '           +CRLF
+  cScript += 'function prueba()  '+CRLF
+  cScript += ' MsgInfo("prueba")'+CRLF
+  cScript += 'return nil'+CRLF
+  cScript += ''+CRLF
+  cScript += ''+CRLF
+
+//  View( oTpuy:RunText( cScript, ... ) )
+
+//  View( oTpuy:oScript:IsDef("hola") )
+
+cQry := "select xbs_name,xbs_md5 from tpuy.base_scripts where xbs_name='test02'"  
+rQry := ~oServer:Query(cQry, "tpuy")
+
+cValCode   := ~~rQry:xbs_md5()
+cScriptName := ~~rQry:xbs_name() 
+cScriptFile := oTpuy:cXBScript + cScriptName + ".xbs"
+
+
+if !File( cScriptFile )
+View("1")   
+   cQry := "select xbs_source from tpuy.base_scripts where xbs_name='test02'"  
+   rQry := ~oServer:Query(cQry, "tpuy")
+   hb_MemoWrit( cScriptFile , ~~rQry:xbs_source() )
+View("2")   
+else
+
+   if hb_md5file( cScriptFile ) != cValCode
+      View( "Debe Actualizar el fuente..." )
+      cQry := "select xbs_source from tpuy.base_scripts where xbs_name='test02'"  
+      rQry := ~oServer:Query(cQry, "tpuy")
+      hb_MemoWrit( cScriptFile , ~~rQry:xbs_source() )
+   endif
+
+endif
+
+if File( cScriptFile )
+   MsgInfo( cScriptName )
+   oTpuy:RunXBS( cScriptName )
+else
+   MsgAlert("problemas...")
+endif
+
+
+return .t.
+
+
+function maspruebas()
+View( rQry )
+
+//View( ~~rQry:aStruct )
+//View( ~~rQry:aData )
+//View( ~~rQry:xbs_name() )
+//View( ~rQry:xbs_name ) 
+MsgInfo( "Tipo de Conexion: " + ~oServer:cConnDefault ) 
+View( ~~rQry:xbs_name() )
+View( ~get(rQry:xbs_md5) )
+~~rQry:Skip()
+View( ~~rQry:xbs_name() )
+
+//  ~Script("main")
+
+return .t.
+
+
+function antes()
+
+   local oWnd
+
+   DEFINE PUBLIC oWnd 
+
+   DEFINE WINDOW ::oWindow ;
+      SIZE 500,500         ;
+      TITLE "Mi Ventana" OF oTpuy:oWnd
+
+      DEFINE BOX ::oBox1 OF ::oWindow SPACING 8 VERTICAL
+
+      DEFINE LABEL ::oLabel1 TEXT "Probando :: Sonido" OF ::oBox1
+
+      DEFINE LABEL ::oLabel2 TEXT "Otro mas" OF ::oBox1
+
+      DEFINE BUTTON ::oBtn1 TEXT "Pulsa Aqui" ;
+             VALID .t. ;
+             ACTION MsgInfo("Has pulsado el botón!");
+             OF ::oBox1
+
+      DEFINE BUTTON ::oBtn1 TEXT "Crear Ventana Hija" ;
+             VALID .t. ;
+             ACTION CreaHija( oWnd );
+             OF ::oBox1
+
+
+   ACTIVATE WINDOW ::oWindow CENTER
+
+   ::oWnd := NIL
+
+return "1234"
+
+
+Procedure CreaHija(oWnd)
+
+   DEFINE WINDOW ::oChild TITLE "Ventana Hija" ;
+          SIZE 300,300 ;
+          OF ::oWindow
+
+   ACTIVATE WINDOW ::oChild
+
+return 
+

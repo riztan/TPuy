@@ -1,0 +1,167 @@
+/*
+ *  Proyecto Tepuy.
+ *  Fuente a Interpretar y ejecutar.
+ *  Autor: Riztan GutiÃ©rrez.  riztan@gmail.com
+ *  Licencia: GPL-3. Visite: http://www.gnu.org/  
+ */
+
+#include "gclass.ch"
+#include "proandsys.ch"
+#include "tepuy.ch"
+
+/* cabeceras para gnomedb y libgda */
+#include "gnomedb.ch"
+
+#define  POSTGRESQL    0
+#define  LIBGDA        1
+#define  MYSQL         2
+
+
+Function AutoLogin(  )
+   Local oConectorType, oIterator
+   Local oXmlDoc := oTpuy:oXmlConnections
+   Local oConnTmp
+
+   oTpuy:cImages    := "./bitmaps/"
+
+   IF !HB_ISNIL( oXmlDoc ) 
+
+      /* aqui se deben recorrer las conexiones existentes y cerrarlas */
+
+      oConectorType := oXmlDoc:FindFirst("connection")
+
+//View( hGet(oConectorType:aAttributes,"nombre") )
+
+      While !HB_ISNIL(  oConectorType )
+
+         If HB_ISNIL(oConectorType)
+            MsgStop("NO")
+         Else
+            oIterator := TXmlIterator():New( oConectorType )
+            oNodeTmp := oIterator:Next()
+            While !HB_ISNIL( oNodeTmp )
+
+               //View( oNodeTmp:ToArray() )
+               /*  Conectar...  */
+
+               oConnTmp := lcl_connect( oNodeTmp )
+
+               If  ValType( oConnTmp ) = "O" .OR. ValType( oConnTmp ) = "N"
+                  AADD( oTpuy:aConnection , oConnTmp )
+
+/*
+                  If !oTpuy:oConnections:IsDef(oConectorType:cName)
+                     oTpuy:oConnections:Add(cName, oConnTmp)
+                  Else
+                     MsgStop( "Ya Existe!!!!" )
+                  EndIf
+*/
+               EndIf
+
+               oNodeTmp := oIterator:Next()
+
+            EndDo
+         EndIf
+         oConectorType := oXmlDoc:FindNext()
+      EndDo
+
+   ENDIF
+
+Return .T.
+
+
+FUNCTION lcl_connect( oConector )
+   Local lRet :=.F.
+   Local pClient, aError
+   Local pConn, oConn
+   Local cPQStatus:=""
+   Local cHost,cPort,cDb,cUser,cPass
+   Local cDSN,cSavePass
+   
+   Default oConector := NIL
+
+   If ValType( oConector ) <> "O"
+      Return NIL
+   EndIf
+
+   cType := oConector:cName
+
+   cHost     := oConector:GetAttribute( "host"      )
+   cDB       := oConector:GetAttribute( "database"  )
+   cUser     := oConector:GetAttribute( "user"      )
+   cPass     := oConector:GetAttribute( "password"  )
+   cPort     := oConector:GetAttribute( "port"      )
+   cSavePass := oConector:GetAttribute( "save_pass" )
+
+   If ( ".t." IN lower( cSavePass ) )
+      cPass := hb_decrypt( cPass, oTpuy:cPassword )
+      cPass := Left(cPass,Len(cPass)-3)
+   EndIf
+
+   If cType = "MySQL"
+//View( "en MySQL" )
+      TRY
+
+         oConn = TDolphinSrv():New( cHost, ;
+                                    cUser, ;
+                                    cPass, ;
+                                    Val(cPort), 0, cDB )
+
+      CATCH oErr
+         MsgStop("No se puede conectar al Servidor MySQL "+cHost,"Conexión")
+//? cHost,cUser,cPass,cPort,cDB
+         RETURN NIL
+      END
+      Return oConn
+
+   ElseIf cType != "PostgreSQL" 
+
+      /*  Conectar via GDA  */
+/*
+      cDSN := oConector:cName
+
+      oConn := TpyConnection():New( LIBGDA, cDSN, cHost, cDB, cUser, cPass, cPort )
+
+      If oConn:lError
+         Return NIL
+      EndIf
+
+      Return oConn
+*/
+   EndIf
+
+/*   View( { {"host"    , cHost }, ;
+           {"database", cDB   }, ;
+           {"port"    , cPort }, ; 
+           {"user"    , cUser }, ;
+           {"pasword" , cPass }  ;
+         } )
+*/
+
+/*
+   pConn := PQsetdbLogin( cHost, cPort, NIL, NIL, cDb, cUser, cPass)
+
+   pConn := PQConnect(cDB, cHost, cUser, cPass, Val(cPort) )
+
+//   oTpuy:conn := conn
+   
+   oConn := TPQserver():New( cHost, cDB, cUser, cPass, Val(cPort)  )
+
+   If PQStatus(pConn) != CONNECTION_OK
+
+      cPQStatus := Alltrim( STR( PQStatus(pConn) ) )
+
+      MsgStop( "<b>"+MSG_STATUS_CONNECTION+":</b> "+cPQStatus+CRLF+;
+               "<b>Error:</b> "+( PQErrorMessage(pConn) ),;
+               MSG_ERROR_CONNECTION )
+
+      Return NIL
+*/
+/*
+   Else
+      MsgInfo( "PostgreSQL "+MSG_CONNECTED+"!" )
+*/
+//   EndIf
+
+RETURN oConn
+

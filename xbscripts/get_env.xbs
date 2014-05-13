@@ -1,0 +1,38 @@
+/*
+ *  Proyecto Tepuy.
+ *  Programa: get_env.  Obtener Variables de oDp en Adaptapro
+ *  Autor: Riztan Gutierrez.  <riztan at gmail.com>
+ *  Licencia: GPL-3. Visite: http://www.gnu.org/  
+ */
+
+//#include "gclass.ch"
+#include "proandsys.ch"
+
+#define CRLF   HB_OSNewLine()
+
+Procedure Get_Env()
+
+LOCAL cText, aText, aItem
+
+cText := MEMOREAD('DP\bridge.txt')
+
+aText := HB_aTokens( cText, CRLF )
+
+FOR EACH cText IN aText
+   aItem := HB_aTokens( cText, ":=" )
+   If LEN(aItem)=3
+      IF aItem[1]="C"
+         oTpuy:Add( ALLTRIM(aItem[2]), aItem[3] )
+      ELSEIF aItem[1]="L"
+         oTpuy:Add( ALLTRIM(aItem[2]), IIF("T"$aItem[3],.t.,.f.) )
+      ELSEIF aItem[1]="D"
+         oTpuy:Add( ALLTRIM(aItem[2]), CTOD(aItem[3]) )
+      ELSEIF aItem[1]="N"
+         oTpuy:Add( ALLTRIM(aItem[2]), VAL(aItem[3]) )
+      ENDIF
+   EndIf
+NEXT
+
+oTpuy:lDpBridge:=.t.
+
+Return

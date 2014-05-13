@@ -1,0 +1,70 @@
+
+/*
+#include "gclass.ch"
+#include "xhb.ch"
+#include "tpy_netio.ch"
+#include "tepuy.ch"
+*/
+#include "tpy_xbs.ch"
+
+function tpy_column( oForm, lAdd)
+
+   Local cResFile := oTpuy:cResources+"tpy_column.ui"
+   Local oResource
+
+   default lAdd := .f.
+
+   if hb_IsNil(oForm) ; MsgAlert("no es posible desplegar el formulario."); Endif
+
+   oTpuy:RunXBS("netio_check")
+
+
+   SET RESOURCES oResource FROM FILE cResFile 
+
+   /* indicamos a donde enviar cada widget del formulario */
+   oForm:oMQuery:col_name:Container := "cont1-1"
+   oForm:oMQuery:col_description:Container := "cont1-1"
+   oForm:oMQuery:col_picture:Container := "cont1-2"
+   oForm:oMQuery:col_order:Container := "cont1-2"
+
+   oForm:oMQuery:col_editable:Container := "cont1-3"
+   oForm:oMQuery:col_viewable:Container := "cont1-3"
+   oForm:oMQuery:col_navigable:Container := "cont1-3"
+
+   oForm:oMQuery:col_reference:Container := "cont2-1"
+   oForm:oMQuery:col_ref_table:Container := "cont2-2"
+   oForm:oMQuery:col_ref_scriptname:Container := "cont2-2"
+   oForm:oMQuery:col_ref_descriptor:Container := "cont2-1"
+   oForm:oMQuery:col_ref_link:Container := "cont2-1"
+
+
+   if lAdd
+      oForm:oABM := Tpy_ABM2():New(,oForm:oMQuery,;
+                               "Propiedades de Columna",,,,,"window1",oResource,"vbox2")
+      
+   else
+      oForm:oABM := Tpy_ABM2():New(oForm:oListBox,oForm:oListBox,;
+                               "Propiedades de Columna",,,,,"window1",oResource,"vbox2")
+   endif
+
+   /* no vamos a usar el contenedor por defecto */
+   oForm:oABM:oBoxes:oBoxMain:Hide()
+
+
+   DEFINE IMAGE oForm:oImage ;
+       FILE oTpuy:cImages+"atribute_icon.jpg" ;
+       ID "image1" RESOURCE oResource
+
+   oForm:oABM:lImage := .f.
+
+/*
+   oForm:oABM:lButton := .t.
+   oForm:oABM:lBarBtn := .f.
+*/
+   oForm:oABM:Active()
+
+   oForm:oABM:col_name:SetFocus()
+
+return .t.
+
+//eof

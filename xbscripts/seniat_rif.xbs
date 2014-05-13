@@ -1,0 +1,135 @@
+/*
+ * seniat_rif: Permite consultar estado del registro de informacion fiscal en Venezuela
+ */
+
+#include "gclass.ch"
+#include "curl.ch"
+
+#define  COOKIE_FILE   oTpuy:cTempDir+'./micookie.txt'
+#define  CAPTCHA_FILE  oTpuy:cTempDir+'./captcha.jpg'
+
+function Seniat_RIF(cRIF,cFile) 
+
+    local agents, cookie := .f., cURL
+    local referer, pCurl, buffer, hFile,hFile2, nRes
+    local oWnd,oBox,oBox2,oLabel,oEntry,oImg,cEntry,oBtn
+
+    default cRif := 'J317413865'
+    default cURL := "http://contribuyente.seniat.gob.ve/BuscaRif/BuscaRif.jsp"
+    default cFile:= oTpuy:cTempDir+"seniat-resp.html"
+
+    Save_Captcha()
+
+
+    DEFINE WINDOW oWnd TITLE 'Validar Codigo SENIAT' ;
+           SIZE 240,90 ;
+           ICON_FILE oTpuy:cImages+"orseit-icon.png"
+
+        DEFINE BOX oBox VERTICAL HOMO EXPAND FILL OF oWnd
+        DEFINE IMAGE oImg FILE CAPTCHA_FILE OF oBox
+        DEFINE BOX oBox2 EXPAND OF oBox
+        DEFINE ENTRY oEntry VAR cEntry EXPAND OF oBox2
+        DEFINE BUTTON oBtn TEXT "Validar" EXPAND ;
+               VALID ValCodigo( oEntry:GetText(), oEntry ) ;
+               ACTION ( Get_URL( cRif,oEntry:GetText(),cFile ),;
+                        oWnd:End() ) OF oBox2
+        DEFINE LABEL oLabel TEXT UTF_8("Es necesario validar este cdigo") OF oBox
+
+        oWnd:SetResizable(.f.)
+//        oWnd:SetTransparency(.1)
+
+    ACTIVATE WINDOW oWnd MODAL 
+
+return nil
+
+
+function GET_URL(cRif,cCodigo,cFile)
+
+    local agents, cookie := .f.
+    local referer, pCurl, buffer, hFile,hFile2, nRes
+
+    if Empty(cCodigo) .or. ;
+       Empty(cRif) .or.    ;
+       Empty(cFile)        ; return .f. ; endif
+
+    agents := 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.16 '
+    agents += '(KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16'
+
+    hFile   := file_open( cFile )
+
+    if (!cookie) 
+        cookie = "micookie"
+    endif
+
+    referer = 'http://contribuyente.seniat.gob.ve/BuscaRif/'
+
+    cURL := 'http://contribuyente.seniat.gob.ve/BuscaRif/BuscaRif.jsp?'
+    cURL += 'p_rif='+ALLTRIM(cRif)+'&codigo='+cCodigo
+
+    pCurl = curl_easy_init()
+
+    curl_easy_setopt(pCurl, CURLOPT_HEADER, 1)
+    curl_easy_setopt(pCurl, CURLOPT_URL, cURL)
+    curl_easy_setopt(pCurl, CURLOPT_COOKIE, cookie)
+    curl_easy_setopt(pCurl, CURLOPT_COOKIEJAR, COOKIE_FILE )
+    curl_easy_setopt(pCurl, CURLOPT_COOKIEFILE, COOKIE_FILE )
+
+    curl_easy_setopt( pCurl, CURLOPT_WRITEDATA , hFile ) 
+  
+    nRes := curl_easy_perform( pCurl )
+
+    if nRes != CURLE_OK
+        MsgAlert( "error " + curl_easy_strerror(nRes), "Problemas" )
+        file_close( hFile )
+        return .f.
+    endif
+    curl_easy_cleanup( pCurl )
+
+return nRes
+
+
+
+Function SAVE_CAPTCHA(pCurl) 
+    local cURL, cookie := .f., hFile
+    local nRes
+
+    cURL := "http://contribuyente.seniat.gob.ve/BuscaRif/Captcha.jpg"
+
+    hFile := file_open( CAPTCHA_FILE )
+
+    pCurl = curl_easy_init()    // Initialize a CURL session.
+    curl_easy_setopt(pCurl, CURLOPT_URL, cURL)  // Pass URL as parameter.
+    curl_easy_setopt(pCurl, CURLOPT_COOKIE, COOKIE_FILE )
+    curl_easy_setopt(pCurl, CURLOPT_COOKIEJAR, COOKIE_FILE )
+    curl_easy_setopt(pCurl, CURLOPT_COOKIEFILE, COOKIE_FILE )
+
+    curl_easy_setopt(pCurl, CURLOPT_WRITEDATA, hFile )
+
+    nRes := curl_easy_perform( pCurl )
+    If nRes != CURLE_OK
+       MsgStop( curl_easy_strerror(nRes) )
+       file_close( hFile )
+       quit
+    EndIf
+
+    //MsgInfo( curl_easy_strerror(nRes) , "perform" )
+  
+    curl_easy_cleanup( pCurl )
+
+    If file_close( hFile ) != 0
+       MsgStop( "No pudo cerrar el archivo" )
+    EndIf
+
+return nil
+
+
+Function VALCODIGO(cCodigo, oEntry)
+   local lResp := .t.
+   if Empty(cCodigo)
+      //MsgAlert("Por favor indique un valor.","Codigo Vacio")
+      lResp := .f.
+      oEntry:SetFocus(.t.)
+   endif
+Return lResp
+
+
