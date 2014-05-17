@@ -108,7 +108,7 @@ Function MS( cFile, cReport )
 
   DEFINE ENTRY ::oTo VAR ::cTo COMPLETION aListas ;
          ACTION VALLISTA( oMS, .t.) ;   //IIF(Empty(::cTo),.t.,.f.) ) ;
-         VALID  !Empty(::cTo) ; // Intente crear la lista si esta en blanco pero da problemas.
+         VALID  .T. ; //!Empty(::cTo) ; // Intente crear la lista si esta en blanco pero da problemas.
          ID "cTo" RESOURCE ::cResource
 
 
@@ -180,20 +180,21 @@ FUNCTION VALLISTA(oMS,lEmpty)
              STRUCT aStruct ;
              DATA   aItems
       
-      DEFINE LISTBOX ::oListBox ;
+      DEFINE LISTBOX oListBox ;
              MODEL oListore ;
              TITLE "Listas de Correo" ;
-             SIZE 300,400 
+             SIZE 300,400 OF ::oWnd
 
-      ::oListBox:lBar:=.f.
+      oListBox:lBar:=.f.
 
-      ::oListBox:bEdit := {|| ::oTo:SetText(aItems[oListore:GetPosRow(),1]),::oListBox:End() }
+      oListBox:bEdit := {|| ::oTo:SetText(aItems[oListore:GetPosRow(),1]),oListBox:End() }
 
-//      ::oListBox:oWnd:SetSkipTaskBar(.t.)  // Esto en Windows no quiere caminar.
+//      oListBox:oWnd:SetSkipTaskBar(.t.)  // Esto en Windows no quiere caminar.
 
-      ::oListBox:oWnd:Modal(.t.)
-      ::oListBox:Active()
-//      ::oListore:Destroy() 
+      oListBox:oWnd:Modal(.t.)
+
+      oListBox:Active()
+//      oListore:Destroy() 
 
    endif
 
@@ -202,7 +203,6 @@ RETURN .T.
 
 
 FUNCTION PREENVIO(oMS,cTo)
-
    Local oSQL,cSQL
    Local cMField,cNField
 
@@ -236,7 +236,7 @@ FUNCTION PREENVIO(oMS,cTo)
           If oSQL:RecCount() > 0 
              oSQL:GoTop()
 
-//             If oSQL:ML_ESTABLA
+             If oSQL:ML_ESTABLA 
                 cMField := AllTrim(oSQL:ML_MCAMPO)
                 cNField := AllTrim(oSQL:ML_MNOMBRE)
                 cSQL := "select *,"+AllTrim(oSQL:ML_MCAMPO)+","+AllTrim(oSQL:ML_MNOMBRE)+" from "
@@ -244,8 +244,11 @@ FUNCTION PREENVIO(oMS,cTo)
                 If !Empty(oSQL:ML_CONDIC)
                    cSQL += "where "+AllTrim(oSQL:ML_CONDIC)
                 EndIf
-
                 oSQL := TDolphinQry():New( cSQL, SERVER )
+if hb_ISNIL(oSQL) 
+   MsgInfo(cSql)
+   return nil
+endif
 
                 If oSQL:RecCount()> 0
                    oSQL:GoTop()
@@ -256,7 +259,14 @@ FUNCTION PREENVIO(oMS,cTo)
                 EndIf
 
                 oSQL:=NIL
-//             EndIf
+
+             Else
+                If Empty( oSQL:ML_MCAMPO ) .OR. Empty(oSQL:ML_MNOMBRE)
+//MsgInfo("No se reconocen tablas o vistas.. intentamos enviar contenido en campo condición","información")
+                   PreEnvio(oMs,ALLTRIM(oSQL:ML_CONDIC))
+                EndIf
+//return .t.
+             EndIf
           Else
              MsgAlert( "["+AllTrim(cTo)+"] No corresponde con una lista de correos.",UTF_8("Atención") )
           Endif
