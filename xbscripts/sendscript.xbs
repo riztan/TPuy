@@ -58,8 +58,8 @@ FUNCTION __Send( cScriptName, cDescri, lForze )
    endif
 
 
+   oMsgRun := MsgRunStart("Actualizando "+cScriptName )
    TRY
-      oMsgRun := MsgRunStart("Actualizando "+cScriptName )
 
       cSql := "select xbs_name,xbs_source,xbs_description,xbs_md5 "
       cSql += "from tpuy.base_scripts where xbs_name="+DataToSql(cScriptName)

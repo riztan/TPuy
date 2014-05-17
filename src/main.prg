@@ -1,6 +1,6 @@
 /* $Id: main.prg,v 1.0 2008/10/23 14:44:02 riztan Exp $*/
 /*
-	Copyright © 2008  Riztan Gutierrez <riztang@gmail.com>
+   Copyright © 2008-2014  Riztan Gutierrez <riztang@gmail.com>
 
    Este programa es software libre: usted puede redistribuirlo y/o modificarlo 
    conforme a los términos de la Licencia Pública General de GNU publicada por
@@ -41,6 +41,7 @@
 #include "tpy_extern.ch"
 //#include "libgdaext.ch"
 #include "tip.ch"
+#include "tpy_init.ch"
 
 // #include "hbstruct.ch"
 // #include "hblang.ch"
@@ -51,98 +52,6 @@
 memvar oTpuy
 
 // memvar oMsgRun_oLabel, oMsgRun_oImage
-
-REQUEST HB_LANG_ES
-//REQUEST FIS_StrXOR
-//REQUEST FIS_ErrStr
-//REQUEST FIS_SendCmd
-//REQUEST HexToStr
-//REQUEST StrToHex
-//REQUEST StruToGType
-//REQUEST Run2Me
-//REQUEST CSV2Array
-//REQUEST ValidMail
-//REQUEST TPYENTRY
-
-REQUEST DISPBOX
-REQUEST __BOX
-REQUEST __BOXD
-REQUEST __BOXS
-REQUEST DEVOUTPICT
-
-REQUEST hb_MD5
-
-REQUEST TDolphinSrv
-REQUEST hb_Crypt
-REQUEST hb_DeCrypt
-
-REQUEST hb_DATETIME
-REQUEST hb_HOUR
-REQUEST hb_MINUTE
-REQUEST hb_TTON
-REQUEST hb_NTOT
-REQUEST hb_TTOS
-REQUEST hb_STOT
-REQUEST hb_TTOC
-REQUEST hb_CTOT
-REQUEST hb_TSTOSTR
-REQUEST hb_STRTOTS
-REQUEST hb_RUN
-REQUEST __RUN
-
-REQUEST hb_serialize
-REQUEST hb_deserialize
-REQUEST netio_connect
-REQUEST netio_funcexec
-REQUEST netio_procexists
-
-REQUEST hb_RegExMatch
-
-REQUEST FILE_OPEN
-REQUEST FILE_CLOSE
-REQUEST CURL_EASY_INIT
-REQUEST CURL_EASY_CLEANUP
-REQUEST CURL_EASY_SETOPT
-REQUEST CURL_EASY_STRERROR
-REQUEST CURL_EASY_PERFORM
-REQUEST CURL_VERSION
-
-
-REQUEST GTREESTORE
-REQUEST GFIXED
-
-REQUEST Directory
-
-#ifdef __PLATFORM__WINDOWS
-   REQUEST HB_GT_WVT_DEFAULT
-
-   REQUEST WIN_OLECREATEOBJECT
-   REQUEST WIN_OLEERRORTEXT
-   REQUEST SHELLEXECUTE
-   REQUEST WAPI_SHELLEXECUTE
-   REQUEST WIN_REGGET
-   REQUEST WIN_REGSET
-   REQUEST WIN_REGREAD
-   REQUEST WIN_REGWRITE
-
-   #define THREAD_GT "WVT"
-
-#else
-   REQUEST HB_GT_STD_DEFAULT
-   #define THREAD_GT "XWC"
-
-#endif
-
-//REQUEST DBFCDX
-//REQUEST DBUSEAREA
-
-//NETIO
-REQUEST NETIO_CONNECT
-REQUEST NETIO_FUNCEXEC
-REQUEST NETIO_PROCEXISTS
-REQUEST NETIO_DISCONNECT
-REQUEST NETIO_GETCONNECTION
-
 
 /** \brief Inicio. Donde comienza todo.
  */
@@ -226,12 +135,10 @@ Function Main( ... )
    oTpuy:cXBScripts := "./xbscripts/"
    oTpuy:cSQLScr    := "./sql/"
    oTpuy:cDocs      := "./doc/"
-   oTpuy:cTempDir   := GetEnv("HOMEPATH")+"/.tpuy_tmp/"
+   oTpuy:cHomePath  := HOMEPATH
+   oTpuy:cTempDir   := oTpuy:cHomePath+"/.tpuy_tmp/"
 
    oTpuy:cTemps     := oTpuy:cTempDir
-   If !File(oTpuy:cTempDir)
-      DirMake(oTpuy:cTempDir)
-   Endif
 
    oTpuy:cResource  := ""
    oTpuy:cIconMain  := oTpuy:cImages+"logo_gnome_64x64.png"
@@ -250,6 +157,9 @@ Function Main( ... )
      MsgStop("Hay problemas para leer el archivo <b>'init.conf'</b>","Finalizado.") 
      RETURN NIL
    END
+   If !File(oTpuy:cTempDir)
+      DirMake(oTpuy:cTempDir)
+   Endif
 
 //netio_main()
 //return
