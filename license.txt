@@ -1,0 +1,15 @@
+TPuy Versión 0.1 (Alfa)
+Copyright (c) 2008 - 2014 tpuy.org
+
+Desarrolladores:
+       Riztan Gutierrez.
+       Federico D'Maussion.
+
+Licencia LGPL.
+
+Este programa está distribuido bajo los términos de GPL v2. Este programa es Software Libre; usted puede redistribuirlo y/o modificarlo bajo los términos de la GNU General Public License, como lo publica la Free Software Foundation en su versión 2 de la Licencia.
+
+Este programa es distribuido con la esperanza de que le será útil, pero SIN NINGUNA GARANTIA; incluso sin la garantía implícita por el MERCADEO o EJERCICIO DE ALGUN PROPOSITO en particular. Vea la GNU General Public License para más detalles.
+
+Usted debe haber recibido una copia de la GNU General Public License junto con este programa, si no, escriba a la Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. (o visite el sitio web http://www.gnu.org/).
+
