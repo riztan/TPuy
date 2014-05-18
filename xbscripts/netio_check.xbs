@@ -3,9 +3,8 @@
  *
  * netio_check: Verifica conexion al servidor de NetIO
  */
-#include "gclass.ch"
-#include "xhb.ch"
-#include "tpy_netio.ch"
+
+#include "tpy_xbs.ch"
 
 FUNCTION netio_check()
 

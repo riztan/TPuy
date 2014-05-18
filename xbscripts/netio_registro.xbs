@@ -1,16 +1,12 @@
-
-#include "gclass.ch"
-#include "xhb.ch"
-#include "tpy_netio.ch"
-#include "tepuy.ch"
-
-
-
 /*
-#xcommand TRY        => BEGIN SEQUENCE WITH { |e| break( e ) }
-#xcommand CATCH [<!oErr!>] => RECOVER [USING <oErr>] <-oErr->
-#xcommand FINALLY          => ALWAYS
-*/
+ *  Proyecto TPuy.
+ *
+ *  netio_registro: Permite registrar un nuevo usuario en el servidor TPuy.
+ *
+ */
+
+#include "tpy_xbs.ch"
+
 
 #xtranslate ::<exp>  =>  oForm:<exp>
 
