@@ -142,7 +142,7 @@ function login_IsUser(oForm)
       oTpuy:oUser:cEntId     := r:oUser:cEntId
    endif
 
-   oTpuy:oStatusBar:SetText("Usuario: "+ oTpuy:oUser:cShortName )
+//   oTpuy:oStatusBar:SetText("Usuario: "+ oTpuy:oUser:cShortName )
 
 Return .t.
 

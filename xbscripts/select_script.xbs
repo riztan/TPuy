@@ -1,12 +1,10 @@
 /*
- *  Proyecto TPuy.
- *  select_script: Permite indicar el nombre del script a ejecutar.
+ * Proyecto TPuy.
+ * select_script: Permite indicar el nombre del script a ejecutar.
  *
  */
 
 #include "tpy_xbs.ch"
-
-#xtranslate :: => oForm:
 
 Function Select_Script()
 
