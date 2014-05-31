@@ -107,6 +107,7 @@ Function Main( ... )
    oTpuy:cSystem_Name :=cSystem_Name
    oTpuy:lSalir       := .F.
    oTpuy:cTime := Left( cStr( Time() ), 5 )
+   oTpuy:lSBarUpdate  := .T.
 //   oTpuy:l_gnome_db_init := .F.
 
    /*
@@ -250,6 +251,7 @@ Return uReturn
  */
 Function TestTimer(tValor)
 
+   Local cText
    DEFAULT tValor := hb_DateTime()
 
    If HB_ISNIL(oTpuy:oWnd)
@@ -263,7 +265,15 @@ Function TestTimer(tValor)
 // --- Esto es una prueba del Timer.
       //oTpuy:oWnd:SetTitle( oTpuy:cSystem_Name + "  "+cStr(Time()) )
       oTpuy:cTime := Left( cStr( Time() ), 5 )
-      oTpuy:oStatusBar:SetText( oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime ) 
+      cText := oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime 
+
+if oTpuy:IsDef("oUser") .and. oTpuy:oUser:IsDef("cUserName")
+   cText += " | "+oTpuy:oUser:cUserName
+endif
+if oTpuy:lSBarUpdate
+      oTpuy:oStatusBar:SetText(cText)
+endif
+ 
       tValor := hb_DateTime() //ROUND(SECONDS()+1,0)
 
    Endif
