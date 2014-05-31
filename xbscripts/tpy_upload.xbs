@@ -1,5 +1,4 @@
 /*
- * Proyecto TPuy.
  * tpy_upload: Selector de ficheros para enviar al Servidor.
  */
 
@@ -175,27 +174,32 @@ procedure __upload( oForm )
    ::oHeaders:oListBox:ForEach( bHead )
    ::oImgns:oListBox:ForEach( bImgns )
 
+
    FOR EACH oObject IN { ::oXBS, ::oUI, ::oHeaders, ::oImgns }
+      IF !Empty( oObject:aFiles )
 
-      FOR EACH aFiles IN { oObject:aFiles } //, ::oUI:aFiles, ::oHeaders:aFiles, ::oImgns:aFiles }
-         nFiles := LEN( aFiles )
-         ::oPBar:SetTotal( nFiles )
-         ::oPBar:SetValue( 0 )
-         ::oPBar:SetText("")
+         FOR EACH aFiles IN { oObject:aFiles } //, ::oUI:aFiles, ::oHeaders:aFiles, ::oImgns:aFiles }
+            nFiles := LEN( aFiles )
+            ::oPBar:SetTotal( nFiles )
+            ::oPBar:SetValue( 0 )
+            ::oPBar:SetText("")
 
-         FOR EACH cFile IN aFiles
+            FOR EACH cFile IN aFiles
 
-            cText := "Procesados.. ( " + AllTrim( Str( cFile:__EnumIndex() ) ) + " / "
-            cText += AllTrim( Str( nFiles ) ) + " ) "
+               cText := "Procesados.. ( " + AllTrim( Str( cFile:__EnumIndex() ) ) + " / "
+               cText += AllTrim( Str( nFiles ) ) + " ) "
 
-            //oTpuy:RunXBS("sendscript", STRTRAN(cFile,".xbs","")  )
-            EVAL( oObject:bRun, cFile )
+               //oTpuy:RunXBS("sendscript", STRTRAN(cFile,".xbs","")  )
+               EVAL( oObject:bRun, cFile )
          
-            ::oPBar:SetValue( cFile:__EnumIndex() )
-            ::oPBar:SetText( cText )
-         NEXT
-      NEXT
+               ::oPBar:SetValue( cFile:__EnumIndex() )
+               ::oPBar:SetText( cText )
 
+            NEXT
+
+         NEXT
+
+      ENDIF
    NEXT
 
 return .t.
