@@ -33,10 +33,10 @@ RETURN cRes
 FUNCTION SENDMAIL(cFrom,cTo,cName,cUser,cPass, ;
                  lTTLS,cSMTP,cSubject,cBody,  ;
                  lHtml,nPort,cAttach)
-   Local nRes, lRes := .f., lBodyFile:=.f.
-   Local cTTLS:=" " , cCadena:= "", cMime:="text/plain"
+   Local nRes, lBodyFile:=.f.
+   Local cTTLS , cCadena, cMime:="text/plain"
    Local cProgram := "bin\ms1.16.exe"
-   Local cMyPass:="", cPort:="25"
+   Local cMyPass, cPort:="25"
 
    DEFAULT lHtml := .F.
 
@@ -94,6 +94,7 @@ mailsend -to user@gmail.com -from user@gmail.com -starttls -smtp smtp.gmail.com 
 //MsgInfo(cProgram+" "+cCadena)
 //return .t.
 #ifdef __PLATFORM__UNIX 
+      /* buscar como enviar el correo en sistema tipo unix */
       nRes := 0 //ShellExecute(cProgram,cCadena,0) 
 #else
       nRes := ShellExecute(cProgram,cCadena,0) 
@@ -309,7 +310,7 @@ RETURN "text/plain"
 
 
 FUNCTION MEncrip(cCadena, lEncripta, lMail)
-  LOCAL cResult :="*"
+  LOCAL cResult 
 
   DEFAULT lEncripta TO .t.
   DEFAULT lMail TO .f.  
@@ -330,18 +331,10 @@ FUNCTION MENCRIP_CHECK(cCadena)
 RETURN Encrip( cCadena, .F., .F., .T. )
 
 
-/*
-Local cCadena := "agua"
-Local cCadena2:=""
-
-cCadena2:= MEncrip(cCadena)
-?? cCadena2
-?? Encrip( cCadena2, .F. )
-*/
 
 FUNCTION Encrip(cCadena, lAccion, lMail, lCheck)
    Local I:=1,cRes:=""
-   Local lVerif:=.f.
+   Local lVerif
 
    DEFAULT lAccion TO .T.
    DEFAULT lMail TO .f.
