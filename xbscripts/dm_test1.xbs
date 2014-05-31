@@ -2,9 +2,7 @@
  * dm_test1: Ejemplo Simple de uso de DataModel y Listbox
  */
 
-#include "gclass.ch"
-#include "proandsys.ch"
-#include "tepuy.ch"
+#include "tpy_xbs.ch"
 
 func dm_test1()
 

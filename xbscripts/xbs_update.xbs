@@ -1,6 +1,10 @@
-#include "gclass.ch"
-#include "tepuy.ch"
-#include "tpy_netio.ch"
+/* 
+ * Proyecto Tpuy.
+ * xbs_update: Actualiza los scripts locales desde el servidor TPuy.
+ *
+ */
+
+#include "tpy_xbs.ch"
 
 
 /* Comentario: De momento, esto es funcional porque existen pocos scripts, pero

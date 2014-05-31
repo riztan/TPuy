@@ -1,13 +1,10 @@
 /*
- *  Proyecto Tepuy.
+ *  Proyecto TPuy.
+ *  select_script: Permite indicar el nombre del script a ejecutar.
  *
- *  Programa Inicial. Genera Menu, Fondo de Pantalla y un 
- *  Expander para colocar algunos logs.
  */
 
-#include "gclass.ch"
-#include "proandsys.ch"
-#include "tepuy.ch"
+#include "tpy_xbs.ch"
 
 #xtranslate :: => oForm:
 
@@ -33,7 +30,7 @@ Function Select_Script()
           ID "window1" RESOURCE ::oRes  ;
           OF oTpuy:oWnd
 
-      DEFINE IMAGE ::oImage FILE oTpuy:cImages+"script.png" ;
+      DEFINE IMAGE ::oImage FILE oTpuy:cImages+"text-x-script.png" ;
              ID "image1" RESOURCE ::oRes
    
              ::oImage:Adjust( 80, 100 )
@@ -69,7 +66,7 @@ PROCEDURE Ejecutar(oForm)
 
    EndIf
 
-   RETURN
+RETURN
 
 
 //eof

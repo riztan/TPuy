@@ -4,10 +4,7 @@
  * net_poslogin: Formulario para definir entorno luego de hacer login.
  *
  */
-#include "gclass.ch"
-#include "xhb.ch"
-#include "tpy_netio.ch"
-#include "tepuy.ch"
+#include "tpy_xbs.ch"
 
 #xtranslate ::<exp>  =>  oForm:<exp>
 

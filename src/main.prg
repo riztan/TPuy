@@ -263,7 +263,7 @@ Function TestTimer(tValor)
 // --- Esto es una prueba del Timer.
       //oTpuy:oWnd:SetTitle( oTpuy:cSystem_Name + "  "+cStr(Time()) )
       oTpuy:cTime := Left( cStr( Time() ), 5 )
-      oTpuy:oStatusBar:SetText( oTpuy:cSystem_Name + " | Hora:" + oTpuy:cTime ) 
+      oTpuy:oStatusBar:SetText( oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime ) 
       tValor := hb_DateTime() //ROUND(SECONDS()+1,0)
 
    Endif

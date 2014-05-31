@@ -4,11 +4,7 @@
  *  Programa Inicial. Genera Menu, Fondo de Pantalla y un 
  *  Expander para colocar algunos logs.
  */
-/*
-#include "gclass.ch"
-#include "proandsys.ch"
-#include "pc-soft.ch"
-*/
+
 #include "tpy_xbs.ch"
 
 #define TPY_CONN    oTpuy:aConnection[1]
@@ -19,10 +15,6 @@ Function begin()
    LOCAL cResFile := oTpuy:cResources+"proandsys.glade"
    LOCAL cResource, pixbuf, oDraw, oSender, lValor
    LOCAL tTime := hb_DateTime()
-
-//   oTpuy:RunXBS("autologin")
-//   oTpuy:RunXBS("nmtrabaj-gui")
-//   return .t.
 
    oTpuy:lNetIO      := .f.  
    oTpuy:tLastNetIO  := tTime    // Ultima conexion a servidor NetIO
@@ -58,23 +50,13 @@ Function begin()
       DEFINE BOX oTpuy:oFondo   CONTAINER OF oTpuy:oDesktop
 
    oTpuy:oTapiz := PCTapiz():New( oTpuy:oFondo )
-   oTpuy:oTapiz:Imagen( oTpuy:cImages+"tepuy_1024x768.png", pcEstirado, pcEstirado, "Saludos Terricola" )
-//   oTpuy:oTapiz:Imagen( oTpuy:cImages+"tepuy_800x600.png", pcArriba, pcArriba )
-//   oTpuy:oTapiz:Say(oBox,pcArriba)
-//   oTpuy:oTapiz:SetText(oBox,"hola")
+   oTpuy:oTapiz:Imagen( oTpuy:cImages+"tepuy_1024x768.png", ;
+                        pcEstirado, pcEstirado, "Saludos Terricola" )
    
    oTpuy:oTapiz:Active( '<span size="12000"><b>'+oTpuy:cSystem_Name+"</b></span>" )
 
       //Create_Menus( oBoxMenu ) 
       oTpuy:RunXBS('menu',oTpuy:oMenuBar)
-
-
-/*      
-      DEFINE DRAWINGAREA oDraw ;
-             EXPOSE EVENT  dibuja( oSender, "Nombre del Programa" );
-             SIZE 100,500;
-             OF oBox CONTAINER
-*/
 
 
       DEFINE EXPANDER oTpuy:oExpander  PROMPT "Estado" MARKUP OF oTpuy:oBox  
@@ -94,17 +76,6 @@ Function begin()
              oTpuy:cLog := ""
              DEFINE TEXTVIEW oTpuy:oLog VAR oTpuy:cLog OF oTpuy:oScroll CONTAINER
                     oTpuy:oLog:SetEditable(.f.)
-
-/*
-             DEFINE LABEL TEXT "Probando Sonido.." OF oTpuy:oBoxV_E
-
-             DEFINE BUTTON TEXT "Conectar" OF oTpuy:oBoxV_E ; 
-                           ACTION dolphin( )
-
-             DEFINE BUTTON TEXT "Ejecutar Script" OF oBoxV_E ; 
-                           ACTION oTpuy:RunXBS('runscript')
-*/
-      // Hasta aqui objetos del Expander
 
 
       DEFINE STATUSBAR oTpuy:oStatusBar OF oTpuy:oBox ;
@@ -132,7 +103,7 @@ FUNCTION NETIOUPDATE()
    if !oTpuy:IsDef("lNetInit") ; oTpuy:lNetInit := .f. ; endif
 
    if oTpuy:lNetInit
-      If !( tTime - oTpuy:tNetIOXBSUp ) > oTpuy:nIntervalUp
+      If !( ( tTime - oTpuy:tNetIOXBSUp ) > oTpuy:nIntervalUp )
          return .t.
       EndIf
    endif
@@ -154,12 +125,12 @@ FUNCTION NETIOUPDATE()
       endif
    EndIf
 
-//   oTpuy:oNetIOUpdate:nInterval := 60000
    if !hb_IsObject( oTpuy:oWnd ) ; return nil ; endif
+
+   if !File( oTpuy:cXBScript+"netio_check.xbs" ) ; return .f. ; endif 
 
    uReturn := oTpuy:RunXBS("netio_check")
 
-   //if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
    if ValType(uReturn)="L" .and. !uReturn ; return .f. ; endif
 
    /* Actualizamos los Script */
@@ -185,11 +156,9 @@ FUNCTION Dibuja( oSender, cMsg )
 
  Local pixbuf := gdk_pixbuf_new_from_file( oTpuy:cImages+"tepuy_800x600.png" )
 
-MsgInfo("aqui")
-
   widget := oSender:pWidget
 
-  gc = gdk_gc_new( widget  )   // cambio propiedades del contexto gráfico gc
+  gc = gdk_gc_new( widget  )   // cambio propiedades del contexto grafico gc
 
   gdk_draw_pixbuf( widget, gc, pixbuf, 0, 0, 0, 0 )
 

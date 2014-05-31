@@ -1,13 +1,9 @@
 /*
  *  Proyecto Tpuy.
- *  Fuente a Interpretar y ejecutar.
- *  Autor: Riztan Gutiérrez.  riztan@gmail.com
- *  Licencia: GPL-3. Visite: http://www.gnu.org/  
+ *  saludo: Ejemplo de ejecución de script.
  */
 
-#include "gclass.ch"
-#include "proandsys.ch"
-#include "tepuy.ch"
+#include "tpy_xbs.ch"
 
 // Static expand,oBar
 

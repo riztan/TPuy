@@ -1,7 +1,6 @@
-/*
- *  Proyecto Tepuy.
+/*  Proyecto Tpuy.
  *
- *  Script para Generar Menu Utilizando Archivos .ini
+ *  menu: Script para Generar Menu Utilizando Archivos .ini
  *
  */
 
@@ -16,11 +15,7 @@
 	       MenuAddRoot( <oMenuItem>,<oMenu>,<cId>,<cTitle>,[<cImage>],[ \{|o| <bAction> \} ],<.lSub.>)
 
 
-
-#include "gclass.ch"
-#include "proandsys.ch"
-#include "xhb.ch"
-#include "tpy_netio.ch"
+#include "tpy_xbs.ch"
 
 
 Function menu(oMenuBar)
