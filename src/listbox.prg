@@ -39,6 +39,8 @@ memvar oTpuy
 CLASS TPY_LISTBOX // FROM TPUBLIC // FROM TPY_DATA_MODEL
 
    DATA oParent
+   DATA lParent
+   DATA lInBox
    DATA oWnd
    DATA oBox
    DATA oModel
@@ -100,6 +102,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
    ::lFix    := .t.
    ::lBotons := .t.
    ::lBar    := .t.
+   ::lInBox  := .f.
    ::bNew    := {|| MsgInfo("Accion del Boton 'Nuevo'" ) }  //{|| .T. }
    ::bEdit   := {|| MsgInfo("Accion del Boton 'Edit'"  ) }  //{|| .T. }
    ::bDel    := {|| MsgInfo("Accion del Boton 'Delete'") }  //{|| .T. }
@@ -121,28 +124,29 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
    // Buscamos asignar un padre a la posible nueva ventana.
    Do Case
    Case oParent:ClassName()="GWINDOW"
-        oParent := oParent
-        lParent := .t.
+        ::oParent := oParent
+        ::lParent := .t.
    Case oParent:ClassName() = "TPY_LISTBOX"
-        oParent := oParent:oWnd
-        lParent := .t.
+        ::oParent := oParent:oWnd
+        ::lParent := .t.
    Case oParent:ClassName() = "GBOX" .OR.;
-        oParent:ClassName() = "GBOXVH"
-        oParent := oParent
-        lParent := .F.
+        ::oParent:ClassName() = "GBOXVH"
+        ::oParent := oParent
+        ::lParent := .F.
+        ::lInBox  := .T.
    Other
         If oTpuy:oWnd:ClassName()="GWINDOW"
-           oParent := oTpuy:oWnd
-           lParent := .t.
+           ::oParent := oTpuy:oWnd
+           ::lParent := .t.
         else
            DEFINE WINDOW ::oWnd SIZE nWidth,nHeight TITLE cTitle
-           DEFINE BOX oParent VERTICAL OF ::oWnd
-           lParent := .f.
+           DEFINE BOX ::oParent VERTICAL OF ::oWnd
+           ::lParent := .f.
         EndIf
    EndCase
 
    //if hb_IsNil( oParent )
-   if lParent
+   if ::lParent
       if nWidth == 0 .OR. nHeight == 0
          DEFINE WINDOW ::oWnd TITLE cTitle ;
                 ID ::cId RESOURCE ::cGlade
@@ -154,8 +158,8 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
       end
       ::oWnd:SetSkipTaskBar( .t. )
 
-      If lParent
-         gtk_window_set_transient_for( ::oWnd:pWidget, oParent:pWidget )
+      If ::lParent
+         gtk_window_set_transient_for( ::oWnd:pWidget, ::oParent:pWidget )
       EndIf
 
       If IsObject(oIcon)
@@ -168,7 +172,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
          DEFINE BOX ::oBox VERTICAL OF ::oWnd SPACING 8
       EndIF
    else
-     ::oBox := oParent
+     ::oBox := ::oParent
    end
 
    IF ::lBar
@@ -338,14 +342,15 @@ METHOD Active( bAction, bInit ) CLASS TPY_LISTBOX
       ::oBarButton:Hide()
    EndIf
 
-   If !IsNIL( ::oWnd )
-
+   If IsNIL( ::oWnd )
+      if !::lParent .and. !::lInBox
+         MsgAlert("No hay Ventana Definida... [revisar] ","Error")
+      endif
+   Else
       IF IsNIL(::uGlade)
          ACTIVATE WINDOW ::oWnd
       ENDIF
 
-   Else
-      MsgAlert("No hay Ventana Definida... ","Error")
    EndIf
 
 
