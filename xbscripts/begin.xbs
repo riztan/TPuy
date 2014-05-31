@@ -127,7 +127,7 @@ FUNCTION NETIOUPDATE()
 
    if !hb_IsObject( oTpuy:oWnd ) ; return nil ; endif
 
-   if !File(oTpuy:cXBScripts+"netio_check") ; return .f. ; endif
+   if !File( oTpuy:cXBScript+"netio_check.xbs" ) ; return .f. ; endif 
 
    uReturn := oTpuy:RunXBS("netio_check")
 
