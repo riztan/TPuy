@@ -59,14 +59,6 @@ Function begin()
       oTpuy:RunXBS('menu',oTpuy:oMenuBar)
 
 
-/*      
-      DEFINE DRAWINGAREA oDraw ;
-             EXPOSE EVENT  dibuja( oSender, "Nombre del Programa" );
-             SIZE 100,500;
-             OF oBox CONTAINER
-*/
-
-
       DEFINE EXPANDER oTpuy:oExpander  PROMPT "Estado" MARKUP OF oTpuy:oBox  
              DEFINE TOOLTIP WIDGET oTpuy:oExpander ;
                     TEXT "Pulse para desplegar detalles del Estado del Sistema" 
@@ -84,7 +76,6 @@ Function begin()
              oTpuy:cLog := ""
              DEFINE TEXTVIEW oTpuy:oLog VAR oTpuy:cLog OF oTpuy:oScroll CONTAINER
                     oTpuy:oLog:SetEditable(.f.)
-
 
 
       DEFINE STATUSBAR oTpuy:oStatusBar OF oTpuy:oBox ;
@@ -112,7 +103,7 @@ FUNCTION NETIOUPDATE()
    if !oTpuy:IsDef("lNetInit") ; oTpuy:lNetInit := .f. ; endif
 
    if oTpuy:lNetInit
-      If !( tTime - oTpuy:tNetIOXBSUp ) > oTpuy:nIntervalUp
+      If !( ( tTime - oTpuy:tNetIOXBSUp ) > oTpuy:nIntervalUp )
          return .t.
       EndIf
    endif
@@ -134,14 +125,12 @@ FUNCTION NETIOUPDATE()
       endif
    EndIf
 
-//   oTpuy:oNetIOUpdate:nInterval := 60000
    if !hb_IsObject( oTpuy:oWnd ) ; return nil ; endif
 
    if !File(oTpuy:cXBScripts+"netio_check") ; return .f. ; endif
 
    uReturn := oTpuy:RunXBS("netio_check")
 
-   //if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
    if ValType(uReturn)="L" .and. !uReturn ; return .f. ; endif
 
    /* Actualizamos los Script */
@@ -169,7 +158,7 @@ FUNCTION Dibuja( oSender, cMsg )
 
   widget := oSender:pWidget
 
-  gc = gdk_gc_new( widget  )   // cambio propiedades del contexto gr?fico gc
+  gc = gdk_gc_new( widget  )   // cambio propiedades del contexto grafico gc
 
   gdk_draw_pixbuf( widget, gc, pixbuf, 0, 0, 0, 0 )
 
@@ -191,4 +180,3 @@ Return .T.
 
 
 //eof
-
