@@ -9,18 +9,22 @@
 FUNCTION netio_check()
 
   local lConnect := .f.
+  local oMsgRun
 
   if !oTpuy:lNetIO 
 
      try
+        oMsgRun := MsgRunStart("Conectando al Servidor NetIO...")
         lConnect := netio_connect( NETSERVER, NETPORT,, NETPASSWD )
         if lConnect
            if !oTpuy:Isdef( "oUser" )
               oTpuy:RunXBS("netio_login",.f.)
            endif
         endif
+        oMsgRun:End()
      catch
         MsgStop( "No se puede conectar con "+NETSERVER )
+        oMsgRun:End()
         Return .F.
      end
 
