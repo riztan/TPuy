@@ -111,7 +111,7 @@ function login_IsUser(oForm)
    local oUser,cAux
 
    cUser := ::oUser:GetText()
-   cPasswd := hb_MD5( ::oPasswd:GetText() )
+   cPasswd := hb_crypt( ::oPasswd:GetText(), oTpuy:cPassword )  //hb_MD5( ::oPasswd:GetText() )
 
    /* Si ya estaba un usuario registrado... entonces.. hay que cerrar la sesion. */
    if oTpuy:IsDef("oUser")
@@ -126,11 +126,13 @@ function login_IsUser(oForm)
     * para enviar o recibir algo del objeto remoto usar:
     * ~~oUser:<mensaje> ó r:oUser:<mensaje>  */
    oUser := ~ServerLogin(cUser,cPasswd)
+   if hb_IsNil( oUser ) 
+      MsgStop("El usuario no existe")
+      return .f. 
+   endif
 
-   if hb_IsNil( oUser ) ; return .f. ; endif
    if !oTpuy:IsDef( "oUser" ) 
       DEFINE PUBLIC oTpuy:oUser
-//return .f.
       oTpuy:oUser:cHandle    := oUser
 
       oTpuy:oUser:cLogin     := r:oUser:cLogin
