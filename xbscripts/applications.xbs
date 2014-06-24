@@ -11,9 +11,8 @@ FUNCTION applications()
 
   local oForm, cQry, rQry, rSrc
 
-  SET PUBLIC oForm
+  #include "xbs_init.prg"
 
-  if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
   if !oTpuy:IsDef("oUser") ; return .f. ; endif
 
   ::cTitle := "Datos de la Aplicación"
