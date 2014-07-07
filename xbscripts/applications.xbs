@@ -24,10 +24,19 @@ FUNCTION applications()
      ID "window1" RESOURCE ::cRes
      ::oWnd:SetResizable(.f.)
 
+     /* Creamos banner decorativo con título */
      DEFINE IMAGE ::oBanner FILE oTpuy:cImages+"banner_1.png" ID "banner" RESOURCE ::cRes
      ::oBanner:Adjust(600)
    
      DEFINE LABEL ::oLabBanner TEXT ::cTitle ID "label_title" RESOURCE ::cRes
+     /* fin del banner */
+
+     ::cAppName := "tpy_"
+     ::bAppName := { |oEntry| __CheckName( oForm,oEntry )  }
+     DEFINE ENTRY ::oAppName VAR ::cAppName ;
+            ID "entry_name" RESOURCE ::cRes
+            ::oAppName:bValid := ::bAppName
+
 
 
      DEFINE BUTTON ::oBtnOk ACTION MsgInfo("bien") ID "btn_ok" RESOURCE ::cRes
@@ -37,12 +46,28 @@ FUNCTION applications()
 
 return .t.
 
+
+
 procedure __Salir( oForm )
 
-   if MsgNoYes( "¿Realmente desea cerrar la ventana y "+CRLF+"descartar los cambios?","Por favor confirme su petición." )
+   if MsgNoYes( "¿Realmente desea cerrar la ventana y "+CRLF+"descartar los cambios?",;
+                "Por favor confirme su petición." )
       oForm:End()
    endif
 return 
 
+
+
+function __CheckName( oForm, oEntry )
+   local lResp := .f.
+
+   MsgInfo("Revisar si el nombre de la aplicacion ya existe, etc...")
+
+   if !Empty(::cAppName)
+      ::oLabBanner:SetText( ::cAppName )
+      lResp := .t.
+   endif
+
+return lResp
 
 //eof
