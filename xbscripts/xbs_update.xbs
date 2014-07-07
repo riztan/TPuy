@@ -15,29 +15,37 @@
  * De esta forma se minimiza la transferencia de contenido y el procesamiento de muchos archivos
  * sin necesidad y posibles pausas...  (RIGC - Nov2013)
  */
-FUNCTION xbs_update( cScriptName )
+FUNCTION xbs_update( cScriptName, lMute )
 
-  local cScriptFile
+  local oForm, oRApp, cScriptFile
   local cValCode, cQry, rQry, rSrc
-  local lUpdate := .f.
+  local lUpdate := .t.
   local aData, aScript
 
   default cScriptName := ""
-
-  if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
+  default lMute := .f.
 
   if !oTpuy:IsDef("oUser") ; return .f. ; endif
 
+  #include "xbs_init.prg"
+  //if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
+
+  oRApp := oTpuy:oApp
+
 tracelog( hb_dateTime() )
 
-  cQry := "select xbs_name,xbs_md5 from tpuy.base_scripts where xbs_active=true" // and xbs_name= test01 "  
-  if !Empty(cScriptName) ; cQry += " and xbs_name="+DataToSql(cScriptName) ; endif
+  if Empty(oRApp)
+     tracelog( "No se a indicado aplicación en uso." )
+     return nil
+  endif
 
-  rQry := ~oServer:Query(cQry, "tpuy")
+  aData := ~~oRApp:XBSList()
 
-  aData := ~~rQry:aData
-
-  if empty( aData ) ; return .f. ; endif
+  if empty( aData ) 
+     tracelog( "No hay información para verificar. " + ; 
+               "Posiblemente no dispone de los permisos requeridos." )
+     return .f. 
+  endif
 
   FOR EACH aScript IN aData
      cScriptName := aScript[1]
@@ -51,49 +59,40 @@ tracelog( hb_dateTime() )
      ENDIF
   NEXT
 
-/*
-  //--- Codigo sustituido para evitar pausas por latencia en la conexion...
-  ~~rQry:GoTop()
-  While !~~rQry:Eof()
-     cValCode   := ~~rQry:xbs_md5()
-     cScriptName := ~~rQry:xbs_name() 
-     cScriptFile := oTpuy:cXBScript + cScriptName + ".xbs"
-
-     if !FILE( cScriptFile )
-        lUpdate := __Update( cScriptName )
-     endif
-
-     if hb_MD5File( cScriptFile ) != cValCode
-        lUpdate := __Update( cScriptName )
-     endif
-
-     SysRefresh()
-     ~~rQry:Skip()
-  EndDo
-*/
-  ~oServer:ObjFree( rQry )
   If lUpdate ; oTpuy:tLastNetIO := hb_DateTime() ; endif
 
 return .t.
 
 
-FUNCTION __UPDATE( cScriptName, cSchema, lMute )
+FUNCTION __UPDATE( cScriptName, lMute )
    local lUpdate := .f.
-   local rSrc, cQry := "select xbs_source from tpuy.base_scripts where xbs_name="+DataToSql(cScriptName)
-   local oMsgRun, cScriptFile
+   local oMsgRun, cScriptFile, cSource
+   local oRApp, oScript
 
-   default cSchema := "tpuy", lMute := .f.
+   default lMute := .f.
 
-   cScriptFile := oTpuy:cXBScript + cScriptName + ".xbs"
+   oRApp := oTpuy:oApp
+
+   oScript := ~~oRApp:GetScript( cScriptName )
+
+   cSource := ~~oScript:GetSource()
+
+   if empty( cSource ) 
+tpyLog( "No se logró acceder al fuente del script. ",cScriptName, procname() )      
+      return .f. 
+   endif
 
    if lMute ; oMsgRun := MsgRunStart( "Actualizando "+cScriptName ) ; endif
-      rSrc := ~oServer:Query(cQry, cSchema)
-      lUpdate := hb_MemoWrit( cScriptFile , ~~rSrc:xbs_source() )
-      if lMute ; MsgRunStop( oMsgRun ) ; endif
-tpyLog( "Actualizado "+cScriptName, procname() )
 
-   ~oServer:ObjFree( rSrc )
+     cScriptFile := oTpuy:cXBScript + cScriptName + ".xbs"
+     lUpdate := hb_MemoWrit( cScriptFile , cSource )
+
+   if lMute ; MsgRunStop( oMsgRun ) ; endif
+
+tpyLog( "Actualizado "+cScriptName, procname() )
+  ~oServer:ObjFree( oScript )
 
 RETURN lUpdate
+
 
 //eof
