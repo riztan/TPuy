@@ -11,6 +11,7 @@ TARGET = ./bin/tpuy
 
 SRCPATH = ./src/
 SOURCES  = $(SRCPATH)main.prg          \
+           $(SRCPATH)menu.prg          \
            $(SRCPATH)tpublic.prg       \
            $(SRCPATH)tscript.prg       \
            $(SRCPATH)hbrun.prg         \

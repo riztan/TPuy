@@ -300,4 +300,17 @@
 
 
 
+
+/* Menú */
+
+#xcommand DEFINE TPY_MNUITEM <oItem> ;
+                 [<lRoot: ROOT> ] ;
+                 ID <cId> TITLE <cTitle> ;
+                 [ACTION <cAction> ] ;
+                 [IMAGE <cImage> ];
+                 [OF <oParentItem> ]   => ;
+          <oItem> := MNUITEM():New( [<.lRoot.>],<cId>,<cTitle>,[<cAction>],;
+                                    [<cImage>],[<oParentItem>] )
+
+
 //eof
