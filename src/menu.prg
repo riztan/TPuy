@@ -37,6 +37,7 @@
 
 #include "proandsys.ch"
 #include "gclass.ch"
+#include "hbclass.ch"
 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
