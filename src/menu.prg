@@ -116,6 +116,7 @@ METHOD ACTIVATE( oParentMenu )
    local cAction := ::cAction
    local hSubMenu, oSubMenu
    local oMenu, oParent, hSubItems, oItem
+   local lSub := .f.
 
    if hb_IsObject(::oGtkItem) ; ::oGtkItem:End() ; endif
 
@@ -199,12 +200,17 @@ METHOD ACTIVATE( oParentMenu )
    if hb_IsObject(::oSubItem) .and. ::oSubItem:ClassName()="TPUBLIC"
       hSubItems := ::oSubItem:hVars
 
+      lSub := .f.
+
       FOR EACH oItem IN hSubItems
 
          if !::lRoot 
             if hb_IsObject( oItem )
 //View("submenu! "+::oSubItem:ClassName() )
-               SUBMENU oSubMenu OF ::oGtkItem
+               if !lSub
+                  SUBMENU oSubMenu OF ::oGtkItem
+                  lSub := .t.
+               endif
                oItem:Activate( oSubMenu )
             else
 //View("no submenu! " + ::oSubItem:cId )
