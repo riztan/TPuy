@@ -4,6 +4,7 @@
  * poslogin: Formulario para definir entorno luego de hacer login.
  *
  */
+
 #include "tpy_xbs.ch"
 #define GtkTreeIter  Array( 4 )
 
@@ -14,6 +15,9 @@ Function PosLogin()
   if !oTpuy:IsDef("oUser") .AND. !IsObject(oTpuy:oUser) ; return nil ; endif
 
   #include "xbs_init.prg" 
+
+  oTpuy:rApp := ~oServer:SetApplication("tpy_base")
+  oTpuy:RunXBS( "netio_menu" )
 
   ::aApps := ~oServer:GetApplications()
   
@@ -43,13 +47,14 @@ Function PosLogin()
   ::oIconView:SetToolTipColumn( 3 )
   ::oIconView:SetColumns( 6 )
   ::oIconView:SetItemWidth( 115 )
-  ::oIconView:bItem_Activated := {|oSender,pPath| __Prueba( oSender, pPath, oForm )  }
+  ::oIconView:bItem_Activated := {|oSender,pPath| __SetApp( oSender, pPath, oForm )  }
 
 //View( ::oIconview )
 
   ::oIconView:SetFocus()
 
 return NIL
+
 
 
 STATIC FUNCTION __Create_Model( oForm )
@@ -86,22 +91,28 @@ STATIC FUNCTION __Create_Model( oForm )
 RETURN oLbx
 
 
-STATIC FUNCTION __prueba( oIconView, pPath, oForm )
 
-   Local cDescri,cAppName, oRApp
+STATIC FUNCTION __SetApp( oIconView, pPath, oForm )
+
+   Local cDescri,cAppName, rApp
    Local cFont := "Sans Italic 8"
 
    //cText     := ::oIconView:GetValue( 3,, pPath )
    cAppName  := ::oIconView:GetValue( 4,, pPath )
 
-   oTpuy:oApp := ~oServer:SetApplication(cAppName)
-   oRApp := oTpuy:oApp
+   if !Empty( oTpuy:rApp )
+      ~oServer:ObjFree( oTpuy:rApp )
+   endif
 
-   cDescri := ~~oRApp:cDescription
+   oTpuy:rApp := ~oServer:SetApplication(cAppName)
+   rApp := oTpuy:rApp
+   oTpuy:RunXBS( "netio_menu" )
 
-   ::cAppVersion := "Versión:  <b>"    + ~~oRApp:cVersion    + "</b>"
-   ::cAppOwner   := "Propietario: <b>" + ~~oRApp:OwnerName() + "</b>"
-   ::cAppOwnMail := "e-Mail: <b>"      + ~~oRApp:OwnerMail() + "</b>"
+   cDescri := ~~rApp:cDescription
+
+   ::cAppVersion := "Versión:  <b>"      + ~~rApp:cVersion    + "</b>"
+   ::cAppOwner   := "Desarrollador: <b>" + ~~rApp:OwnerName() + "</b>"
+   ::cAppOwnMail := "e-Mail: <b>"        + ~~rApp:OwnerMail() + "</b>"
 
 //View( {::cAppOwner,::cAppOwnMail} )
 
@@ -143,7 +154,14 @@ STATIC FUNCTION __prueba( oIconView, pPath, oForm )
      DEFINE LABEL ::oLAppVersion TEXT ::cAppVersion OF ::oBoxApp MARKUP
 
 
-   View( ~~oRApp:XBSList() )
+//   View( ~~rApp:XBSList() )
+View( ~oServer:IsDeveloper() )
+   if ~oServer:IsDeveloper()
+      oTpuy:cStBarTxt += " | Modo Desarrollo |"
+   else
+      oTpuy:cStBarTxt := STRTRAN( oTpuy:cStBarTxt, " | Modo Desarrollo |", "" )
+   endif
+   oTpuy:oStatusBar:SetText( oTpuy:cStBarTxt )
 
 Return nil
 

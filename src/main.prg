@@ -251,7 +251,6 @@ Return uReturn
  */
 Function TestTimer(tValor)
 
-   Local cText
    DEFAULT tValor := hb_DateTime()
 
    If HB_ISNIL(oTpuy:oWnd)
@@ -259,19 +258,20 @@ Function TestTimer(tValor)
       Return hb_DateTime()
    EndIf
 
-   //If nValor <= ROUND(SECONDS(),0) .AND. !Empty( oTpuy:oWnd )
+   if !oTpuy:IsDef("cStBarTxt") ; oTpuy:Add("cStBarTxt","") ; endif
+
    If tValor <= hb_DateTime() .AND. !Empty( oTpuy:oStatusBar )
 
 // --- Esto es una prueba del Timer.
       //oTpuy:oWnd:SetTitle( oTpuy:cSystem_Name + "  "+cStr(Time()) )
       oTpuy:cTime := Left( cStr( Time() ), 5 )
-      cText := oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime 
+      oTpuy:cStBarTxt := oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime 
 
 if oTpuy:IsDef("oUser") .and. oTpuy:oUser:IsDef("cUserName")
-   cText += " | "+oTpuy:oUser:cUserName
+   oTpuy:cStBarTxt += " | "+oTpuy:oUser:cUserName
 endif
 if oTpuy:lSBarUpdate
-      oTpuy:oStatusBar:SetText(cText)
+      oTpuy:oStatusBar:SetText( oTpuy:cStBarTxt )
 endif
  
       tValor := hb_DateTime() //ROUND(SECONDS()+1,0)
@@ -349,10 +349,10 @@ function FromRemote( cFuncName, cObj, ... )
 
       if UPPER(cObj) == "OSERVER" ; cObj := cHandle ; endif
 
-tracelog( "solicitando "+cFuncName+" ,"+cHandle+", ..." )
+//tracelog( "solicitando "+cFuncName+" ,"+cHandle+", ..." )
       uReturn := hb_deserialize( netio_funcexec( cFuncName, cHandle, cObj, ...  ) )
    else
-tracelog( "solicitando "+cFuncName+" , , ..." )
+//tracelog( "solicitando "+cFuncName+" , , ..." )
       uReturn := hb_deserialize( netio_funcexec( cFuncName, "", cObj, ...  ) )
    endif
 return uReturn //hb_deserialize( netio_funcexec( ... ) )

@@ -50,7 +50,7 @@ memvar oTpuy
 CLASS MNUITEM FROM TPUBLIC
 
    DATA lRoot     INIT .f.
-   DATA nImgSize  INIT 16
+   DATA nImgSize  INIT 24
    DATA oParent
    DATA oGtkItem  INIT NIL
    DATA oMenuBar

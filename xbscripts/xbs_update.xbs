@@ -15,31 +15,32 @@
  * De esta forma se minimiza la transferencia de contenido y el procesamiento de muchos archivos
  * sin necesidad y posibles pausas...  (RIGC - Nov2013)
  */
-FUNCTION xbs_update( cScriptName, lMute )
+FUNCTION xbs_update( cScriptName, lMute, lForce )
 
-  local oForm, oRApp, cScriptFile
+  local oForm, rApp, cScriptFile
   local cValCode, cQry, rQry, rSrc
   local lUpdate := .t.
   local aData, aScript
 
   default cScriptName := ""
   default lMute := .f.
+  default lForce := .f.
 
   if !oTpuy:IsDef("oUser") ; return .f. ; endif
 
   #include "xbs_init.prg"
   //if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
 
-  oRApp := oTpuy:oApp
+  rApp := oTpuy:rApp
 
 tracelog( hb_dateTime() )
 
-  if Empty(oRApp)
+  if Empty(rApp)
      tracelog( "No se a indicado aplicación en uso." )
      return nil
   endif
 
-  aData := ~~oRApp:XBSList()
+  aData := ~~rApp:XBSList()
 
   if empty( aData ) 
      tracelog( "No hay información para verificar. " + ; 
@@ -54,7 +55,10 @@ tracelog( hb_dateTime() )
 
      IF !FILE( cScriptFile ) .OR. hb_MD5File( cScriptFile ) != cValCode
 
+tpyLog( "Diferencia en "+cScriptName+" | "+hb_MD5File( cScriptFile )+" != "+cValCode, procname() )
+if lForce .or. MsgNoYes("Se ha encontrado diferencia en el script "+cScriptName+". ¿Desea actualizar? " )
         lUpdate := __Update( cScriptName )
+endif
 
      ENDIF
   NEXT
@@ -67,13 +71,13 @@ return .t.
 FUNCTION __UPDATE( cScriptName, lMute )
    local lUpdate := .f.
    local oMsgRun, cScriptFile, cSource
-   local oRApp, oScript
+   local rApp, oScript
 
    default lMute := .f.
 
-   oRApp := oTpuy:oApp
+   rApp := oTpuy:rApp
 
-   oScript := ~~oRApp:GetScript( cScriptName )
+   oScript := ~~rApp:GetScript( cScriptName )
 
    cSource := ~~oScript:GetSource()
 
