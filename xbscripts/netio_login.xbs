@@ -43,8 +43,6 @@ function netio_login( lCheck )
              ACTION login_Run( oForm ) ;
              ID "btn_connect" RESOURCE ::oResource
 
-             //ACTION ( oTpuy:RunXBS("netio_table"), ::oWnd:End() ) ;
-
       DEFINE BUTTON ::oBtnExit ;
              ACTION ( netio_disconnect(NETSERVER, NETPORT),;
                       log_exit(oForm), ::End() ) ;
