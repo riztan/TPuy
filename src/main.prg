@@ -280,7 +280,7 @@ Function TestTimer(tValor)
          rApp := oTpuy:rApp
          //if Empty( oTpuy:aStBarItem[3] )
             oTpuy:aStBarItem[3] := oTpuy:oUser:cUserName
-            if ~~rApp:DevelMode()
+            if !Empty(rApp) .and. ~~rApp:DevelMode()
                oTpuy:aStBarItem[3] += " [Devel] "
             endif
          //endif
