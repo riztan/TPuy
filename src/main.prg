@@ -108,6 +108,7 @@ Function Main( ... )
    oTpuy:lSalir       := .F.
    oTpuy:cTime := Left( cStr( Time() ), 5 )
    oTpuy:lSBarUpdate  := .T.
+   oTPuy:aStBarItem   := Array(10)
 //   oTpuy:l_gnome_db_init := .F.
 
    /*
@@ -251,30 +252,56 @@ Return uReturn
  */
 Function TestTimer(tValor)
 
+   local cItem, nItems := 0
+   local rApp
+
    DEFAULT tValor := hb_DateTime()
 
    If HB_ISNIL(oTpuy:oWnd)
-      //Return ROUND(SECONDS()+1,0)
       Return hb_DateTime()
    EndIf
 
-   if !oTpuy:IsDef("cStBarTxt") ; oTpuy:Add("cStBarTxt","") ; endif
-
+   if !oTpuy:IsDef("cStBarTxt")  ; oTpuy:Add("cStBarTxt","")  ; endif
+/*
+   if !oTpuy:IsDef("aStBarItem") 
+      oTpuy:Add("aStBarItem",Array(10))
+      oTpuy:aStBarItem[1] := ""
+      oTpuy:aStBarItem[2] := ""
+      oTpuy:aStBarItem[3] := ""
+   endif
+*/
    If tValor <= hb_DateTime() .AND. !Empty( oTpuy:oStatusBar )
 
-// --- Esto es una prueba del Timer.
-      //oTpuy:oWnd:SetTitle( oTpuy:cSystem_Name + "  "+cStr(Time()) )
       oTpuy:cTime := Left( cStr( Time() ), 5 )
-      oTpuy:cStBarTxt := oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime 
+      oTpuy:aStBarItem[1] := oTpuy:cSystem_Name
+      oTpuy:aStBarItem[2] := "Hora: " + oTpuy:cTime
 
-if oTpuy:IsDef("oUser") .and. oTpuy:oUser:IsDef("cUserName")
-   oTpuy:cStBarTxt += " | "+oTpuy:oUser:cUserName
-endif
+      if oTpuy:IsDef("oUser") .and. oTpuy:oUser:IsDef("cUserName")
+         rApp := oTpuy:rApp
+         //if Empty( oTpuy:aStBarItem[3] )
+            oTpuy:aStBarItem[3] := oTpuy:oUser:cUserName
+            if ~~rApp:DevelMode()
+               oTpuy:aStBarItem[3] += " [Devel] "
+            endif
+         //endif
+      endif
 if oTpuy:lSBarUpdate
+      oTpuy:cStBarTxt := ""
+      nItems := Len(oTpuy:aStBarItem)
+      FOR EACH cItem IN oTpuy:aStBarItem
+         if ValType( cItem ) = "C"
+            if cItem:__EnumIndex() = 1
+               oTpuy:cStBarTxt += cItem
+            else
+               oTpuy:cStBarTxt += " | "
+               oTpuy:cStBarTxt += cItem
+            endif
+         endif
+      NEXT
       oTpuy:oStatusBar:SetText( oTpuy:cStBarTxt )
 endif
  
-      tValor := hb_DateTime() //ROUND(SECONDS()+1,0)
+      tValor := hb_DateTime() //+0.001 
 
    Endif
 
