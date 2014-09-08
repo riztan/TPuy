@@ -154,14 +154,7 @@ STATIC FUNCTION __SetApp( oIconView, pPath, oForm )
      DEFINE LABEL ::oLAppVersion TEXT ::cAppVersion OF ::oBoxApp MARKUP
 
 
-//   View( ~~rApp:XBSList() )
-View( ~oServer:IsDeveloper() )
-   if ~oServer:IsDeveloper()
-      oTpuy:cStBarTxt += " | Modo Desarrollo |"
-   else
-      oTpuy:cStBarTxt := STRTRAN( oTpuy:cStBarTxt, " | Modo Desarrollo |", "" )
-   endif
-   oTpuy:oStatusBar:SetText( oTpuy:cStBarTxt )
+   View( ~~rApp:XBSList() )
 
 Return nil
 

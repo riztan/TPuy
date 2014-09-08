@@ -140,6 +140,7 @@ function login_IsUser(oForm)
       oTpuy:oUser:cEMail     := r:oUser:cEMail
       oTpuy:oUser:cId        := r:oUser:cId
       oTpuy:oUser:cEntId     := r:oUser:cEntId
+      oTpuy:oUser:lDeveloper := ~oServer:IsDeveloper()
    endif
 
 //   oTpuy:oStatusBar:SetText("Usuario: "+ oTpuy:oUser:cShortName )
