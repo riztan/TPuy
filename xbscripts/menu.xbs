@@ -4,7 +4,7 @@
  *
  */
 
-#xcommand MENU_ROOT [<oMenuItem>] ;
+#xcommand MENU_ROOT [<oMnuName> ON] [<oMenuItem>] ;
                    [<lSub: CHILDS>];
                    ID <cId> ;
                    TITLE <cTitle> ;
@@ -12,7 +12,7 @@
 	           [ ACTION <bAction> ];
 	           OF  <oMenu> ;
   	      => ;
-	       MenuAddRoot( <oMenuItem>,<oMenu>,<cId>,<cTitle>,[<cImage>],[ \{|o| <bAction> \} ],<.lSub.>)
+	       <oMnuName> := MenuAddRoot( <oMenuItem>,<oMenu>,<cId>,<cTitle>,[<cImage>],[ \{|o| <bAction> \} ],<.lSub.>)
 
 
 #include "tpy_xbs.ch"
@@ -34,20 +34,23 @@ Function menu(oMenuBar)
       oTpuy:cMenuDir:="./menu/"
    ENDIF
 
-   hMenu := GetMenu( "main" )
+   oTpuy:hMenu := GetMenu( "main" )
+//View( hb_valtoexp(hMenu) )
 
    DEFINE FONT oFont NAME "Verdana 12" 
 
    DEFINE IMAGE oImage FILE "../../images/gnome-logo.png"
 
-   FOR EACH hItem IN hMenu
+   FOR EACH hItem IN oTpuy:hMenu
 
      IF hItem:__EnumIndex()>1
-
-        MENU_ROOT oMenuBar ;
+/*
+        MENU_ROOT oTpuy:oMnuPrin ON oMenuBar ;
              ID hItem TITLE hItem ["title"] ;
              IMAGE_FILE hItem ["image"] ;
              OF oTpuy:oMenu
+*/
+        __Menu( hItem, oMenuBar, oTpuy:oMenu, .t. )
 
      ENDIF
 
@@ -55,6 +58,18 @@ Function menu(oMenuBar)
 
 Return .t.
 
+
+
+Procedure __Menu( hItem, oMenuBar, oMenuParent, lRoot )
+   local oMenu
+   if lRoot
+        MENU_ROOT hItem["object"] ON oMenuBar ;
+             ID hItem TITLE hItem ["title"] ;
+             IMAGE_FILE hItem ["image"] ;
+             OF oMenuParent
+//        hItem["object"] := oMenu
+   endif
+return 
 
 
 
@@ -66,6 +81,7 @@ Function MenuAddRoot( oMnuParent, oMenu, hId, cDescri, cImage, cAction, lSub )
 
    Local oImage
    Local hSubMenu,hItem
+   Local oMnuName
 
    Default lSub := .F.
 
@@ -83,11 +99,11 @@ Function MenuAddRoot( oMnuParent, oMenu, hId, cDescri, cImage, cAction, lSub )
 
          IF Empty(cAction)
 
-            MENUITEM IMAGE ROOT TITLE cDescri ;
+            MENUITEM IMAGE oMnuName ROOT TITLE cDescri ;
                         IMAGE oImage ;
                         MNEMONIC OF oMenu
          ELSE
-            MENUITEM IMAGE ROOT TITLE cDescri ;
+            MENUITEM IMAGE oMnuName ROOT TITLE cDescri ;
                         IMAGE oImage ;
                         ACTION &cAction ;
                         MNEMONIC OF oMenu
@@ -96,10 +112,10 @@ Function MenuAddRoot( oMnuParent, oMenu, hId, cDescri, cImage, cAction, lSub )
       ELSE
   
          IF !Empty(cAction)
-            MENUITEM IMAGE ROOT TITLE cDescri ;
+            MENUITEM IMAGE oMnuName ROOT TITLE cDescri ;
                  ACTION &cAction MNEMONIC OF oMenu
          ELSE
-            MENUITEM IMAGE ROOT TITLE cDescri MNEMONIC OF oMenu
+            MENUITEM IMAGE oMnuName ROOT TITLE cDescri MNEMONIC OF oMenu
          ENDIF
 
       ENDIF
@@ -124,7 +140,7 @@ Function MenuAddRoot( oMnuParent, oMenu, hId, cDescri, cImage, cAction, lSub )
 
    ENDIF
 
-Return NIL
+Return oMnuName
 
 
 
@@ -192,8 +208,7 @@ Function MenuAddItem( oParent, hId )
 
    ENDIF
 
-Return NIL
-
+Return oItem
 
 /*
  // Ejemplo de menu en JSON

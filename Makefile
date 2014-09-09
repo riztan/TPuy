@@ -11,6 +11,7 @@ TARGET = ./bin/tpuy
 
 SRCPATH = ./src/
 SOURCES  = $(SRCPATH)main.prg          \
+           $(SRCPATH)menu.prg          \
            $(SRCPATH)tpublic.prg       \
            $(SRCPATH)tscript.prg       \
            $(SRCPATH)hbrun.prg         \
@@ -33,7 +34,6 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)pctapiz.prg       \
            $(SRCPATH)tpywin.prg        \
            $(SRCPATH)model_abm.prg     \
-           $(SRCPATH)testdbf.prg       \
            $(SRCPATH)tpy_dp.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq

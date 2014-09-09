@@ -1,6 +1,6 @@
 /*
- *  Proyecto Tpuy.
- *  saludo: Ejemplo de ejecución de script.
+ * Proyecto Tpuy.
+ * saludo: Ejemplo de ejecución de script.
  */
 
 #include "tpy_xbs.ch"

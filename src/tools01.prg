@@ -118,8 +118,8 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
    oMsgRun:Activate(,,,,,, ,, .T., .F. , .F., .F., .F. )
 
    oMsgRun:Refresh()
-   SysRefresh()
    SecondsSleep(.2)
+   SysRefresh()
 
    TRY
       Eval(bAction)

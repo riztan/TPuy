@@ -46,6 +46,19 @@
 // #include "hbstruct.ch"
 // #include "hblang.ch"
 
+EXTERNAL HB_LANGSELECT
+EXTERNAL G_OBJECT_SET_STRING
+EXTERNAL GTK_IS_ENTRY
+EXTERNAL GTK_RC_PARSE_STRING
+EXTERNAL GTK_TREE_MODEL_GET_PATH
+EXTERNAL HB_GTK_TREE_MODEL_GET_DOUBLE
+EXTERNAL HB_GTK_TREE_MODEL_GET_INT
+EXTERNAL GTK_TREE_VIEW_COLUMN_SET_CELL_DATA_FUNC
+EXTERNAL GTK_TREE_VIEW_GET_COLUMN
+EXTERNAL GTK_TREE_VIEW_SET_CURSOR
+EXTERNAL GTK_TREE_PATH_NEW_FROM_STRING
+EXTERNAL GTK_TREE_PATH_FREE
+
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
 
@@ -107,6 +120,8 @@ Function Main( ... )
    oTpuy:cSystem_Name :=cSystem_Name
    oTpuy:lSalir       := .F.
    oTpuy:cTime := Left( cStr( Time() ), 5 )
+   oTpuy:lSBarUpdate  := .T.
+   oTPuy:aStBarItem   := Array(10)
 //   oTpuy:l_gnome_db_init := .F.
 
    /*
@@ -250,21 +265,56 @@ Return uReturn
  */
 Function TestTimer(tValor)
 
+   local cItem, nItems := 0
+   local rApp
+
    DEFAULT tValor := hb_DateTime()
 
    If HB_ISNIL(oTpuy:oWnd)
-      //Return ROUND(SECONDS()+1,0)
       Return hb_DateTime()
    EndIf
 
-   //If nValor <= ROUND(SECONDS(),0) .AND. !Empty( oTpuy:oWnd )
+   if !oTpuy:IsDef("cStBarTxt")  ; oTpuy:Add("cStBarTxt","")  ; endif
+/*
+   if !oTpuy:IsDef("aStBarItem") 
+      oTpuy:Add("aStBarItem",Array(10))
+      oTpuy:aStBarItem[1] := ""
+      oTpuy:aStBarItem[2] := ""
+      oTpuy:aStBarItem[3] := ""
+   endif
+*/
    If tValor <= hb_DateTime() .AND. !Empty( oTpuy:oStatusBar )
 
-// --- Esto es una prueba del Timer.
-      //oTpuy:oWnd:SetTitle( oTpuy:cSystem_Name + "  "+cStr(Time()) )
       oTpuy:cTime := Left( cStr( Time() ), 5 )
-      oTpuy:oStatusBar:SetText( oTpuy:cSystem_Name + " | Hora: " + oTpuy:cTime ) 
-      tValor := hb_DateTime() //ROUND(SECONDS()+1,0)
+      oTpuy:aStBarItem[1] := oTpuy:cSystem_Name
+      oTpuy:aStBarItem[2] := "Hora: " + oTpuy:cTime
+
+      if oTpuy:IsDef("oUser") .and. oTpuy:oUser:IsDef("cUserName")
+         rApp := oTpuy:rApp
+         //if Empty( oTpuy:aStBarItem[3] )
+            oTpuy:aStBarItem[3] := oTpuy:oUser:cUserName
+            if !Empty(rApp) .and. ~~rApp:DevelMode()
+               oTpuy:aStBarItem[3] += " [Devel] "
+            endif
+         //endif
+      endif
+if oTpuy:lSBarUpdate
+      oTpuy:cStBarTxt := ""
+      nItems := Len(oTpuy:aStBarItem)
+      FOR EACH cItem IN oTpuy:aStBarItem
+         if ValType( cItem ) = "C"
+            if cItem:__EnumIndex() = 1
+               oTpuy:cStBarTxt += cItem
+            else
+               oTpuy:cStBarTxt += " | "
+               oTpuy:cStBarTxt += cItem
+            endif
+         endif
+      NEXT
+      oTpuy:oStatusBar:SetText( oTpuy:cStBarTxt )
+endif
+ 
+      tValor := hb_DateTime() //+0.001 
 
    Endif
 
@@ -339,10 +389,10 @@ function FromRemote( cFuncName, cObj, ... )
 
       if UPPER(cObj) == "OSERVER" ; cObj := cHandle ; endif
 
-tracelog( "solicitando "+cFuncName+" ,"+cHandle+", ..." )
+//tracelog( "solicitando "+cFuncName+" ,"+cHandle+", ..." )
       uReturn := hb_deserialize( netio_funcexec( cFuncName, cHandle, cObj, ...  ) )
    else
-tracelog( "solicitando "+cFuncName+" , , ..." )
+//tracelog( "solicitando "+cFuncName+" , , ..." )
       uReturn := hb_deserialize( netio_funcexec( cFuncName, "", cObj, ...  ) )
    endif
 return uReturn //hb_deserialize( netio_funcexec( ... ) )

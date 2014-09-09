@@ -4,6 +4,7 @@
  * poslogin: Formulario para definir entorno luego de hacer login.
  *
  */
+
 #include "tpy_xbs.ch"
 #define GtkTreeIter  Array( 4 )
 
@@ -13,9 +14,10 @@ Function PosLogin()
 
   if !oTpuy:IsDef("oUser") .AND. !IsObject(oTpuy:oUser) ; return nil ; endif
 
-  if !oTpuy:RunXBS("netio_check") ; return .f. ; endif
+  #include "xbs_init.prg" 
 
-  SET PUBLIC oForm
+  oTpuy:rApp := ~oServer:SetApplication("tpy_base")
+  oTpuy:RunXBS( "netio_menu" )
 
   ::aApps := ~oServer:GetApplications()
   
@@ -45,14 +47,14 @@ Function PosLogin()
   ::oIconView:SetToolTipColumn( 3 )
   ::oIconView:SetColumns( 6 )
   ::oIconView:SetItemWidth( 115 )
-  //::oIconView:bItem_Activated := {|oSender,pPath| Comprueba( oSender, pPath )  }
-  ::oIconView:bItem_Activated := {|oSender,pPath| __Prueba( oSender, pPath, oForm )  }
+  ::oIconView:bItem_Activated := {|oSender,pPath| __SetApp( oSender, pPath, oForm )  }
 
 //View( ::oIconview )
 
   ::oIconView:SetFocus()
 
 return NIL
+
 
 
 STATIC FUNCTION __Create_Model( oForm )
@@ -63,14 +65,14 @@ STATIC FUNCTION __Create_Model( oForm )
   /* Creamos Arreglo con Datos para el Modelo */
   FOR EACH aApp IN ::aApps
      if !FILE( oTpuy:cImages+aApp[3]+"_"+aApp[4]+".png" )
-        AADD( aFiles, {"software_sticker.png", aApp[5], aApp[6]  } )
+        AADD( aFiles, {"software_sticker.png", aApp[5], aApp[6], aApp[4]  } )
      else
-        AADD( aFiles, {aApp[3]+"_"+aApp[4]+".png", aApp[5], aApp[6] } )
+        AADD( aFiles, {aApp[3]+"_"+aApp[4]+".png", aApp[5], aApp[6], aApp[4] } )
      endif
   NEXT
 
 
-  DEFINE LIST_STORE oLbx TYPES G_TYPE_STRING, GDK_TYPE_PIXBUF, G_TYPE_STRING
+  DEFINE LIST_STORE oLbx TYPES G_TYPE_STRING, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING
     For x := 1 To Len( aFiles )
         APPEND LIST_STORE oLbx ITER aIter
         SET LIST_STORE oLbx ITER aIter POS 1 VALUE aFiles[x,2]
@@ -82,16 +84,37 @@ STATIC FUNCTION __Create_Model( oForm )
         gdk_pixbuf_unref( pixbuf )
 
         SET LIST_STORE oLbx ITER aIter POS 3 VALUE aFiles[x,3]
+
+        SET LIST_STORE oLbx ITER aIter POS 4 VALUE aFiles[x,4]
     Next
 
 RETURN oLbx
 
 
-STATIC FUNCTION __prueba( oIconView, pPath, oForm )
 
-   Local cText
+STATIC FUNCTION __SetApp( oIconView, pPath, oForm )
 
-   cText  := ::oIconView:GetValue( 3,, pPath )
+   Local cDescri,cAppName, rApp
+   Local cFont := "Sans Italic 8"
+
+   //cText     := ::oIconView:GetValue( 3,, pPath )
+   cAppName  := ::oIconView:GetValue( 4,, pPath )
+
+   if !Empty( oTpuy:rApp )
+      ~oServer:ObjFree( oTpuy:rApp )
+   endif
+
+   oTpuy:rApp := ~oServer:SetApplication(cAppName)
+   rApp := oTpuy:rApp
+   oTpuy:RunXBS( "netio_menu" )
+
+   cDescri := ~~rApp:cDescription
+
+   ::cAppVersion := "Versión:  <b>"      + ~~rApp:cVersion    + "</b>"
+   ::cAppOwner   := "Desarrollador: <b>" + ~~rApp:OwnerName() + "</b>"
+   ::cAppOwnMail := "e-Mail: <b>"        + ~~rApp:OwnerMail() + "</b>"
+
+//View( {::cAppOwner,::cAppOwnMail} )
 
    if hb_IsObject(oTpuy:oFondo)
 //      oTpuy:oFondo:End()
@@ -106,7 +129,7 @@ STATIC FUNCTION __prueba( oIconView, pPath, oForm )
    DEFINE IMAGE ::ImgCerrar FILE oTpuy:cImages+"cerrar.png" 
                 ::ImgCerrar:Adjust(12)
 
-   cText  := " <span font_desc='Sans Italic 8'><i>"+cText+"</i></span> "
+   cDescri  := " <span font_desc='"+cFont+"'><i>"+cDescri+"</i></span> "
 
    DEFINE BOX ::oBoxLabel CONTAINER
 
@@ -115,41 +138,25 @@ STATIC FUNCTION __prueba( oIconView, pPath, oForm )
              OF ::oBoxLabel
              ::oBtn:SetImage( ::ImgCerrar )
 
-      DEFINE LABEL ::oLabel TEXT cText MARKUP OF ::oBoxLabel
+      DEFINE LABEL ::oLabel TEXT cDescri MARKUP OF ::oBoxLabel
 
    DEFINE FRAME ::oGrp LABEL ::oBoxLabel OF ::oBoxTest CONTAINER SHADOW 1
 
-//View( ::oGrp )
-   
-Return nil
 
-// Una manera facil de obtener el valor de las columnas
-// Podemos ver como coger la imagen de la columna 1
-Function Comprueba( oIconView, pPath  )
-    Local oWnd , oImage, cText
-    Local nWidth,nHeight
-    Local cWidth,cHeight
-    Local nWMax:=600, nHMax:=600
-    
-    // u := o:GetValue( nColumn, cType_data, pPath )
-    cText  := oIconView:GetValue( 1,, pPath )
-    
-    DEFINE WINDOW oWnd TITLE cText TYPE_HINT GDK_WINDOW_TYPE_HINT_MENU
-         DEFINE IMAGE oImage FILE oTpuy:cImages+cText OF oWnd CONTAINER
-         
-         nWidth  := oImage:GetWidth()
-         nHeight := oImage:GetHeight()
-         
-         cWidth  := AllTrim( Str(nWidth) )
-         cHeight := AllTrim( Str(nHeight) )
-         
-         if nWidth > nWMax ; nWidth := nWMax ; endif
-         if nHeight > nHMax ; nHeight := nHMax ; endif
-         
-         oImage:Adjust( nWidth ) //, nHeight )
-         
-         oWnd:SetTitle( cText+". "+cHeight+"x"+cWidth )
-    
-    ACTIVATE WINDOW oWnd MODAL CENTER
+   DEFINE SCROLLEDWINDOW ::oScroll2 CONTAINER OF ::oGrp
+     ::oScroll2:SetPolicy( GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC )
+     ::oScroll2:SetBorder(3)
+
+     DEFINE BOX ::oBoxApp VERTICAL OF ::oScroll2 CONTAINER EXPAND FILL
+
+     DEFINE LABEL ::oLAppOwner   TEXT ::cAppOwner   OF ::oBoxApp MARKUP
+     DEFINE LABEL ::oLAppOwnMail TEXT ::cAppOwnMail OF ::oBoxApp MARKUP
+     DEFINE LABEL ::oLAppVersion TEXT ::cAppVersion OF ::oBoxApp MARKUP
+
+
+   View( ~~rApp:XBSList() )
 
 Return nil
+
+
+//eof
