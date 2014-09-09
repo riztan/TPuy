@@ -1,4 +1,4 @@
-/*  $Id: gclass.ch,v 1.13 2008/12/02 21:37:48 riztan Exp $ */
+/*  $Id: tepuy.ch,v 1.13 2014/09/01 21:37:48 riztan Exp $ */
 /*
 	Copyright © 2008  Riztan Gutierrez <riztang@gmail.org>
 
