@@ -1,0 +1,73 @@
+/* 
+ * Proyecto Tpuy.
+ * applications: Gestiona aplicaciones del servidor Tpuy.
+ *
+ */
+
+#include "tpy_xbs.ch"
+
+
+FUNCTION applications()
+
+  local oForm, cQry, rQry, rSrc
+
+  #include "xbs_init.prg"
+
+  if !oTpuy:IsDef("oUser") ; return .f. ; endif
+
+  ::cTitle := "Datos de la Aplicación"
+
+  SET RESOURCES ::cRes FROM FILE oTpuy:cResources+"applications.ui"
+
+  DEFINE WINDOW ::oWnd TITLE ::cTitle ;
+     SIZE 450,300 ;
+     ID "window1" RESOURCE ::cRes
+     ::oWnd:SetResizable(.f.)
+
+     /* Creamos banner decorativo con título */
+     DEFINE IMAGE ::oBanner FILE oTpuy:cImages+"banner_1.png" ID "banner" RESOURCE ::cRes
+     ::oBanner:Adjust(600)
+   
+     DEFINE LABEL ::oLabBanner TEXT ::cTitle ID "label_title" RESOURCE ::cRes
+     /* fin del banner */
+
+     ::cAppName := "tpy_"
+     ::bAppName := { |oEntry| __CheckName( oForm,oEntry )  }
+     DEFINE ENTRY ::oAppName VAR ::cAppName ;
+            ID "entry_name" RESOURCE ::cRes
+            ::oAppName:bValid := ::bAppName
+
+
+
+     DEFINE BUTTON ::oBtnOk ACTION MsgInfo("bien") ID "btn_ok" RESOURCE ::cRes
+     DEFINE BUTTON ::oBtnCancel ACTION __Salir(oForm) ID "btn_cancel" RESOURCE ::cRes
+
+  ACTIVATE WINDOW ::oWnd
+
+return .t.
+
+
+
+procedure __Salir( oForm )
+
+   if MsgNoYes( "¿Realmente desea cerrar la ventana y "+CRLF+"descartar los cambios?",;
+                "Por favor confirme su petición." )
+      oForm:End()
+   endif
+return 
+
+
+
+function __CheckName( oForm, oEntry )
+   local lResp := .f.
+
+   MsgInfo("Revisar si el nombre de la aplicacion ya existe, etc...")
+
+   if !Empty(::cAppName)
+      ::oLabBanner:SetText( ::cAppName )
+      lResp := .t.
+   endif
+
+return lResp
+
+//eof

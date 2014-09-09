@@ -43,8 +43,6 @@ function netio_login( lCheck )
              ACTION login_Run( oForm ) ;
              ID "btn_connect" RESOURCE ::oResource
 
-             //ACTION ( oTpuy:RunXBS("netio_table"), ::oWnd:End() ) ;
-
       DEFINE BUTTON ::oBtnExit ;
              ACTION ( netio_disconnect(NETSERVER, NETPORT),;
                       log_exit(oForm), ::End() ) ;
@@ -142,6 +140,7 @@ function login_IsUser(oForm)
       oTpuy:oUser:cEMail     := r:oUser:cEMail
       oTpuy:oUser:cId        := r:oUser:cId
       oTpuy:oUser:cEntId     := r:oUser:cEntId
+      oTpuy:oUser:lDeveloper := ~oServer:IsDeveloper()
    endif
 
 //   oTpuy:oStatusBar:SetText("Usuario: "+ oTpuy:oUser:cShortName )
