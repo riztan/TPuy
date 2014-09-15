@@ -79,13 +79,17 @@ METHOD New( lRoot, cId, cTitle, cAction, cImage, oParentItem )  CLASS MNUITEM
 
    Default lRoot to .f.
 
-   Super:New()
+   Super:New(.t.,.f.,.f.)
+
+   //hb_HKeepOrder( ::hVars, .T. )
 
    ::Add( "cId"     , cId     )
    ::Add( "cTitle"  , cTitle  )
    ::Add( "cAction" , cAction )
    ::Add( "cImage"  , cImage  )
-   ::Add( "oSubItem", TPublic():New() )
+   ::Add( "oSubItem", TPublic():New(.t.,.f.,.f.) )
+
+   //hb_HKeepOrder( ::oSubItem:hVars, .T. )
 
    ::lRoot := lRoot
 
@@ -194,7 +198,6 @@ METHOD ACTIVATE( oParentMenu )
       ENDIF
 
    ENDIF
-
 
 
    if hb_IsObject(::oSubItem) .and. ::oSubItem:ClassName()="TPUBLIC"
