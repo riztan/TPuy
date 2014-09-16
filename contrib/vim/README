@@ -20,10 +20,14 @@ an 50.110.281 &Syntax.TUV.TPuy :cal SetSyn("tpuy")
    Igual al punto anterior, se puede copiar el archivo y sustituir el actual ó
    puede hacer la modificacion manualmente.
 
-2. tpuy.vim
+3. tpuy.vim
    Es el fichero (copia de clipper.vim) que contiene la sintaxis para tpuy.
    Debemos copiarlo en:
      (gnu/linux): /usr/share/vim/vim72/syntax/tpuy.vim
      (windows): 
 
+4. snippets/tpuy.snippet 
+   Este fichero de recortes puede ser agregado cuando el plugin SnipMate 
+   de gVim es instalado. (http://www.vim.org/scripts/script.php?script_id=2540)
+   Solo agregar el fichero en la carpeta snippets (~/.vim/snippets).
 
