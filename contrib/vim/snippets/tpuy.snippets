@@ -1,9 +1,27 @@
+# oTpuy
+snippet tp
+	oTPuy:${1:}
+
 # main()
 snippet main
 	Function Main()
 	
 
 	Return 
+
+#Function
+snippet func
+	Function ${1:FunctionName}() 
+	   local ${2:uReturnValue} 
+	   ${3:}
+	Return ${2} 
+
+#Procedure
+snippet proc
+	Procedure ${1:ProcedureName}() 
+	   ${2:}
+	Return 
+
 # init xbscript
 snippet xbs
 	/* 
@@ -14,7 +32,7 @@ snippet xbs
 
 	#include "tpy_xbs.ch"
 
-	Procedure Main()
+	Procedure $1()
 	   local oForm
 
 	   #include "xbs_init.prg"
@@ -26,7 +44,7 @@ snippet xbs
 	//eof
 
 # DEFINE WINDOW 
-snippet defw
+snippet dwin
 	DEFINE WINDOW ${1:oWnd} TITLE "${2:Title}" ;
 	       SIZE ${3:X},${4:Y} 
 
@@ -36,7 +54,7 @@ snippet defw
 	
 
 # DEFINE WINDOW FROM RESOURCE (GLADE)
-snippet defwg
+snippet dwing
 	RESOURCE ${1:::cRes} FROM FILE oTpuy:cResource+"${2:file}.ui" 
 
 	DEFINE WINDOW ${3:::oWnd} TITLE "${4:Title}" ;
@@ -45,6 +63,38 @@ snippet defwg
 	   ${10:}
 
 	ACTIVATE WINDOW $3 ${8:CENTER} ${9:VALID}
+
+# DEFINE BOX
+snippet dbox
+	DEFINE BOX ${1:::oBox} ${2:VERTICAL} ${3:HOMOGENEOUS} BORDER ${4:nBorder} SPACING ${5:nSpacing} ;
+	       OF ${6:::oParent} ${7:CONTAINER} ${8:EXPAND} ${9:FILL} PADDING ${10:nPadding}
+
+# DEFINE BOX (GLADE)
+snippet dboxg
+	DEFINE BOX ${1:::oBox} ID "${2:box_name}" RESOURCE ${3:::cRes}
+
+# DEFINE LABEL
+snippet dlab
+	DEFINE LABEL ${1:::oLabel} TEXT "${2:Text or cVar}" ${3:MARKUP} ${4:MNEMONIC} ${5:CONTAINER} ${6:FILL};
+	       FONT ${7:::oFont} PADDING ${8:nPadding} OF ${9:::oParent}
+
+# DEFINE LABEL (GLADE)
+snippet dlabg
+	DEFINE LABEL ${1:::oLabel} TEXT "${2:Text or cVar}" ID "${3:label_name}" RESOURCE ${4:::cRes}
+
+# DEFINE BUTTON
+snippet dbut
+	DEFINE BUTTON ${1:::oBtn} TEXT "${2:Text or cVar}" ;
+	       ACTION ${3:bAction} ;
+	       VALID  ${4:bValid} ;
+	       FONT   ${5:::oFont} ;
+	       FROM STOCK ${6:cFromStock} ;
+	       ${7:MNEMONIC} ${8:EXPAND} ${9:FILL} ${10:CONTAINER} PADDING ${11:nPadding} ;
+	       OF ${12:::oParent}
+
+#DEFINE BUTTON (GLADE)
+snippet dbutg
+	DEFINE BUTTON ${1:::oBtn} TEXT "${2:Text or cVar}" ID "${3:button_name}" RESOURCE ${4:::cRes}
 	
 
 # #include "..."
@@ -112,4 +162,12 @@ snippet msgr2
 	MsgRunStop( $1 )
 
 	${4}
+
+# MsgRun
+snippet msgr
+	MsgRun( "${1:Message}", {|${2:o}| ${3:/* code */} } ) 
+
+# MsgInfo
+snippet msgi
+	MsgInfo( "${1:Message}", "${2:Title}"${3: MARKUP} ) 
 

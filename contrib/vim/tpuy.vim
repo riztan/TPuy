@@ -31,7 +31,7 @@ syn keyword tpuyStatement	INDEX INPUT VALID WHEN
 syn keyword tpuyStatement	JOIN KEYBOARD LABEL FORM LIST LOCATE MENU TO
 syn keyword tpuyStatement	NOTE PACK QUIT READ
 syn keyword tpuyStatement	RECALL REINDEX RELEASE RENAME REPLACE REPORT
-syn keyword tpuyStatement	RETURN FORM RESTORE
+syn keyword tpuyStatement	FORM RESTORE
 syn keyword tpuyStatement	RUN SAVE SEEK SELECT
 syn keyword tpuyStatement	SKIP SORT STORE SUM TEXT TOTAL TYPE UNLOCK
 syn keyword tpuyStatement	UPDATE USE WAIT ZAP
@@ -52,17 +52,19 @@ syn keyword tpuyStatement	DBSORTITEM DBTRANSINFO DBTRANSITEM WORKAREA
 " Conditionals
 syn keyword tpuyConditional	CASE OTHERWISE ENDCASE
 syn keyword tpuyConditional	IF ELSE ENDIF IIF IFDEF IFNDEF
+"syn keyword tpuyConditional	if else elseif endif
 
 " Loops
 syn keyword tpuyRepeat	DO WHILE ENDDO
 syn keyword tpuyRepeat	FOR TO NEXT STEP
+syn keyword tpuyRepeat	FOR EACH IN NEXT
 
 " Visibility
 syn keyword tpuyStorageClass	ANNOUNCE STATIC
 syn keyword tpuyStorageClass DECLARE EXTERNAL LOCAL MEMVAR PARAMETERS
 syn keyword tpuyStorageClass PRIVATE PROCEDURE PUBLIC REQUEST STATIC
 syn keyword tpuyStorageClass FIELD FUNCTION
-syn keyword tpuyStorageClass EXIT PROCEDURE INIT PROCEDURE
+syn keyword tpuyStorageClass EXIT PROCEDURE INIT PROCEDURE RETURN
 
 " Operators
 syn match   tpuyOperator	"$\|%\|&\|+\|-\|->\|!"
@@ -101,7 +103,7 @@ if exists("c_comment_strings")
   syntax region tpuyComment		start="/\*" end="\*/" contains=tpuyCommentString,tpuyCharacter,tpuyNumber,tpuyString
   syntax match  tpuyComment		"//.*" contains=tpuyComment2String,tpuyCharacter,tpuyNumber
 else
-  syn region tpuyComment		start="/\*" end="\*/"
+  syn region tpuyComment		start="/\*" end="\*/" fold
   syn match tpuyComment		"//.*"
 endif
 syntax match tpuyCommentError	"\*/"
@@ -140,4 +142,19 @@ endif
 
 let b:current_syntax = "tpuy"
 
+" Exclusivo t-gtk y TPuy
+syn keyword tpuyStatement	DEFINE WINDOW BUTTON LABEL MENUBAR ACTIVATE
+syn keyword tpuyStatement	RESOURCES ENTRY ACTION ID OF VAR TITLE 
+syn keyword tpuyStatement	RESOURCE CENTER VALID 
+
+" TPuy
+syn keyword tpuyStorageClass	oTPuy tracelog
+
+
 " vim: ts=4
+
+"syn region tpuyWINDOW		start="DEFINE WINDOW" end="ACTIVATE WINDOW" fold
+syn region tpuyMENU		start="MENUBAR " end="ACTIVATE MENUBAR" fold
+
+
+set foldmethod=syntax
