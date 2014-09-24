@@ -121,13 +121,14 @@ CLASS TPublic
 
    DATA  lAutoAdd    AS LOGICAL	 INIT .T.		
    DATA  lSensitive  AS LOGICAL	 INIT .F.		
+   DATA  lOrder      AS LOGICAL	 INIT .T.
 
    DATA  hVars
 
    DATA  nPos        AS NUMERIC    INIT 0   // READONLY // [ER]
    DATA  cName       AS CHARACTER  INIT ""  // READONLY // [ER]
 
-   METHOD New( lAutoAdd, lSensitive )          /**New(). */
+   METHOD New( lAutoAdd, lSensitive, lOrder )          /**New(). */
    METHOD End()   
 
    METHOD Add( cName, xValue )                 /**Add(). */
@@ -182,19 +183,22 @@ RETURN lResp
  *  para definir si permite la creacion de variables y si admite 
  *  sensibilidad a las mayusculas respectivamente.
 */
-METHOD New( lAutoAdd, lSensitive ) CLASS TPublic
+METHOD New( lAutoAdd, lSensitive, lOrder ) CLASS TPublic
 
    ::hVars := Hash()
 
-   DEFAULT lAutoAdd:=.T., lSensitive:=.F.
+   DEFAULT lAutoAdd:=.T., lSensitive:=.F., lOrder := .T.
 
    HSetAutoAdd( ::hVars, lAutoAdd )
 
    HSetCaseMatch( ::hVars, lSensitive )
 
+   hb_HKeepOrder( ::hVars, !lOrder )
+
    ::cName:=""
    ::lAutoAdd  :=lAutoAdd
    ::lSensitive:=lSensitive
+   ::lOrder    :=lOrder
 
 RETURN Self
 

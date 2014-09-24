@@ -1,0 +1,33 @@
+Modificaciones a realizar para el editor gVim que permiten activar la sintaxis de TPuy.
+
+1. synmenu.vim  
+   Este fichero contiene las opciones de sintaxis a aparecer en elmenú.  
+   Puede copiar este fichero y sustituir el actual (previa copia). Asi 
+   como también puede incluir la modificación específica que se detalla
+   a continuación.
+      Incluir aprox en la línea 499. Luego de la linea que contiene:
+
+an 50.110.280 &Syntax.TUV.TPP :cal SetSyn("tpp")
+
+es decir, incluir:
+
+an 50.110.281 &Syntax.TUV.TPuy :cal SetSyn("tpuy")
+
+   De esta forma, ya aparece tpuy en las opciones de sintaxis.
+
+2. filetype.vim
+   Indica el tipo de archivo a asociar con el fichero de sintaxis. 
+   Igual al punto anterior, se puede copiar el archivo y sustituir el actual ó
+   puede hacer la modificacion manualmente.
+
+3. tpuy.vim
+   Es el fichero (copia de clipper.vim) que contiene la sintaxis para tpuy.
+   Debemos copiarlo en:
+     (gnu/linux): /usr/share/vim/vim72/syntax/tpuy.vim
+     (windows): 
+
+4. snippets/tpuy.snippet 
+   Este fichero de recortes puede ser agregado cuando el plugin SnipMate 
+   de gVim es instalado. (http://www.vim.org/scripts/script.php?script_id=2540)
+   Solo agregar el fichero en la carpeta snippets (~/.vim/snippets).
+
