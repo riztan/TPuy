@@ -38,6 +38,7 @@
 #include "proandsys.ch"
 #include "gclass.ch"
 #include "tgtkext.ch"
+#include "tgtkext2.ch"
 #include "tpy_extern.ch"
 //#include "libgdaext.ch"
 #include "tip.ch"
