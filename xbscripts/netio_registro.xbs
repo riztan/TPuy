@@ -22,7 +22,7 @@ function netio_registro()
 
    DEFINE PUBLIC oForm
 
-   oTpuy:RunXBS("netio_Check")
+   oTpuy:RunXBS("netio_check")
 
    ::lCheckEntry := .f.
 
@@ -45,7 +45,7 @@ function netio_registro()
 
    DEFINE BOX ::oBox ID "hbox17" RESOURCE ::cResource
 
-   DEFINE IMAGE ::oImage FILE oTpuy:cImages+"man_and_girl.png" ;
+   DEFINE IMAGE ::oImage FILE oTpuy:cImages+"people.png" ;
           ID "image3" RESOURCE ::cResource
           ::oImage:Adjust( 128, 128 )
 
