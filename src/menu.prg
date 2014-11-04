@@ -75,7 +75,7 @@ ENDCLASS
 
 
 
-METHOD New( lRoot, cId, cTitle, cAction, cImage, oParentItem )  CLASS MNUITEM
+METHOD New( lRoot, cId, cTitle, cAction, cImage, cValid, oParentItem )  CLASS MNUITEM
 
    Default lRoot to .f.
 
@@ -87,6 +87,7 @@ METHOD New( lRoot, cId, cTitle, cAction, cImage, oParentItem )  CLASS MNUITEM
    ::Add( "cTitle"  , cTitle  )
    ::Add( "cAction" , cAction )
    ::Add( "cImage"  , cImage  )
+   ::Add( "cValid"  , cValid  )
    ::Add( "oSubItem", TPublic():New(.t.,.f.,.f.) )
 
    //hb_HKeepOrder( ::oSubItem:hVars, .T. )
@@ -118,6 +119,7 @@ RETURN Self
 METHOD ACTIVATE( oParentMenu )
 
    local cAction := ::cAction
+   local cValid  
    local hSubMenu, oSubMenu
    local oMenu, oParent, hSubItems, oItem
    local lSub := .f.
@@ -138,6 +140,7 @@ METHOD ACTIVATE( oParentMenu )
       endif
    endif
 
+   cValid := ::cValid
    
    IF !Empty(::cImage) .and. !FILE( ::cImage )
       if FILE( oTpuy:cImages+::cImage ) 
@@ -189,6 +192,7 @@ METHOD ACTIVATE( oParentMenu )
             MENUITEM IMAGE ::oGtkItem TITLE ::cTitle ;
                  ACTION &cAction MNEMONIC OF oMenu
          endif
+
       ELSE
          if ::lRoot
             MENUITEM IMAGE ::oGtkItem ROOT TITLE ::cTitle MNEMONIC OF oMenu
@@ -199,6 +203,13 @@ METHOD ACTIVATE( oParentMenu )
 
    ENDIF
 
+   if empty(cValid) .or. (hb_IsNIL(cValid))
+      ::oGtkItem:Enable()
+   else
+      if !&cValid
+         ::oGtkItem:Disable()
+      endif
+   endif
 
    if hb_IsObject(::oSubItem) .and. ::oSubItem:ClassName()="TPUBLIC"
       hSubItems := ::oSubItem:hVars
