@@ -42,7 +42,7 @@ CLASS MODELQUERY FROM TPUBLIC
    DATA aTables
 
 //   METHOD New( oConn, cQry )
-   METHOD NewFromRemote( cSchema, cQry, lRemote, lMute  )
+   METHOD NewFromRemote( cSchema, uQry, lRemote, lMute  )
 //   METHOD New( rQry, lRemote )
 //   METHOD Serialize( cMsg )   
 //   METHOD HColumn( cCol )  INLINE  {"En desarrollo..."}
@@ -426,7 +426,7 @@ METHOD NEW(oConn, cQry, cConn)
 
 RETURN self
 */
-METHOD NEWFROMREMOTE( cSchema, cQry, lRemote, lMute )  CLASS MODELQUERY
+METHOD NEWFROMREMOTE( cSchema, uQry, lRemote, lMute )  CLASS MODELQUERY
    local oQry
    local aLin
    local nPos
@@ -441,26 +441,34 @@ METHOD NEWFROMREMOTE( cSchema, cQry, lRemote, lMute )  CLASS MODELQUERY
 
 
 /*
-  Debemos evaluar si la variable cQry es una consulta o si ya es un objeto remoto..
+  Debemos evaluar si la variable uQry es una consulta o si ya es un objeto remoto..
   no se puede determinar con valtype() porque ambos son "C"haracter
   Imagino que aplicando un filtro de expresion regular se puede verificar.
+
+  * 2014-11-04 - si no tiene blanco es un identificador remoto.
+
 */
 
    ::lRemote := lRemote
    ::lCursorTop := .t.
    ::lMute   := lMute
 
-   ::oQuery   := cQry
-   //oQry       := cQry
-   if ValType( cQry ) = "C"
+   ::oQuery   := uQry
+   //oQry       := uQry
+   if ValType( uQry ) = "C"
       if ::lRemote
          if !::lMute ; oMsgRun := MsgRunStart("Generando Consulta...") ; endif
-         ::oQuery := ~oServer:ModelQuery( cQry, cSchema )
+
+         if ( " " $ uQry )  //-- Si no hay espacio en blanco no es una consulta, es identificador de obj remoto.
+            ::oQuery := ~oServer:ModelQuery( uQry, cSchema )
+         else
+            ::cQry := ~~uQry:cQuery
+         endif
 
 /* inicializamos el conteo para verificar conexion netIO */
 oTpuy:tLastNetIO := hb_DateTime()
 
-//view({ procname(),": ", ::oQuery:cQry })
+//view({ procname(),": ", ::oQuery:uQry })
 
          //oQry := ::oQuery
          if !::lMute ; MsgRunStop( oMsgRun ) ; endif
@@ -500,7 +508,8 @@ oTpuy:tLastNetIO := hb_DateTime()
       Return NIL
    ENDIF
 
-   ::cQuery  := cQry
+   if empty( ::cQuery ) ;  ::cQuery  := uQry ; endif  //-- esto es temporal, porque si uQry es un objeto entonces no es correcto.
+
    ::aTypes  := ARRAY( LEN( ::aStruct ) )
    
    FOR EACH aLin IN ::aStruct
