@@ -55,7 +55,7 @@ RETURN .T.
 Procedure __Login()
 
    local cScriptName := "netio_login", cScriptFile
-   local aScripts, aScript
+   local aScripts, aScript, cMD5, cSource 
 
    __FilesCheck("INC")
    __FilesCheck("RES")
@@ -64,8 +64,11 @@ Procedure __Login()
    aScripts := ~GetScripts()
 
    FOR EACH aScript IN aScripts
-      if !File( oTpuy:cXBScripts+aScript[1]+".xbs" )
-         hb_MemoWrit( oTpuy:cXBScripts+aScript[1]+".xbs", aScript[2] )
+      cScriptFile := oTpuy:cXBScripts+aScript[1]+".xbs"
+      cMD5 := hb_MD5File( cScriptFile )
+      if !File( cScriptFile ) .or. !(aScript[2] == cMD5)
+         cSource := ~GetScripts( aScript[1] )
+         hb_MemoWrit( cScriptFile, cSource )
       endif
    NEXT
 
@@ -102,7 +105,7 @@ Procedure __FilesCheck(cType)
    endif
 
    FOR EACH aFile IN aRFiles
-      cLFile_MD5 := hb_MD5( MemoRead(cDir+aFile[1]) )
+      cLFile_MD5 := hb_MD5File( cDir+aFile[1] )
       if cLFile_MD5 != aFile[2]
          //MsgInfo( cDir+aFile[1] )
          hb_MemoWrit( cDir+aFile[1], Eval(bGet) )
