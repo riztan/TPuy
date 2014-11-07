@@ -114,6 +114,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA aActions          INIT {}
       DATA aTypes
       DATA hModel
+      DATA aCol
 
       DATA nRows             INIT 0
       
@@ -397,7 +398,7 @@ Return .F.
 METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 
   Local oScroll, n
-  Local oCol, aTypes, aStruct, aItems, oTemp
+  Local aTypes, aStruct, aItems, oTemp
   Local cType //, nMin, nWidth
   Local nLenStru
   Local cValTmp,nColumn
@@ -492,7 +493,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
    ::oTreeView:SetRules( .T. )            
       
    //::oTreeView:SetSearchColumn( 4 ) /* Determinamos por cual columna vamos a buscar */
-   oCol := ARRAY(nLenStru)
+   ::aCol := ARRAY(nLenStru)
 
    // Vamos a coger los valores de las columnas, se pasa path y col desde el evento
    //     ::oTreeView:bRow_Activated := { |path,col| Comprueba( ::oTreeview, path, col ) }
@@ -507,7 +508,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
             cType := "text"       
          EndIf
 
-         oTemp := oCol[nColumn]
+         oTemp := ::aCol[nColumn]
 //? aStruct[nColumn,1]
          DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE aStruct[nColumn,1] ;
                 TYPE cType SORT OF ::oTreeView
@@ -520,7 +521,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
          oTemp:SetResizable( .T. )
 
          ::oTreeView:bRow_Activated := oListBox:bEdit
-         oCol[nColumn] := oTemp
+         ::aCol[nColumn] := oTemp
 
      else
       IF !hb_IsNIL(::aDMStru[nColumn,5])
@@ -549,7 +550,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 */
          EndIf
           
-         oTemp := oCol[nColumn]
+         oTemp := ::aCol[nColumn]
          If !Empty(::aDMStru[nColumn,1])
             DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE ::aDMStru[nColumn,1] ;
                    TYPE cType SORT OF ::oTreeView
@@ -606,7 +607,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
          //-- Hacemos que doble clic active el bloque de codigo para el boton "editar".
          ::oTreeView:bRow_Activated := oListBox:bEdit
    
-         oCol[nColumn] := oTemp
+         ::aCol[nColumn] := oTemp
 
       ENDIF       
      endif
