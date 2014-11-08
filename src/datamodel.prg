@@ -477,7 +477,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
              EndIf
 
           EndIf
-          SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE cValTmp
+          SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE UTF_8(cValTmp)
           //SET VALUES LIST_STORE ::oLbx ITER ::aIter VALUES aItems[nColumn]
        next
    Next
@@ -612,6 +612,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
       ENDIF       
      endif
    Next nColumn
+
 
    If hb_IsBlock( ::bOnChange )
       ::oTreeView:Connect("cursor-changed")
