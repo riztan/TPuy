@@ -23,7 +23,7 @@
 #include "xhb.ch"
 #include "common.ch"
 #include "base_columns.ch"
-//#include "proandsys_lang_es_ve.ch"
+#include "proandsys_lang_es_ve.ch"
 
 //#translate  <exp1> IN <exp2>     =>  <exp1> $ <exp2> 
 
@@ -307,11 +307,10 @@
                  [<lRoot: ROOT> ] ;
                  ID <cId> TITLE <cTitle> ;
                  [ACTION <cAction> ] ;
-                 [VALID <cValid> ] ;
                  [IMAGE <cImage> ];
                  [OF <oParentItem> ]   => ;
           <oItem> := MNUITEM():New( [<.lRoot.>],<cId>,<cTitle>,[<cAction>],;
-                                    [<cImage>],[<cValid>], [<oParentItem>] )
+                                    [<cImage>],[<oParentItem>] )
 
 
 //eof
