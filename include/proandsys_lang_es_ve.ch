@@ -15,10 +15,21 @@
    http://www.gnu.org/licenses/
 */
 
-#define MSG_ALERTA                    "Alerta!"
+
+/* Formatos Numericos (Pictures) */
+#define P_60   "@E 999,999"
+#define P_62   "@E 999,999.99"
+
+#define P_92   "@E 999,999,999.99"
+
+#define P_BS   "@E 999,999,999.99Bs."
+
+
+
+/* Mensajes */
+#define MSG_ALERT                     "Alerta!"
 #define MSG_CONNECTED                 "Conectado"
 
-#define MESSAGE_INFO                  "Información"
 #define MESSAGE_PROCESSING            "Procesando..."
 #define MESSAGE_CONNECTING            "Conectando..."
 #define MESSAGE_STOP                  "Detenido"
