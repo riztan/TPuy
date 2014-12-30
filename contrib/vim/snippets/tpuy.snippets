@@ -55,7 +55,7 @@ snippet dwin
 
 # DEFINE WINDOW FROM RESOURCE (GLADE)
 snippet dwing
-	RESOURCE ${1:::cRes} FROM FILE oTpuy:cResource+"${2:file}.ui" 
+	SET RESOURCES ${1:::cRes} FROM FILE oTpuy:cResources+"${2:file}.ui" 
 
 	DEFINE WINDOW ${3:::oWnd} TITLE "${4:Title}" ;
 	       SIZE ${5:X},${6:Y} ID "${7:win_name}" RESOURCE $1
