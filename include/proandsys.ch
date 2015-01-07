@@ -15,13 +15,10 @@
    http://www.gnu.org/licenses/
 */
 
-#include "proandsys_lang_es_ve.ch"
 #include "tepuy.ch"
-#include "tepuy_tables.ch"
-#include "tepuy_files.ch"
-#include "hbxml.ch"
+#include "proandsys_lang_es_ve.ch"
+//#include "hbxml.ch"
 #include "postgres.ch"
-#include "tpy_netio.ch"
 
 #define MSGRUN_NONE            0
 #define MSGRUN_CONNECTING      1

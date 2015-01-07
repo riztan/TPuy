@@ -15,12 +15,12 @@
    http://www.gnu.org/licenses/
 */
 
-#include "gclass.ch"
-#include "proandsys.ch"
+//#include "gclass.ch"
+//#include "proandsys.ch"
 #include "tepuy.ch"
-#include "xhb.ch"
-#include "tpy_netio.ch"
-#include "pc-soft.ch"
+//#include "xhb.ch"
+//#include "tpy_netio.ch"
+//#include "pc-soft.ch"
 
 
 #xtranslate ::<exp> => oForm:<exp>
