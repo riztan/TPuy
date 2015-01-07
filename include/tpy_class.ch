@@ -1,4 +1,4 @@
-/*  $Id: tpy_xbs.ch,v 1.13 2014/01/27 18:36 riztan Exp $ */
+/*  $Id: tpy_class.ch,v 1.00 2015/01/07 16:44 riztan Exp $ */
 /*
 	Copyright © 2008  Riztan Gutierrez <riztang@gmail.org>
 
@@ -15,14 +15,9 @@
    http://www.gnu.org/licenses/
 */
 
-#include "tepuy.ch"
-#include "proandsys.ch"
-//#include "pc-soft.ch"
+#include "tpy_xbs.ch"
+#include "hbclass.ch"
 
-
-#xtranslate ::<exp> => oForm:<exp>
-
-#xtranslate tracelog( <uValue> )  => tpyLog( <uValue>, ProcName() )
-
+#xuntranslate ::<exp> => oForm:<exp>
 
 //eof

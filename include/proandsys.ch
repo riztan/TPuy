@@ -17,7 +17,6 @@
 
 #include "tepuy.ch"
 #include "proandsys_lang_es_ve.ch"
-//#include "hbxml.ch"
 #include "postgres.ch"
 
 #define MSGRUN_NONE            0
