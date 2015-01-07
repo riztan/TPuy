@@ -19,10 +19,12 @@
  * TPYSELECTOR 
  *
  */
-
-#include "xhb.ch"
-#include "common.ch"
+#include "gclass.ch"
+#include "tpy_hb.ch"
 #include "base_columns.ch"
+#include "tepuy_files.ch"
+#include "tpy_netio.ch"
+#include "pc-soft.ch"
 
 //#translate  <exp1> IN <exp2>     =>  <exp1> $ <exp2> 
 

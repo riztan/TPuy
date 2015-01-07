@@ -1,6 +1,6 @@
-/* $Id: tepuy_tables.ch,v 1.0 2008/11/19 17:39:48 riztan Exp $*/
+/*  $Id: tpy_hb.ch,v 1.00 2015/01/07 13:40 riztan Exp $ */
 /*
-	Copyright © 2008  Riztan Gutierrez <riztan@gmail.com>
+	Copyright © 2008  Riztan Gutierrez <riztang@gmail.org>
 
    Este programa es software libre: usted puede redistribuirlo y/o modificarlo 
    conforme a los términos de la Licencia Pública General de GNU publicada por
@@ -15,10 +15,10 @@
    http://www.gnu.org/licenses/
 */
 
-#define TP_SCHEMA_MAIN             "tp_general"
-#define TP_SCHEMA_DEFAULT          "public"
+#include "xhb.ch"
+#include "hbcompat.ch"
+#include "common.ch"
+#include "hbxml.ch"
 
 
-#define TP_TABLE_MAIN              "tp_tables"
-#define TP_TABLE_USERS             "tp_users"
-#define TP_TABLE_ENTITY            "tp_entity"
+//eof
