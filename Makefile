@@ -7,6 +7,8 @@ include ./root.mk
 
 include $(ROOT)config/global.mk
 
+RESOURCE_FILE =./src/resource.rc
+
 TARGET = ./bin/tpuy
 
 SRCPATH = ./src/
