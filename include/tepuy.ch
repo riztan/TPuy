@@ -308,10 +308,11 @@
                  [<lRoot: ROOT> ] ;
                  ID <cId> TITLE <cTitle> ;
                  [ACTION <cAction> ] ;
+                 [VALID <bValid> ] ;
                  [IMAGE <cImage> ];
                  [OF <oParentItem> ]   => ;
           <oItem> := MNUITEM():New( [<.lRoot.>],<cId>,<cTitle>,[<cAction>],;
-                                    [<cImage>],[<oParentItem>] )
+                                    [<cImage>],[<bValid>],[<oParentItem>] )
 
 
 //eof
