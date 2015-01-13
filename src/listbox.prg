@@ -123,10 +123,10 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
 
    // Buscamos asignar un padre a la posible nueva ventana.
    Do Case
-   Case oParent:ClassName()="GWINDOW"
+   Case oParent:IsDerivedFrom("GWINDOW")
         ::oParent := oParent
         ::lParent := .t.
-   Case oParent:ClassName() = "TPY_LISTBOX"
+   Case oParent:IsDerivedFrom("TPY_LISTBOX")
         ::oParent := oParent:oWnd
         ::lParent := .t.
    Case oParent:ClassName() = "GBOX" .OR.;
@@ -135,7 +135,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
         ::lParent := .F.
         ::lInBox  := .T.
    Other
-        If oTpuy:oWnd:ClassName()="GWINDOW"
+        If oTpuy:oWnd:IsDerivedFrom("GWINDOW")
            ::oParent := oTpuy:oWnd
            ::lParent := .t.
         else
