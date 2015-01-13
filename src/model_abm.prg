@@ -233,18 +233,18 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
 
    if hb_IsObject(oParent) //.AND. oParent:ClassName()=="GWINDOW"
-      if oParent:ClassName()=="TPY_LISTBOX"
+      if oParent:IsDerivedFrom("TPY_LISTBOX")
          oParent := oParent:oWnd
          oWndParent := oParent
       endif
-      if oParent:ClassName()=="GWINDOW"
+      if oParent:IsDerivedFrom("GWINDOW")
          oWndParent := oParent
       endif
    else
       oWndParent := oTpuy:oWnd
    endif
 
-   if oParent == NIL .or. oParent:ClassName()=="GWINDOW"
+   if oParent == NIL .or. oParent:IsDerivedFrom("GWINDOW")
       if nWidth == 0 .or. nHeight == 0
          DEFINE WINDOW ::oWnd TITLE cTitle OF oWndParent;
                        ID ::cId RESOURCE ::cGlade
