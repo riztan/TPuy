@@ -35,6 +35,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)about.prg         \
            $(SRCPATH)pctapiz.prg       \
            $(SRCPATH)tpywin.prg        \
+           $(SRCPATH)tpywindow.prg     \
            $(SRCPATH)model_abm.prg     \
            $(SRCPATH)tpy_dp.prg
 

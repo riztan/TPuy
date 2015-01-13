@@ -350,6 +350,11 @@ CLASS TApp FROM TPublic
 */
    DATA lNetIO  INIT .f.
 
+   DATA cAppName      
+   DATA cSystem_Name 
+   DATA cIconMain   
+
+   METHOD SetAppName(cName)
    METHOD About()
    METHOD RunXBS( cFile, ... )
    METHOD RRunXBS( cScript, ... )
@@ -360,6 +365,34 @@ CLASS TApp FROM TPublic
    METHOD Exit( lForce )
 
 ENDCLASS
+
+
+METHOD SetAppName(cNewName,cLargeName) CLASS TApp
+  local lResp := .f.
+  local cIcoName
+ 
+  default cNewName := TPUY_NAME
+  default cLargeName := ::cSystem_Name
+
+  ::cAppName     := cNewName 
+  ::cSystem_Name := cLargeName
+  ::cIconMain    := ""
+
+#ifdef HB_OS_LINUX
+   cIcoName := lower( ::cImages+cNewName ) + "-icon"
+   ::cOS          := "LINUX"
+   if File( cIcoName+".png") 
+      ::cIconMain  += lower(cNewName)+"-icon.png"
+   endif
+#else
+   ::cOS          := "WINDOWS"
+   if File( ::cImages+::cAppName+".ico")
+      ::cIconMain  += ::cAppName+".ico"
+   endif
+#endif
+
+RETURN lResp
+
 
 
 /** About()   

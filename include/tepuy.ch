@@ -33,7 +33,7 @@
 #define TPUY_WWW                "http://code.google.com/p/tepuysoft/"
 #define TPUY_TEAM               "http://code.google.com/p/tepuysoft/people/list"
 #define TPUY_MAIL               "tpuy@t-gtk.org"
-#define TPUY_SCHEMA             "tepuy"
+#define TPUY_SCHEMA             "tpuy"
 
 #define TPY_DATEFORMAT  "dd/mm/yyyy"
 
@@ -308,10 +308,11 @@
                  [<lRoot: ROOT> ] ;
                  ID <cId> TITLE <cTitle> ;
                  [ACTION <cAction> ] ;
+                 [VALID <bValid> ] ;
                  [IMAGE <cImage> ];
                  [OF <oParentItem> ]   => ;
           <oItem> := MNUITEM():New( [<.lRoot.>],<cId>,<cTitle>,[<cAction>],;
-                                    [<cImage>],[<oParentItem>] )
+                                    [<cImage>],[<bValid>],[<oParentItem>] )
 
 
 //eof

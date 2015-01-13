@@ -19,6 +19,35 @@
 #include "proandsys.ch"
 //#include "pc-soft.ch"
 
+#xuncommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
+                               [ ICON_NAME <cIconName>];
+                               [ ICON_FILE <cIconFile>];
+                               [ TYPE <nType> ];
+                               [ TYPE_HINT <nType_Hint> ];
+                               [ SIZE <nWidth>, <nHeight> ] ;
+                               [ OF <oParent> ];
+                               [ ID <cId> ;
+                               [ RESOURCE <uGlade> ] ];
+      => ;
+      <oWnd> := GWindow():New( <cTitle>, <nType>, <nWidth>, <nHeight>, [<cId>],;
+                              [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
+
+
+#xcommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
+                               [ ICON_NAME <cIconName>];
+                               [ ICON_FILE <cIconFile>];
+                               [ TYPE <nType> ];
+                               [ TYPE_HINT <nType_Hint> ];
+                               [ SIZE <nWidth>, <nHeight> ] ;
+                               [ OF <oParent> ];
+                               [ ID <cId> ;
+                               [ RESOURCE <uGlade> ] ];
+      => ;
+      <oWnd> := TpyWindow():New( <cTitle>, <nType>, <nWidth>, <nHeight>, [<cId>],;
+                              [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
+
+
+
 
 #xtranslate ::<exp> => oForm:<exp>
 

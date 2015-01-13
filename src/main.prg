@@ -35,8 +35,9 @@
  * etc...
  */
 
-#include "proandsys.ch"
-#include "gclass.ch"
+//#include "proandsys.ch"
+//#include "gclass.ch"
+#include "tepuy.ch"
 #include "tgtkext.ch"
 #include "tgtkext2.ch"
 #include "tpy_extern.ch"
@@ -142,7 +143,7 @@ Function Main( ... )
  * 
 */
 
-   oTpuy:aTabs_Main := { TP_TABLE_MAIN, TP_TABLE_ENTITY }
+//   oTpuy:aTabs_Main := { TP_TABLE_MAIN, TP_TABLE_ENTITY }
    oTpuy:cMainSchema:= Alltrim(TPUY_SCHEMA)+"."
    oTpuy:cImages    := "./images/"
    oTpuy:cResources := "./resources/"
@@ -157,8 +158,12 @@ Function Main( ... )
    oTpuy:cTemps     := oTpuy:cTempDir
 
    oTpuy:cResource  := ""
-   oTpuy:cIconMain  := oTpuy:cImages+"logo_gnome_64x64.png"
    oTpuy:cRsrcMain  := oTpuy:cResources+"proandsys.glade"
+
+   oTpuy:cOS        := ""
+   oTpuy:cIconMain  := ""
+   oTpuy:cAppName   := ""
+   oTpuy:SetAppName( TPUY_NAME )
 
    oTpuy:cPassword  := "Sarisariñama"
    
