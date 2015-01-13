@@ -163,7 +163,6 @@ Function Main( ... )
    oTpuy:cOS        := ""
    oTpuy:cIconMain  := ""
    oTpuy:cAppName   := ""
-   oTpuy:SetAppName( TPUY_NAME )
 
    oTpuy:cPassword  := "Sarisariñama"
    
@@ -178,6 +177,10 @@ Function Main( ... )
      MsgStop("Hay problemas para leer el archivo <b>'init.conf'</b>","Finalizado.") 
      RETURN NIL
    END
+
+   // Debemos resetear nombre de la aplicacion luego de ejecutar el init.conf 
+   oTpuy:SetAppName( TPUY_NAME )
+
    If !File(oTpuy:cTempDir)
       DirMake(oTpuy:cTempDir)
    Endif

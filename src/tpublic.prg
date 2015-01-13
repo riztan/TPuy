@@ -378,6 +378,8 @@ METHOD SetAppName(cNewName,cLargeName) CLASS TApp
   ::cSystem_Name := cLargeName
   ::cIconMain    := ""
 
+  cNewName := ALLTRIM(cNewName)
+
 #ifdef HB_OS_LINUX
    cIcoName := lower( ::cImages+cNewName ) + "-icon"
    ::cOS          := "LINUX"
@@ -386,8 +388,8 @@ METHOD SetAppName(cNewName,cLargeName) CLASS TApp
    endif
 #else
    ::cOS          := "WINDOWS"
-   if File( ::cImages+::cAppName+".ico")
-      ::cIconMain  += ::cAppName+".ico"
+   if File( ::cImages+cNewName+".ico")
+      ::cIconMain  += cNewName+".ico"
    endif
 #endif
 
