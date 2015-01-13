@@ -3,7 +3,13 @@
 # pero para depurar, va de muerte que salgan mensajes en la consola
 
 #ROOT = ../../../
-include ./root.mk
+  #include ./root.mk
+ifeq ($(HOME),)
+  ROOT = /t-gtk/
+else
+  ROOT = $(HOME)/t-gtk/
+endif
+  $(info $(ROOT))
 
 include $(ROOT)config/global.mk
 
