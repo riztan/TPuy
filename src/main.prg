@@ -160,19 +160,10 @@ Function Main( ... )
    oTpuy:cResource  := ""
    oTpuy:cRsrcMain  := oTpuy:cResources+"proandsys.glade"
 
-   oTpuy:cIconMain  := "" 
-
-#ifdef HB_OS_LINUX
-      oTpuy:cOS          := "LINUX"
-      if File( lower( oTpuy:cImages+TPUY_NAME+".png") )
-         oTpuy:cIconMain  += lower( oTpuy:cImages+TPUY_NAME+".png" )
-      endif
-#else
-      oTpuy:cOS          := "WINDOWS"
-      if File( oTpuy:cImages+TPUY_NAME+".ico")
-         oTpuy:cIconMain  += oTpuy:cImages+TPUY_NAME+".ico"
-      endif
-#endif
+   oTpuy:cOS        := ""
+   oTpuy:cIconMain  := ""
+   oTpuy:cAppName   := ""
+   oTpuy:SetAppName( TPUY_NAME )
 
    oTpuy:cPassword  := "Sarisariñama"
    

@@ -33,7 +33,7 @@
 #define TPUY_WWW                "http://code.google.com/p/tepuysoft/"
 #define TPUY_TEAM               "http://code.google.com/p/tepuysoft/people/list"
 #define TPUY_MAIL               "tpuy@t-gtk.org"
-#define TPUY_SCHEMA             "tepuy"
+#define TPUY_SCHEMA             "tpuy"
 
 #define TPY_DATEFORMAT  "dd/mm/yyyy"
 
