@@ -38,11 +38,9 @@
 //#include "tepuy.ch"
 #include "proandsys.ch"
 #include "xhb.ch"
-//#include "common.ch"
 #include "gclass.ch"
 #include "hbclass.ch"
-//#include "pc-soft.ch"
-#include "include/pc-soft.ch"
+#include "pc-soft.ch"
 
 
 //#define GTK_STOCK_EDIT      "gtk-edit"
@@ -141,6 +139,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD GetPosRow()
       METHOD GetCol( cCol )
       METHOD GetPosCol( cCol ) INLINE ::oTreeView:GetPosCol( cCol )
+      METHOD SetColTitle( cField, cValue )
       METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
 ENDCLASS
@@ -154,7 +153,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
 
    Local cBaseFields, nFields, nLenStru
    Local y, nColumn, cWhere, cQuery //, oConsul,aDMStru
-   Local aField
+   Local aField, aItem
 
    Default aItems   := {}
    Default aStruct  := {}
@@ -188,14 +187,32 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
       ::oConn  := oConn
       ::oQuery := oConn:Query(xQuery)
       ::lQuery := .T.
-      ::aItems := ::oQuery:aData
-      ::aStruct:= ::oQuery:aStruct
+      If ::oQuery:ClassName()="TDOLPHINQRY"
+         ::aStruct := {} 
+         FOR EACH aItem IN ::oQuery:aStructure
+            AADD( ::aStruct , { aItem[1], aItem[9], aItem[6], aItem[8] } ) 
+         NEXT
+         ::aItems := ::oQuery:FillArray()
+      Else
+         ::aItems := ::oQuery:aData
+         ::aStruct:= ::oQuery:aStruct
+      EndIf
 
    EndIf
     
+
    ::aIter := ARRAY( LEN(::aItems) )
 
    If ::lQuery .AND. hb_IsObject(::oQuery)
+
+      IF ::oQuery:ClassName() == "TDOLPHINQRY"
+         /* ToDo: Rutinas para tomar datos de columnas */
+         nLenStru  := Len(::aStruct)
+         //nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
+         ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) )
+      ELSE
+
+      /* Consulta Tipo PostgreSQL */
 
       If ::oConn:ViewExists( "v_base_fields"  )
          cBaseFields := ::oConn:Schema+".v_base_fields"
@@ -257,6 +274,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
 
       EndIf
 
+      ENDIF
    Else
 
       nLenStru  := Len(::aStruct)
@@ -349,6 +367,17 @@ METHOD GetCol( cCol ) CLASS TPY_DATA_MODEL
    uRes := AllTrim( CSTR(::oTreeView:GetValue( nPosCol, "", pPath, @aIter )) )
 Return uRes
 
+
+METHOD SetColTitle( cField, cValue )
+   local aField, aStruct
+   aStruct := iif( Empty(::aDMStruct), ::aStruct, ::aDMStruc )
+   FOR EACH aField IN aStruct
+      if aField[1] == cField //.OR.aField[2] == cField
+         aField[1] := cValue
+         return .t.
+      endif
+   NEXT
+RETURN .f.
 
 
 METHOD ColSet(cField,nPos,uValue)  CLASS TPY_DATA_MODEL
@@ -631,7 +660,6 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
    ::lListore := .t.
 
 Return Self
-
 
 
 

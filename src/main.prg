@@ -35,8 +35,9 @@
  * etc...
  */
 
-#include "proandsys.ch"
-#include "gclass.ch"
+//#include "proandsys.ch"
+//#include "gclass.ch"
+#include "tepuy.ch"
 #include "tgtkext.ch"
 #include "tgtkext2.ch"
 #include "tpy_extern.ch"
@@ -142,7 +143,7 @@ Function Main( ... )
  * 
 */
 
-   oTpuy:aTabs_Main := { TP_TABLE_MAIN, TP_TABLE_ENTITY }
+//   oTpuy:aTabs_Main := { TP_TABLE_MAIN, TP_TABLE_ENTITY }
    oTpuy:cMainSchema:= Alltrim(TPUY_SCHEMA)+"."
    oTpuy:cImages    := "./images/"
    oTpuy:cResources := "./resources/"
@@ -157,8 +158,21 @@ Function Main( ... )
    oTpuy:cTemps     := oTpuy:cTempDir
 
    oTpuy:cResource  := ""
-   oTpuy:cIconMain  := oTpuy:cImages+"logo_gnome_64x64.png"
    oTpuy:cRsrcMain  := oTpuy:cResources+"proandsys.glade"
+
+   oTpuy:cIconMain  := "" 
+
+#ifdef HB_OS_LINUX
+      oTpuy:cOS          := "LINUX"
+      if File( lower( oTpuy:cImages+TPUY_NAME+".png") )
+         oTpuy:cIconMain  += lower( oTpuy:cImages+TPUY_NAME+".png" )
+      endif
+#else
+      oTpuy:cOS          := "WINDOWS"
+      if File( oTpuy:cImages+TPUY_NAME+".ico")
+         oTpuy:cIconMain  += oTpuy:cImages+TPUY_NAME+".ico"
+      endif
+#endif
 
    oTpuy:cPassword  := "Sarisariñama"
    
