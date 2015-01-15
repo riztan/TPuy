@@ -2,8 +2,6 @@
 # -mwindows al enlazar no sale ventana consola.
 # pero para depurar, va de muerte que salgan mensajes en la consola
 
-#ROOT = ../../../
-  #include ./root.mk
 ifeq ($(HOME),)
   ROOT = /t-gtk/
 else
