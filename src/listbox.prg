@@ -122,28 +122,30 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
    EndIf
 
    // Buscamos asignar un padre a la posible nueva ventana.
-   Do Case
-   Case oParent:IsDerivedFrom("GWINDOW")
-        ::oParent := oParent
-        ::lParent := .t.
-   Case oParent:IsDerivedFrom("TPY_LISTBOX")
-        ::oParent := oParent:oWnd
-        ::lParent := .t.
-   Case oParent:ClassName() = "GBOX" .OR.;
-        ::oParent:ClassName() = "GBOXVH"
-        ::oParent := oParent
-        ::lParent := .F.
-        ::lInBox  := .T.
-   Other
-        If oTpuy:oWnd:IsDerivedFrom("GWINDOW")
-           ::oParent := oTpuy:oWnd
+   if oParent = NIL
+      DEFINE WINDOW ::oWnd SIZE nWidth,nHeight TITLE cTitle
+             DEFINE BOX ::oParent VERTICAL OF ::oWnd
+      ::lParent := .f.
+   else
+      Do Case
+      Case oParent:IsDerivedFrom("GWINDOW")
+           ::oParent := oParent
            ::lParent := .t.
-        else
-           DEFINE WINDOW ::oWnd SIZE nWidth,nHeight TITLE cTitle
-           DEFINE BOX ::oParent VERTICAL OF ::oWnd
-           ::lParent := .f.
-        EndIf
-   EndCase
+      Case oParent:IsDerivedFrom("TPY_LISTBOX")
+           ::oParent := oParent:oWnd
+           ::lParent := .t.
+      Case oParent:ClassName() = "GBOX" .OR.;
+           ::oParent:ClassName() = "GBOXVH"
+           ::oParent := oParent
+           ::lParent := .F.
+           ::lInBox  := .T.
+      Other
+           If oTpuy:oWnd:IsDerivedFrom("GWINDOW")
+              ::oParent := oTpuy:oWnd
+              ::lParent := .t.
+           EndIf
+      EndCase
+   EndIf
 
    //if hb_IsNil( oParent )
    if ::lParent

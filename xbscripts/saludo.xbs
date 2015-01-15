@@ -1,6 +1,8 @@
 /*
- * Proyecto Tpuy.
- * saludo: Ejemplo de ejecución de script.
+ *  Proyecto Tpuy.
+ *  Fuente a Interpretar y ejecutar.
+ *  Autor: Riztan Gutiérrez.  riztan@gmail.com
+ *  Licencia: GPL-3. Visite: http://www.gnu.org/  
  */
 
 #include "tpy_xbs.ch"
@@ -18,7 +20,6 @@ Function Saludo( uPar1 )
 
   DEFAULT uPar1 := ""
 
-  oTpuy:cImages := "./bitmaps/"
 
   cTextLabel := '<span foreground="blue" size="large"><b>Interpretando un <span foreground="yellow"'+;
                 ' size="xx-large" background="black" ><i>SCRIPT!</i></span></b></span>'+;
@@ -166,7 +167,7 @@ FUNCTION Create_Menus( oBoxMenu )
 
     DEFINE FONT oFont NAME "Arial 12" 
 
-    DEFINE IMAGE oImage FILE "../../images/gnome-logo.png"
+    DEFINE IMAGE oImage FILE oTpuy:cImages+"tpuy-icon-32.png"
 
     // Defino barra de menus
     DEFINE BARMENU oMenuBar OF oBoxMenu
@@ -190,7 +191,7 @@ FUNCTION Create_Menus( oBoxMenu )
                   MENUITEM CHECK TITLE "C_heck Item" MNEMONIC OF oMenu
                   MENUITEM CHECK TITLE "Check Item as Radio" ASRADIO ACTIVE OF oMenu
                   MENUITEM IMAGE FROM STOCK GTK_STOCK_APPLY OF oMenu
-                  MENUITEM IMAGE TITLE "gnome-logo.png" IMAGE oImage OF oMenu
+                  MENUITEM IMAGE TITLE "tpuy-icon-32.png" IMAGE oImage OF oMenu
 
     ACTIVATE MENUBAR oMenu
 
