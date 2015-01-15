@@ -37,6 +37,7 @@ func dm_test1()
           TITLE   "Listado";
           SIZE    350,400 //OF oTpuy:oDesktop
    
+
    /* TODO:  Mejorar lo de modal y parent entre ventanas... 
              esta funcionando el modal, pero no del todo bien. 
              RIGC 
