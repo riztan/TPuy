@@ -79,7 +79,7 @@ METHOD New( lRoot, cId, cTitle, cAction, cImage, cValid, oParentItem )  CLASS MN
 
    Default lRoot to .f.
 
-   Super:New(.t.,.f.,.f.)
+   ::Super:New(.t.,.f.,.f.)
 
    //hb_HKeepOrder( ::hVars, .T. )
 

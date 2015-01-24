@@ -48,9 +48,9 @@ METHOD NEW( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, c
   if !File( cIconFile ) ; cIconFile := cIconDefault ; endif
 
   if File( cIconFile )
-     Super:New( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, , cIconFile, oParent )
+     ::Super:New( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, , cIconFile, oParent )
   else
-     Super:New( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, , oParent )
+     ::Super:New( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, , oParent )
   endif
 
 RETURN self
