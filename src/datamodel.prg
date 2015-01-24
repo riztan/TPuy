@@ -49,49 +49,6 @@ memvar oTpuy
 
 #define GtkTreeIter  Array( 4 )
 
-/*
-CLASS GLISTSTORE FROM GOBJECT
-      DATA aTypes
-
-      METHOD New( aTypes )
-      METHOD NewAuto( aTypes )
-      METHOD Append( aValues )
-      METHOD Insert( nRow, aValues )
-      METHOD Set( aIter, nCol, uValue )
-      METHOD Clear() INLINE gtk_list_store_clear( ::pWidget )
-      METHOD Remove( aIter ) INLINE gtk_list_store_remove( ::pWidget, aIter )
-
-ENDCLASS
-*/
-/*
-#xcommand DEFINE TPY_DATA_MODEL [ <oModel> ];
-               [ MIME <cMime> ] ;
-               [ <lNoShowLines: NOSHOWLINES> ] ;
-               [ <lReadOnly: READONLY> ] ;
-               [ OF <oParent> ] ;
-               [ VAR <uVar> ];
-               [ <lExpand: EXPAND> ] ;
-               [ <lFill: FILL> ] ;
-               [ PADDING <nPadding> ];
-               [ <lContainer: CONTAINER> ] ;
-               [ POS <x>,<y>  ];
-               [ ID <cId> ;
-               [ RESOURCE <uGlade> ] ];
-               [ SIZE <nWidth>, <nHeight> ] ;
-               [ LABELNOTEBOOK <uLabelBook> ];
-               [ <lEnd: INSERT_END> ] ;
-               [ <lSecond: SECOND_PANED > ] ;
-               [ <lResize: RESIZE > ] ;
-               [ <lShrink: SHRINK > ] ;
-               [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ] ;
-       => ;
- [ <oMemo> := ] gSourceView():New( <cMime>, <.lNoShowLines.> , bSetGet( <uVar> ), <.lReadOnly.>, [<oParent>],;
-                <.lExpand.>, <.lFill.>, <nPadding>,;
-                <.lContainer.>,<x>, <y>, <cId>, <uGlade>, <uLabelBook>, <nWidth>, <nHeight>,<.lEnd.>,;
-                <.lSecond.>, <.lResize.>, <.lShrink.>, <left_ta>,<right_ta>,<top_ta>,<bottom_ta>,;
-                <xOptions_ta>, <yOptions_ta> )
-*/                
-
 
 CLASS TPY_DATA_MODEL FROM TPUBLIC
 
