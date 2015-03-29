@@ -111,11 +111,12 @@
                  [ CONN <oConn>      ] ;
                  [ QUERY <oQuery>    ] ;
                  [ STRUCT <aStruct>  ] ;
+                 [ DMSTRUCT <aDMStru>  ] ;
                  [ DATA <aData>      ] ;
                  [ ACTIONS <aAction> ] ;
                  [ ON_EDIT <aEdited> ] ;
       => ;
-      <oModel>:=TPY_DATA_MODEL():New( <oConn>, <oQuery>, <aStruct>, <aData>, <aAction>, <aEdited> )
+      <oModel>:=TPY_DATA_MODEL():New( <oConn>, <oQuery>, <aStruct>, <aData>, <aAction>, <aEdited>, <aDMStru> )
 
 
 

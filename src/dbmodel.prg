@@ -639,7 +639,14 @@ METHOD LISTORE( oBox, oListBox ) CLASS MODELQUERY
        oGtkCol:Connect( "clicked" )
        oGtkCol:bAction := {|o| ::oTreeView:SetSearchColumn( o:GetSort() ) }
 
-       oCol:oGtkColumn := oGtkCol
+//       oCol:oGtkColumn := oGtkCol
+//-- Registramos la columna como un data del objeto.
+       __objAddData( self, oCol:Name )
+#ifndef __XHARBOUR__
+       __objSendMsg( self, "_"+oCol:Name, oGtkCol )
+#else
+       hb_execFromArray( @self, oCol:Name, {oGtkCol} )
+#endif
 
    NEXT
 
