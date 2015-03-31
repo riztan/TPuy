@@ -9,6 +9,8 @@ else
 endif
   $(info $(ROOT))
 
+include ./src/genresource.mk
+
 include $(ROOT)config/global.mk
 
 RESOURCE_FILE =./src/resource.rc
