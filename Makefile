@@ -11,9 +11,11 @@ endif
 
 include $(ROOT)config/global.mk
 
+include ./src/genresource.mk
+
 RESOURCE_FILE =./src/resource.rc
 
-TARGET = ./bin/tpuy
+TARGET = ./bin/tpuy-dp
 
 SRCPATH = ./src/
 SOURCES  = $(SRCPATH)main.prg          \
