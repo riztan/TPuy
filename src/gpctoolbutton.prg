@@ -54,7 +54,7 @@ METHOD New( cText, bAction, cStock, lMnemonic, cFromStock, oParent, lExpand, xIm
        DEFAULT lExpand   := .F.,;
                lMnemonic := .F.
 
-       Super:New( cText, bAction, cStock, lMnemonic, cFromStock, oBarButton, lExpand,;
+       ::Super:New( cText, bAction, cStock, lMnemonic, cFromStock, oBarButton, lExpand,;
             cId, uGlade )
        IF cId == NIL
              if xImage != NIL

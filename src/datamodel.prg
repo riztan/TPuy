@@ -49,49 +49,6 @@ memvar oTpuy
 
 #define GtkTreeIter  Array( 4 )
 
-/*
-CLASS GLISTSTORE FROM GOBJECT
-      DATA aTypes
-
-      METHOD New( aTypes )
-      METHOD NewAuto( aTypes )
-      METHOD Append( aValues )
-      METHOD Insert( nRow, aValues )
-      METHOD Set( aIter, nCol, uValue )
-      METHOD Clear() INLINE gtk_list_store_clear( ::pWidget )
-      METHOD Remove( aIter ) INLINE gtk_list_store_remove( ::pWidget, aIter )
-
-ENDCLASS
-*/
-/*
-#xcommand DEFINE TPY_DATA_MODEL [ <oModel> ];
-               [ MIME <cMime> ] ;
-               [ <lNoShowLines: NOSHOWLINES> ] ;
-               [ <lReadOnly: READONLY> ] ;
-               [ OF <oParent> ] ;
-               [ VAR <uVar> ];
-               [ <lExpand: EXPAND> ] ;
-               [ <lFill: FILL> ] ;
-               [ PADDING <nPadding> ];
-               [ <lContainer: CONTAINER> ] ;
-               [ POS <x>,<y>  ];
-               [ ID <cId> ;
-               [ RESOURCE <uGlade> ] ];
-               [ SIZE <nWidth>, <nHeight> ] ;
-               [ LABELNOTEBOOK <uLabelBook> ];
-               [ <lEnd: INSERT_END> ] ;
-               [ <lSecond: SECOND_PANED > ] ;
-               [ <lResize: RESIZE > ] ;
-               [ <lShrink: SHRINK > ] ;
-               [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ] ;
-       => ;
- [ <oMemo> := ] gSourceView():New( <cMime>, <.lNoShowLines.> , bSetGet( <uVar> ), <.lReadOnly.>, [<oParent>],;
-                <.lExpand.>, <.lFill.>, <nPadding>,;
-                <.lContainer.>,<x>, <y>, <cId>, <uGlade>, <uLabelBook>, <nWidth>, <nHeight>,<.lEnd.>,;
-                <.lSecond.>, <.lResize.>, <.lShrink.>, <left_ta>,<right_ta>,<top_ta>,<bottom_ta>,;
-                <xOptions_ta>, <yOptions_ta> )
-*/                
-
 
 CLASS TPY_DATA_MODEL FROM TPUBLIC
 
@@ -142,11 +99,12 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD SetColTitle( cField, cValue )
       METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
+      METHOD SetColEditable( nCol, bAction )
 ENDCLASS
 
 
 
-METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA_MODEL
+METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS TPY_DATA_MODEL
 
 //      ::hModel := hModel
 //      ::pWidget  := gtk_list_store_newv( Len( ::aTypes ) ,::aTypes  )
@@ -157,6 +115,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
 
    Default aItems   := {}
    Default aStruct  := {}
+   Default aDMStru  := {}
    Default aActions := {}
    Default aValiders:= {}
 
@@ -196,6 +155,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
       Else
          ::aItems := ::oQuery:aData
          ::aStruct:= ::oQuery:aStruct
+         if !empty(aDMStru) ; ::aDMStru := aDMStru ; endif
       EndIf
 
    EndIf
@@ -212,38 +172,38 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
          ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) )
       ELSE
 
-      /* Consulta Tipo PostgreSQL */
+         /* Consulta Tipo PostgreSQL */
 
-      If ::oConn:ViewExists( "v_base_fields"  )
-         cBaseFields := ::oConn:Schema+".v_base_fields"
-      Else
-         cBaseFields := oTpuy:cMainSchema+"base_fields"
-      EndIf
+         If ::oConn:ViewExists( "v_base_fields"  )
+            cBaseFields := ::oConn:Schema+".v_base_fields"
+         Else
+            cBaseFields := oTpuy:cMainSchema+"base_fields"
+         EndIf
 
-      nLenStru  := Len(::aStruct)
-      nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
+         nLenStru  := Len(::aStruct)
+         nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
 
-      ::aDMStru := ARRAY( nLenStru, nFields+Len(::aStruct[1]) )
+         ::aDMStru := ARRAY( nLenStru, nFields+Len(::aStruct[1]) )
       
-      If nLenStru==Len(::oQuery:aStruct)
+         If nLenStru==Len(::oQuery:aStruct)
       
-         //Generando nombre de campos a partir
-         //de la tabla que tiene tal información
+            //Generando nombre de campos a partir
+            //de la tabla que tiene tal información
 
-         y := 1
-         For nColumn := 1 To nLenStru
+            y := 1
+            For nColumn := 1 To nLenStru
 
-            cWhere := "where flds_name = "+DataToSQL(::aStruct[nColumn,1])+;
-                      " and (information_schema.tables.table_schema = "+;
-                      DataToSQL(::oConn:Schema)+" or "+;
-                      " information_schema.tables.table_schema = 'tpuy') and "+;
-                      cBaseFields+".flds_table_name=information_schema.tables.table_name "+;
-                      "limit 1"
+               cWhere := "where flds_name = "+DataToSQL(::aStruct[nColumn,1])+;
+                         " and (information_schema.tables.table_schema = "+;
+                         DataToSQL(::oConn:Schema)+" or "+;
+                         " information_schema.tables.table_schema = 'tpuy') and "+;
+                         cBaseFields+".flds_table_name=information_schema.tables.table_name "+;
+                         "limit 1"
 
-            cQuery := "select * from "+cBaseFields+", "+;
-                      "information_schema.tables "+cWhere
+               cQuery := "select * from "+cBaseFields+", "+;
+                         "information_schema.tables "+cWhere
 
-            //oConsul:= ::oConn:Query( cQuery )
+               //oConsul:= ::oConn:Query( cQuery )
 
 #define FLD_DESCRIP    ::oForm:aFields[y,1 ]
 #define FLD_NAME       ::oForm:aFields[y,2 ]
@@ -257,29 +217,29 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders ) CLASS TPY_DATA
 #define FLD_REFSCRIPT  ::oForm:aFields[y,12]
 #define FLD_BOXNAME    ::oForm:aFields[y,13]
 
-            cQuery := "select flds_description, flds_name, flds_editable, "
-            cQuery +=        "flds_viewable, flds_navigable, flds_picture, "
-            cQuery +=        "flds_default, "
-            cQuery +=        "flds_reference, flds_ref_table_name, flds_ref_field_link, "
-            cQuery +=        "flds_ref_field_descriptor, flds_ref_scriptname, "
-            cQuery +=        "flds_box_parent_name "
-            cQuery += "from "+cBaseFields+",information_schema.tables "
-            cQuery += cWhere
+               cQuery := "select flds_description, flds_name, flds_editable, "
+               cQuery +=        "flds_viewable, flds_navigable, flds_picture, "
+               cQuery +=        "flds_default, "
+               cQuery +=        "flds_reference, flds_ref_table_name, flds_ref_field_link, "
+               cQuery +=        "flds_ref_field_descriptor, flds_ref_scriptname, "
+               cQuery +=        "flds_box_parent_name "
+               cQuery += "from "+cBaseFields+",information_schema.tables "
+               cQuery += cWhere
 
-            FOR EACH aField IN ::oConn:Query(cQuery):aData
-               AEVAL(aField, {|item,n| ::aDMStru[nColumn,n] := item } )               
-            NEXT
+               FOR EACH aField IN ::oConn:Query(cQuery):aData
+                  AEVAL(aField, {|item,n| ::aDMStru[nColumn,n] := item } )               
+               NEXT
 
-         Next nColumn
+            Next nColumn
 
-      EndIf
+         EndIf
 
       ENDIF
    Else
 
       nLenStru  := Len(::aStruct)
       //nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
-      ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) )
+      if empty(::aDMStru) ; ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) ) ; endif
 
    EndIf
 
@@ -370,7 +330,7 @@ Return uRes
 
 METHOD SetColTitle( cField, cValue )
    local aField, aStruct
-   aStruct := iif( Empty(::aDMStruct), ::aStruct, ::aDMStruc )
+   aStruct := iif( Empty(::aDMStru), ::aStruct, ::aDMStru )
    FOR EACH aField IN aStruct
       if aField[1] == cField //.OR.aField[2] == cField
          aField[1] := cValue
@@ -424,13 +384,25 @@ Return .F.
 
 
 
+METHOD SetColEditable( nCol, bAction )  CLASS TPY_DATA_MODEL
+   if empty(nCol) ; return ; endif
+
+   if hb_IsBlock( bAction )
+      ::aCol[nCol]:oRenderer:SetEditable(.T.)
+      ::aCol[nCol]:oRenderer:bEdited( bAction )
+      ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
+   endif
+
+RETURN 
+
+
 METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 
   Local oScroll, n
   Local aTypes, aStruct, aItems, oTemp
   Local cType //, nMin, nWidth
   Local nLenStru
-  Local cValTmp,nColumn
+  Local cValTmp,nColumn, cColTitle
 
   If hb_IsNIL( oBox )
      Return NIL
@@ -539,7 +511,8 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 
          oTemp := ::aCol[nColumn]
 //? aStruct[nColumn,1]
-         DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE aStruct[nColumn,1] ;
+         cColTitle := aStruct[nColumn,1]
+         DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE cColTitle ;
                 TYPE cType SORT OF ::oTreeView
          if aStruct[nColumn,2] == "L"
                /* Indicamos la accion a ejecutar al click de la fila.*/
@@ -581,10 +554,12 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
           
          oTemp := ::aCol[nColumn]
          If !Empty(::aDMStru[nColumn,1])
-            DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE ::aDMStru[nColumn,1] ;
+            cColTitle := ::aDMStru[nColumn,1]
+            DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE cColTitle ;
                    TYPE cType SORT OF ::oTreeView
          Else
-            DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE aStruct[nColumn,1] ;
+            cColTitle := aStruct[nColumn,1]
+            DEFINE TREEVIEWCOLUMN oTemp COLUMN nColumn TITLE cColTitle ;
                    TYPE cType SORT OF ::oTreeView
          EndIf
 
@@ -637,6 +612,12 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
          ::oTreeView:bRow_Activated := oListBox:bEdit
    
          ::aCol[nColumn] := oTemp
+         __objAddData( self, cColTitle )
+#ifndef __XHARBOUR__
+         __objSendMsg( self, "_"+cColTitle, oTemp )
+#else
+         hb_execFromArray( @self, cColTitle, {oTemp} )
+#endif
 
       ENDIF       
      endif

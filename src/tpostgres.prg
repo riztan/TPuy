@@ -1165,7 +1165,12 @@ METHOD Refresh(lQuery) CLASS TPQquery
                //aRow := ARRAY( ::nFields )
                //aOld := ARRAY( ::nFields )
                For nCol := 1 to ::nFields               
-                   ::aData[ i, nCol ] := CStr(PQGetValue(res, i, nCol))
+                   //::aData[ i, nCol ] := CStr(PQGetValue(res, i, nCol))
+                   if PQGetValue( res, i, nCol ) = NIL
+                      ::aData[ i, nCol ]  := ""
+                   else
+                      ::aData[ i, nCol ]  := CStr(PQGetValue(res, i, nCol))
+                   endif
                    If aStruct[nCol,2]=="L"
                       If ::aData[i,nCol]=="t"
                          ::aData[i,nCol]:=.t.
