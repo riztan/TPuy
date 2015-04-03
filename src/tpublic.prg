@@ -339,7 +339,7 @@ RETURN uValue
  * al hacer un guardar como.
  */
 
-CLASS TApp FROM TPublic
+CLASS TApp FROM TObject
 
 /*
    DATA cAutor 
@@ -797,20 +797,15 @@ Return .T.
 
 //EOF
 
-/** Nuevo TPublic
+/** Nuevo TObject
  *
 */
-CLASS TPublic2
+CLASS TObject
 
    VISIBLE:
 
    DATA  lAutoAdd    AS LOGICAL	 INIT .T.		
    DATA  lSensitive  AS LOGICAL	 INIT .F.		
-
-//   DATA  hVars
-
-//   DATA  nPos        AS NUMERIC    INIT 0   // READONLY // [ER]
-//   DATA  cName       AS CHARACTER  INIT ""  // READONLY // [ER]
 
    METHOD New( lAutoAdd, lSensitive )          /**New(). */
    METHOD End()            INLINE ::Release()  /**End(). */ 
@@ -827,13 +822,7 @@ CLASS TPublic2
 
    METHOD SendMsg()
 
-//   METHOD GetPos( cName )
-//   METHOD GetVar( nPos )
-
-//   METHOD Clone()          INLINE HClone( ::hVars )
-//   METHOD nCount()         INLINE Len( ::hVars )
-
-//   METHOD GetArray()           
+   METHOD GetArray()       INLINE __objGetValueList( self ) 
 
    METHOD Release()        INLINE Self := NIL
 
@@ -843,7 +832,7 @@ ENDCLASS
 
 
 //------------------------------------------------//
-METHOD New( lAutomatic ) CLASS TPublic2
+METHOD New( lAutomatic ) CLASS TObject
    DEFAULT lAutomatic:=.T.
 
    ::lAutoAdd  :=lAutomatic
@@ -851,7 +840,7 @@ RETURN Self
 
 
 //------------------------------------------------//
-METHOD Add( cName, xValue ) CLASS TPublic2
+METHOD Add( cName, xValue ) CLASS TObject
 
    if !::lAutoAdd ; return .f. ; endif
 
@@ -868,7 +857,7 @@ RETURN .F.
 
 
 //------------------------------------------------//
-METHOD Del( cName ) CLASS TPublic2
+METHOD Del( cName ) CLASS TObject
    if !::IsDef(cName)
       __objDelMethod( Self, cName )
       return .t.
@@ -877,10 +866,10 @@ Return .f.
 
 
 //------------------------------------------------//
-METHOD Get( cName ) CLASS TPublic2
+METHOD Get( cName ) CLASS TObject
    //local aData, nPos
    if ::IsDef(cName)
-      return ::SendMsg( "_"+cName )
+      return ::SendMsg( cName )
    endif
 /*
    if __objHasData( Self, cName )
@@ -893,7 +882,7 @@ Return nil
 
 
 //------------------------------------------------//
-METHOD Set( cName, xValue ) CLASS TPublic2
+METHOD Set( cName, xValue ) CLASS TObject
    local uRet
    
    if __objHasData( Self, cName)
@@ -902,15 +891,12 @@ METHOD Set( cName, xValue ) CLASS TPublic2
       if xValue == nil
          uRet = __ObjSendMsg( Self, cName )
       else
-         __objSendMsg( Self, "___"+cName, __objSendMsg(Self,cName) )
          uRet = __ObjSendMsg( Self, "_"+cName, xValue )
       endif
    #else   
       if xValue == nil
          uRet = hb_execFromArray( @Self, cName )
       else
-         hb_execFromArray( @Self, "___"+cName, ;
-                           { hb_execFromArray( @Self,cName) } )
          uRet = hb_execFromArray( @Self, cName, { xValue } )
       endif
    #endif    
@@ -921,7 +907,7 @@ return nil
 
 
 //------------------------------------------------//
-METHOD AddMethod( cMethod, pFunc ) CLASS TPublic2
+METHOD AddMethod( cMethod, pFunc ) CLASS TObject
  
    if ! __objHasMethod( Self, cMethod )  
       __objAddMethod( Self, cMethod, pFunc )    
@@ -931,7 +917,7 @@ return nil
 
 
 //------------------------------------------------//
-METHOD DelMethod( cMethod ) CLASS TPublic2
+METHOD DelMethod( cMethod ) CLASS TObject
  
    if ! __objHasMethod( Self, cMethod )  
       __objDelMethod( Self, cMethod )    
@@ -943,13 +929,13 @@ return nil
 //------------------------------------------------//
 
 #ifndef __XHARBOUR__
-METHOD SendMsg( cMsg, ...  ) CLASS TPublic2
+METHOD SendMsg( cMsg, ...  ) CLASS TObject
    if "(" $ cMsg
       cMsg = StrTran( cMsg, "()", "" )
    endif
 return __ObjSendMsg( Self, cMsg, ... )
 #else   
-METHOD SendMsg( ... ) CLASS TPublic2
+METHOD SendMsg( ... ) CLASS TObject
    local aParams := hb_aParams()
       
    if "(" $ aParams[ 1 ]
@@ -965,7 +951,7 @@ METHOD SendMsg( ... ) CLASS TPublic2
 
 
 //------------------------------------------------//
-METHOD ONERROR( uParam1 ) CLASS TPublic2
+METHOD ONERROR( uParam1 ) CLASS TObject
    local cCol    := __GetMessage()
 
    if Left( cCol, 1 ) == "_"
