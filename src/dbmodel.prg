@@ -462,7 +462,8 @@ METHOD NEWFROMREMOTE( cSchema, uQry, lRemote, lMute )  CLASS MODELQUERY
          if ( " " $ uQry )  //-- Si no hay espacio en blanco no es una consulta, es identificador de obj remoto.
             ::oQuery := ~oServer:ModelQuery( uQry, cSchema )
          else
-            ::cQry := ~~uQry:cQuery
+            //::cQry := ~~uQry:cQuery
+            ::cQry := "" // No hay acceso a la cadena del query remoto. 
          endif
 
 /* inicializamos el conteo para verificar conexion netIO */
