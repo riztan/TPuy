@@ -103,10 +103,15 @@
     <oXmlDoc>:oRoot:AddBelow( <oXmlNode> )
 
 
+/* Modelos de Datos en Queries */
+#xcommand DEFINE MODEL_QUERY <oMQuery> [<lRemote: REMOTE>] [<lMute: MUTE>];
+                 QUERY <cQuery>          ;
+                 [SCHEMA <cSchema>]   => ;
+                 <oMQuery> := ModelQuery():NewFromRemote( [<cSchema>], <cQuery>,[<.lRemote.>],[<.lMute.>] )
+
 
 
 /* Definiciones para Modelo de Datos */
-//dxn mdf
 #xcommand DEFINE MODEL <oModel> ;
                  [ CONN <oConn>      ] ;
                  [ QUERY <oQuery>    ] ;
@@ -292,13 +297,6 @@
                   <.lSecond.>, <.lResize.>, <.lShrink.>, <left_ta>,<right_ta>,<top_ta>,<bottom_ta>,;
                   <xOptions_ta>, <yOptions_ta>, <cId>, <uGlade> )
 
-
-/* Modelos de Datos en Queries */
-
-#xcommand DEFINE MODEL_QUERY <oMQuery> [<lRemote: REMOTE>] [<lMute: MUTE>];
-                 QUERY <cQuery>          ;
-                 [SCHEMA <cSchema>]   => ;
-                 <oMQuery> := ModelQuery():NewFromRemote( [<cSchema>], <cQuery>,[<.lRemote.>],[<.lMute.>] )
 
 
 
