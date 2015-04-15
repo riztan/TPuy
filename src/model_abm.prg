@@ -103,7 +103,7 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 
    DATA cImage
 
-   METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight, cId, uGlade, cBox, lNew )
+   METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight, cId, uGlade, cBox, lNew, lRemote )
    METHOD End( lForce )
    METHOD Active( bAction, bInit )
    METHOD ACantGet()
@@ -139,7 +139,7 @@ ENDCLASS
 
 
 METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
-            cId, uGlade, cBox, lNew )  CLASS TPY_ABM2  
+            cId, uGlade, cBox, lNew, lRemote )  CLASS TPY_ABM2  
 
    Local aColumn, oColumn//, xDefault
    Local cTemp
@@ -373,9 +373,10 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
                cTemp := ::oListBox:GetValue( oColumn:Name )
             else
 ? "aqui...  revisar. (model_abm.prg)"
-               cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) ) )
+               cTemp := CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) )
             endif
-            ::hOldValues[ oColumn:Name ] := cTemp
+//View( iif( !Empty(cTemp), ALLTRIM( cTemp ), cTemp ) )
+            ::hOldValues[ oColumn:Name ] := iif( !Empty(cTemp), ALLTRIM( cTemp ), cTemp )
          Else
             //? "no hay fila seleccionada"
             //if ::oModel:oTreeView:IsGetSelected()
@@ -858,7 +859,7 @@ METHOD SAVE() CLASS TPY_ABM2
                 cValue :=  ::hWidget[oColumn:Name]:GetValue()
              EndCase
 
-             hb_HSet( hNewValues, oColumn:Name, cValue )
+             hb_HSet( hNewValues, oColumn:Name, ALLTRIM(cValue) )
              
           /* Modificar */
           else  
@@ -868,8 +869,8 @@ METHOD SAVE() CLASS TPY_ABM2
                 Do Case
                 Case cClassName = "GENTRY" .or. cClassName = "GGET" 
                    
-                   cValue := ::hWidget[oColumn:Name]:GetText()
-
+                   cValue := ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
+//View( cValue )
                    hb_HSet( hNewValues, oColumn:Name, cValue )
 //? hb_valtoexp( ::hOldValues )
 //? ValType( ::oModel:oTreeView )
@@ -937,9 +938,9 @@ METHOD GenOldValues()  CLASS TPY_ABM2
                if ::lFromListBox
                   cTemp := ::oListBox:GetValue( oColumn:Name )
                else
-                  cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) ) )
+                  cTemp := CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) ) 
                endif
-               ::hOldValues[ oColumn:Name ] := cTemp
+               ::hOldValues[ oColumn:Name ] := iif( ValType(cTemp)="C", ALLTRIM( cTemp ), cTemp )
             endif
 
 //         endif

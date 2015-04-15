@@ -96,7 +96,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
 
    ::oParent := oParent
    ::oModel  := oModel
-   ::oBtns   := TPUBLIC():New()
+   ::oBtns   := TObject():New()
    ::cId     := cId
    ::uGlade  := uGlade
    ::lFix    := .t.
@@ -279,7 +279,8 @@ METHOD GetValue(xCol, aIter ) CLASS TPY_LISTBOX
    cValType := VALTYPE(xCol)
    If cValType = "C"
       if ::oModel:IsDef(xCol)
-         nColumn := ::oModel:Get(xCol):oGtkColumn:nColumn + 1
+         //nColumn := ::oModel:Get(xCol):oGtkColumn:nColumn + 1
+         nColumn := ::oModel:GetPosCol(xCol)
       else
          nColumn := ::oModel:GetPosCol(xCol) //:oGtkColumn:nColumn + 1
          if !::oModel:lQuery
