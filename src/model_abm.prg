@@ -73,6 +73,7 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 
    DATA hOldValues 
    DATA hPreValues
+   DATA hNewValues
    DATA aFields
 //   DATA aVars
    DATA aReg
@@ -127,15 +128,60 @@ CLASS TPY_ABM2 //FROM TPUBLIC
    METHOD SetRefTable(uField,cTable)   INLINE  ::Set( 9,uField,cTable)
    METHOD SetRefDescri(uField,cField)  INLINE  ::Set(11,uField,cField)
    METHOD SetRefField(uField,cField)   INLINE  ::Set(10,uField,cField)
-   METHOD SetEditable(uField,lVal)     INLINE  ::Set( 3,uField,lVal)
+   METHOD SetEditable(uField,lVal)     //INLINE  ::Set( 3,uField,lVal)
    METHOD SetViewable(uField,lVal)     INLINE  ::Set( 4,uField,lVal)
    METHOD SetNavigable(uField,lVal)    INLINE  ::Set( 5,uField,lVal)
+
+   METHOD SetValue( cField, uValue )   //INLINE  ::hNewValues[ cField ] := uValue
 
    METHOD IsDef( cField )              INLINE  HHasKey( ::hWidGet, cField )
 
    ERROR HANDLER OnError( uValue )
 
 ENDCLASS
+
+
+METHOD SETEDITABLE( cField, lValue )
+   default cField to ""
+
+   if ValType(lValue) != "L" ; return nil ; endif
+   if empty(cField) ; return nil ; endif
+
+   ::oBoxes:hVars[cField]:Show()
+   ::hWidget[cField+"_label"]:Show()
+   ::hWidget[cField]:Show()
+   if lValue
+      ::hWidget[cField]:Enable()
+      ::hWidget[cField]:Enable()
+   else
+      ::hWidget[cField]:Disable()
+      ::hWidget[cField]:Disable()
+   endif
+RETURN nil
+
+
+/**
+*/
+METHOD SETVALUE( cField, uValue )
+   local cClassName
+if !( hb_HHasKey( ::hWidget, cField ) )
+   View( HGetKeys(::hWidget) )
+endif
+   if hb_HHasKey( ::hWidget, cField )
+      cClassName := ::hWidget[cField]:ClassName()
+      if cClassName="GENTRY" .or. cClassName="GGET"
+         ::hWidget[cField]:SetText( uValue )
+      elseif cClassName="GCHECKBOX"
+         ::hWidget[cField]:SetValue(uValue) 
+      else
+MsgAlert(cClassName, procname() )
+         ::hNewValues[ cField ] := uValue
+      endif
+   else
+MsgAlert(cClassName, procname() )
+      ::hNewValues[ cField ] := uValue
+   endif
+Return nil
 
 
 METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
@@ -209,6 +255,7 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
    ::hOldValues := Hash()
    ::hPreValues := Hash()
+   ::hNewValues := Hash()
 
    ::cImage  := "logo_gnome_64x64.png"
    ::bSave   := {|| .T. }
@@ -499,11 +546,17 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
          endif
 
          /* Ocultamos o Desactivamos... */
+
          if !oColumn:Viewable 
             oBoxTmp:Hide()
             oWidGetTmp:Hide()
          endif
          if !oColumn:Editable 
+            oBoxTmp:Show()
+            oWidGetTmp:Show()
+//            if hb_HHasKey( ::hWidget[ oColumn:Name + "_label" ] )
+               ::hWidget[oColumn:Name+"_label"]:Show()
+//            endif
             oWidGetTmp:Disable()
          endif
 
@@ -548,7 +601,21 @@ Return uRes
 METHOD GETVALUE(cField) CLASS TPY_ABM2
 
    Local cValue, nPosCol
+   Local cClassName 
 
+   if hb_HHasKey( ::hWidget, cField )
+
+      cClassName := ::hWidget[cField]:ClassName()
+
+      Do Case
+      Case cClassName = "GENTRY" .or. cClassName = "GGET"
+         cValue :=  ALLTRIM( ::hWidget[ cField ]:GetText() )
+      Case cClassName = "GCHECKBOX"
+         cValue :=  ::hWidget[ cField ]:GetValue() 
+      EndCase
+
+   endif
+/*
    IF ::oGet:IsDef(cField)
    
       cValue := ::oGet:Get(cField):GetValue()
@@ -571,7 +638,7 @@ METHOD GETVALUE(cField) CLASS TPY_ABM2
    ENDIF
    
 //   View(ValType(cValue) )
-
+*/
 Return cValue
 
 
@@ -816,7 +883,7 @@ METHOD SAVE() CLASS TPY_ABM2
    Local lRet
    Local aColumn, oColumn
    Local cClassName, cValue, uValue
-   Local hNewValues := Hash()
+//   Local hNewValues := Hash()
    Local aIter := ARRAY( 4 )
    Local pPath
    Local aUpdate := {}
@@ -854,12 +921,17 @@ METHOD SAVE() CLASS TPY_ABM2
           if Empty( ::hOldValues )  
              Do Case
              Case cClassName = "GENTRY" .or. cClassName = "GGET"
-                cValue :=  ::hWidget[oColumn:Name]:GetText()
+                cValue :=  ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
              Case cClassName = "GCHECKBOX"
-                cValue :=  ::hWidget[oColumn:Name]:GetValue()
+                cValue :=  ::hWidget[oColumn:Name]:GetValue() 
              EndCase
 
-             hb_HSet( hNewValues, oColumn:Name, ALLTRIM(cValue) )
+             hb_HSet( ::hNewValues, oColumn:Name, cValue )
+if ValType(cValue) = "C"
+  MsgInfo("Valor nuevo...  " + oColumn:Name + " = " + cValue)
+else
+  MsgInfo("Valor nuevo...  " + oColumn:Name + " = " + CStr(cValue))
+endif
              
           /* Modificar */
           else  
@@ -871,7 +943,7 @@ METHOD SAVE() CLASS TPY_ABM2
                    
                    cValue := ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
 //View( cValue )
-                   hb_HSet( hNewValues, oColumn:Name, cValue )
+                   hb_HSet( ::hNewValues, oColumn:Name, cValue )
 //? hb_valtoexp( ::hOldValues )
 //? ValType( ::oModel:oTreeView )
 //                   if !Empty( ::hOldValues )
@@ -883,7 +955,7 @@ METHOD SAVE() CLASS TPY_ABM2
 //                   endif          
                 Case cClassName = "GCHECKBOX"
                    uValue := ::hWidget[oColumn:Name]:GetValue()
-                   hb_HSet( hNewValues, oColumn:Name, uValue )
+                   hb_HSet( ::hNewValues, oColumn:Name, uValue )
                    if !(::hOldValues[ oColumn:Name ] == uValue )
                       AADD( aUpdate, { aColumn:__EnumIndex, uValue } )
                    endif
@@ -892,6 +964,7 @@ METHOD SAVE() CLASS TPY_ABM2
                 EndCase
 
              else
+<<<<<<< HEAD
                 //-- puede ser no editable pero es posible que se asignara 
                 //   un valor desde el script de trabajo.
 
@@ -901,6 +974,11 @@ METHOD SAVE() CLASS TPY_ABM2
                 uValue := ::oModel:GetValue( oColumn:Name )
                 hb_HSet( hNewValues, oColumn:Name, uValue )
                 
+=======
+//MsgInfo( ::oModel:GetValue( oColumn:Name ), oColumn:Name )
+                uValue := ::oModel:GetValue( oColumn:Name )
+                hb_HSet( ::hNewValues[ oColumn:Name ], uValue )
+>>>>>>> 85eae9f3c4a08e1a5a3a3ac3e9b88bcb4b25451e
              endif
 
           endif
@@ -909,11 +987,12 @@ METHOD SAVE() CLASS TPY_ABM2
 
 //View( aUpdate )
       if ::lNew 
-         Return ::oModel:Insert(hNewValues) 
+View( ::hNewValues )
+         Return ::oModel:Insert(::hNewValues) 
       endif
 
       //-- Mandamos a Actualizar el Modelo
-      if ::oModel:Set( hNewValues, ::hOldValues ) .and. ;
+      if ::oModel:Set( ::hNewValues, ::hOldValues ) .and. ;
          ::oModel:oTreeView:IsGetSelected(aIter)
 
          pPath := ::oModel:oTreeView:GetPath( aIter )

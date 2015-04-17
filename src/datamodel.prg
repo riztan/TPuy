@@ -612,15 +612,16 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
          ::oTreeView:bRow_Activated := oListBox:bEdit
    
          ::aCol[nColumn] := oTemp
-         __objAddData( self, cColTitle )
-#ifndef __XHARBOUR__
-         __objSendMsg( self, "_"+cColTitle, oTemp )
-#else
-         hb_execFromArray( @self, cColTitle, {oTemp} )
-#endif
-
       ENDIF       
      endif
+
+     __objAddData( self, cColTitle )
+#ifndef __XHARBOUR__
+     __objSendMsg( self, "_"+cColTitle, oTemp )
+#else
+     hb_execFromArray( @self, cColTitle, {oTemp} )
+#endif
+
    Next nColumn
 
 

@@ -305,7 +305,7 @@ METHOD INSERT( hNewValues )  CLASS ModelQuery
       return NIL
    endif
 
-   //MsgInfo("Metodo Insert en ModelQuery", "dbmodel.prg")
+//   MsgInfo("Metodo Insert en ModelQuery", "dbmodel.prg")
 
    if ::lRemote
       //MsgInfo("El Objeto Query es Remoto...  vamos a refrescar como llamar a un metodo del objeto..")
@@ -551,7 +551,8 @@ METHOD QRYREFRESH()  CLASS MODELQUERY
    endif
 
    //View(::oGtkModel)
-   ::oGtkModel:Release()
+   if !IsObject( ::oTreeView ) ; return .f. ; endif
+   ::oTreeView:ClearModel() //::oGtkModel:Release()
    ::Refresh( lAppend )
 //View( ~~oQry:aData )
 RETURN .t.
@@ -570,7 +571,9 @@ METHOD REFRESH( lAppend )  CLASS MODELQUERY
 //   ::aData := _QUERY_:aData
    if ::lRemote
       oQry := ::oQuery
+//      ~~oQry:Refresh()
       ::aData := ~~oQry:GetData()
+//View(::aData)
 oTpuy:tLastNetIO := hb_DateTime()
    else
       ::aData := ::oQuery:aData
