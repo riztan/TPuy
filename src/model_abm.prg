@@ -964,21 +964,12 @@ endif
                 EndCase
 
              else
-<<<<<<< HEAD
                 //-- puede ser no editable pero es posible que se asignara 
                 //   un valor desde el script de trabajo.
 
-                //MsgInfo( oColumn:Name, oColumn:ClassName() )
-                //MsgInfo( oColumn:hWidGet[oColumn:Name]:GetValue() )
-                MsgInfo( "Columna :   " + oColumn:Name + " = " + ::oModel:GetValue( oColumn:Name ), oColumn:ClassName() )
-                uValue := ::oModel:GetValue( oColumn:Name )
-                hb_HSet( hNewValues, oColumn:Name, uValue )
-                
-=======
 //MsgInfo( ::oModel:GetValue( oColumn:Name ), oColumn:Name )
                 uValue := ::oModel:GetValue( oColumn:Name )
                 hb_HSet( ::hNewValues[ oColumn:Name ], uValue )
->>>>>>> 85eae9f3c4a08e1a5a3a3ac3e9b88bcb4b25451e
              endif
 
           endif
