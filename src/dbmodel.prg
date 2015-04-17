@@ -86,6 +86,7 @@ METHOD OBJFREE() CLASS MODELQUERY
       oQry:=NIL
    endif
    ::Release()
+   self := nil
 RETURN NIL
 
 

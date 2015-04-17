@@ -774,6 +774,7 @@ METHOD Exit( lForce ) CLASS TApp
                que posiblemente ha dejado abierto.. 
              */
             //~oServer:ObjFree( "oServer" ) --> no permitir matar el objeto oServer.
+            ~oServer:Logout()
             NETIO_DISCONNECT( NETSERVER, NETPORT )
          CATCH
             MsgStop("Problema al intentar salir...")

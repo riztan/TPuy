@@ -978,7 +978,7 @@ endif
 
 //View( aUpdate )
       if ::lNew 
-View( ::hNewValues )
+//View( ::hNewValues )
          Return ::oModel:Insert(::hNewValues) 
       endif
 

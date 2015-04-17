@@ -107,7 +107,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
    ::bEdit   := {|| MsgInfo("Accion del Boton 'Edit'"  ) }  //{|| .T. }
    ::bDel    := {|| MsgInfo("Accion del Boton 'Delete'") }  //{|| .T. }
    ::bPrint  := {|| MsgInfo("Accion del Boton 'Print'" ) }  //{|| .T. }
-   ::bQuit   := {|| ::Release(), .t.  }  //{|| .T. }
+   ::bQuit   := {|| ::oModel:Destroy(),::Release(), .t.  }  //{|| .T. }
 
    DEFAULT  nWidth := 0 , nHeight := 0
 
