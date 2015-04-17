@@ -138,7 +138,7 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 ENDCLASS
 
 
-METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
+METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
             cId, uGlade, cBox, lNew, lRemote )  CLASS TPY_ABM2  
 
    Local aColumn, oColumn//, xDefault
@@ -534,7 +534,7 @@ return Self
 
 
 
-METHOD Get(cField) CLASS TPY_ABM2
+METHOD GET(cField) CLASS TPY_ABM2
    Local uRes
    
    IF ::oGet:IsDef( cField )
@@ -545,7 +545,7 @@ Return uRes
 
 
 
-METHOD GetValue(cField) CLASS TPY_ABM2
+METHOD GETVALUE(cField) CLASS TPY_ABM2
 
    Local cValue, nPosCol
 
@@ -576,7 +576,7 @@ Return cValue
 
 
 
-METHOD GetTitle(cField) CLASS TPY_ABM2
+METHOD GETTITLE(cField) CLASS TPY_ABM2
 
    Local nPosFld
    
@@ -590,7 +590,7 @@ Return NIL
 
 
 
-METHOD Set(nColumn,uField, cValue) CLASS TPY_ABM2
+METHOD SET(nColumn,uField, cValue) CLASS TPY_ABM2
    
    Local nPos
    
@@ -611,7 +611,7 @@ Return .F.
 
 
 
-METHOD End( lForce ) CLASS TPY_ABM2
+METHOD END( lForce ) CLASS TPY_ABM2
 
    DEFAULT lForce To .t.
 
@@ -891,6 +891,16 @@ METHOD SAVE() CLASS TPY_ABM2
 ? ::hWidget[oColumn:Name]:ClassName()  
                 EndCase
 
+             else
+                //-- puede ser no editable pero es posible que se asignara 
+                //   un valor desde el script de trabajo.
+
+                //MsgInfo( oColumn:Name, oColumn:ClassName() )
+                //MsgInfo( oColumn:hWidGet[oColumn:Name]:GetValue() )
+                MsgInfo( "Columna :   " + oColumn:Name + " = " + ::oModel:GetValue( oColumn:Name ), oColumn:ClassName() )
+                uValue := ::oModel:GetValue( oColumn:Name )
+                hb_HSet( hNewValues, oColumn:Name, uValue )
+                
              endif
 
           endif
@@ -923,7 +933,7 @@ METHOD SAVE() CLASS TPY_ABM2
 Return lRet
 
 
-METHOD GenOldValues()  CLASS TPY_ABM2
+METHOD GENOLDVALUES()  CLASS TPY_ABM2
    Local aColumn, oColumn, cTemp
 
    FOR EACH aColumn IN ::oModel:aTpyStruct
@@ -949,7 +959,7 @@ METHOD GenOldValues()  CLASS TPY_ABM2
 RETURN .t.
 
 
-METHOD aCantGet(  ) CLASS TPY_ABM2
+METHOD ACANTGET(  ) CLASS TPY_ABM2
    Local x, i
    Local x2 := 0
 
@@ -978,7 +988,7 @@ RETURN x2
 
 
 
-METHOD UpdateBuffer( ) CLASS TPY_ABM2
+METHOD UPDATEBUFFER( ) CLASS TPY_ABM2
    Local x, ctext
 
    for x=1 to Len(::aGet)
@@ -1002,7 +1012,7 @@ RETURN nil
 
 
 
-METHOD PosField( cField ) CLASS TPY_ABM2
+METHOD POSFIELD( cField ) CLASS TPY_ABM2
 
    Local n:=0
    Local aReg:={}
@@ -1027,7 +1037,7 @@ Return NIL
 
 
 
-METHOD OnError( uValue ) CLASS TPY_ABM2
+METHOD ONERROR( uValue ) CLASS TPY_ABM2
   Local cMsg   := Lower( ALLTRIM(__GetMessage()) )
 
   If ::IsDef( cMsg )
