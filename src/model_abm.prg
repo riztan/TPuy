@@ -418,12 +418,16 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
             //cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetValue( aColumn:__EnumIndex(), "", pPath, @aIter ) ) )
             if ::lFromListBox
                cTemp := ::oListBox:GetValue( oColumn:Name )
+               if ValType(cTemp)="C"
+                  cTemp := ALLTRIM( cTemp )
+               endif
             else
-? "aqui...  revisar. (model_abm.prg)"
+View( "aqui...  revisar. (model_abm.prg)" )
                cTemp := CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) )
             endif
 //View( iif( !Empty(cTemp), ALLTRIM( cTemp ), cTemp ) )
-            ::hOldValues[ oColumn:Name ] := iif( !Empty(cTemp), ALLTRIM( cTemp ), cTemp )
+
+            ::hOldValues[ oColumn:Name ] := cTemp //iif( !Empty(cTemp), cTemp, cTemp )
          Else
             //? "no hay fila seleccionada"
             //if ::oModel:oTreeView:IsGetSelected()
