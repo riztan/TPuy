@@ -134,11 +134,37 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 
    METHOD SetValue( cField, uValue )   //INLINE  ::hNewValues[ cField ] := uValue
 
+   METHOD SetImage( cImgName )
+
    METHOD IsDef( cField )              INLINE  HHasKey( ::hWidGet, cField )
 
    ERROR HANDLER OnError( uValue )
 
 ENDCLASS
+
+
+/** SetImage( cImgName ) Asigna una imagen al formulario. 
+ *  Si la imagen no existe localmente, la solicita al servidor. En caso 
+ *  de existir la imagen, la envia al servidor para ser guardada.
+ *
+ *  cImgName: Nombre del archivo contenedor de la imagen.
+ */
+METHOD SETIMAGE( cImgName )  CLASS TPY_ABM2
+   local rApp
+   If !File( oTPuy:cImages + cImgname )
+      GetImage( cImgName )
+      if File( oTpuy:cImages + cImgName )
+         ::oImage:SetFile( oTPuy:cImages + cImgName )
+         Return .t.
+      endif
+   else
+      if oTpuy:lNetIO .and. !Empty(oTpuy:rApp)
+         rApp := oTPuy:rApp
+         ~~rApp:SetImage( cImgName, MemoRead( oTPuy:cImages + cImgName ) )
+      endif
+      ::oImage:SetFile( oTPuy:cImages + cImgName )
+   EndIf
+RETURN .f.
 
 
 METHOD SETEDITABLE( cField, lValue )
@@ -196,6 +222,7 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
    Local oEventBox
    Local oWndParent, cScript
    Local lIni := .T.
+   Local rApp
 
    
    ::lFromListBox := .f.
@@ -349,8 +376,20 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
       //  DEFINE SEPARATOR OF ::oBox VERTICAL PADDING 15 //EXPAND FILL
       //end
       ::oBoxes:oBoxMain:SetBorder( 8 )
-      DEFINE IMAGE ::oImage FILE oTpuy:cImages+::cImage OF ::oBoxes:oBoxMain
-      DEFINE SEPARATOR ::oSeparator OF ::oBoxes:oBoxMain VERTICAL PADDING 15 //EXPAND FILL
+      if !FILE( oTPuy:cImages+::cImage )
+         if oTPuy:lNetIO .and. !Empty( oTPuy:rApp )
+            rApp := oTPuy:rApp
+            GetImage( ::cImage )
+            DEFINE IMAGE ::oImage FILE oTpuy:cImages+::cImage ;
+                   OF ::oBoxes:oBoxMain
+            
+         endif
+      else
+         DEFINE IMAGE ::oImage FILE oTpuy:cImages+::cImage ;
+                OF ::oBoxes:oBoxMain
+      endif
+      DEFINE SEPARATOR ::oSeparator OF ::oBoxes:oBoxMain ;
+             VERTICAL PADDING 15 //EXPAND FILL
    EndIf
 
    DEFINE BOX ::oBoxes:oBoxTable VERTICAL OF ::oBoxes:oBoxMain EXPAND FILL HOMOGENEOUS

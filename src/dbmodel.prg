@@ -75,7 +75,8 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
    METHOD Value( uColumn, aIter ) INLINE ::GetValue( uColumn, aIter )
    METHOD GetColPos( cColName ) 
    METHOD GetPosCol( cColName )   INLINE ::GetColPos( cColName ) 
-   METHOD Eval( bBlock )
+   METHOD Eval( bBlock, ... )
+   METHOD ClearModel()
 
    METHOD SetFilter(cColName, uValue, lEqual)  
 
@@ -86,14 +87,29 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
 ENDCLASS
 
+
+
+METHOD CLEARMODEL()  CLASS MODELQUERY
+
+   if IsObject( ::oTreeView )
+      ::oTreeView:ClearModel() //::oGtkModel:Release()
+      ::Refresh( lAppend )
+   else
+      ::oGtkModel:Clear()
+   endif
+RETURN nil
+
+
+
 METHOD SETFILTER( cColName, uValue, lEqual )  CLASS MODELQUERY
    ::cColFilter := cColName
    ::uValFilter := uValue
    ::lEqual     := lEqual
 
-   ::oGtkModel:Clear()
+   ::ClearModel()
    ::Refresh(.t.)
 RETURN
+
 
 
 METHOD OBJFREE() CLASS MODELQUERY
@@ -106,6 +122,7 @@ METHOD OBJFREE() CLASS MODELQUERY
    ::Release()
    self := nil
 RETURN NIL
+
 
 
 METHOD UPDATE( cColName, uNewValue )
@@ -133,13 +150,14 @@ METHOD UPDATE( cColName, uNewValue )
 RETURN lRes
 
 
-METHOD EVAL( bBlock ) CLASS ModelQuery
+
+METHOD EVAL( bBlock, ... ) CLASS ModelQuery
 
    if !hb_IsBlock( bBlock ) ; return .f. ; endif
 
    ::GoTop()
    While .t.
-      Eval( bBlock, self )
+      Eval( bBlock, self, ... )
       if !::Next() ; exit ; endif
    EndDo
 RETURN .t.
@@ -165,6 +183,7 @@ METHOD GetColPos( cColName )
       nColPos := ::oTreeView:GetPosCol( cColName )
    endif
 RETURN (nColPos)
+
 
 
 METHOD GetValue( uColumn, aIter ) CLASS ModelQuery
@@ -571,14 +590,7 @@ METHOD QRYREFRESH()  CLASS MODELQUERY
       ::oQuery:Refresh( .t. )
    endif
 
-   //View(::oGtkModel)
-   if IsObject( ::oTreeView )
-      ::oTreeView:ClearModel() //::oGtkModel:Release()
-      ::Refresh( lAppend )
-   else
-      ::oGtkModel:Clear()
-View("deberia limbpiar")
-   endif
+   ::ClearModel()
 //View( ~~oQry:aData )
 RETURN .t.
 
