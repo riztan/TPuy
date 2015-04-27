@@ -80,7 +80,7 @@ Return .T.
  */
 Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
 
-   Local oMsgRun, pixbuf, oDraw
+   Local oMsgRun, pixbuf, oDraw, oErr
 
    Public oMsgRun_oLabel, oMsgRun_oImage
 
@@ -707,5 +707,30 @@ Function GetMenu(cMenuName)
       hMenu := ~HGet( LoadMenu( cMenuName ) )
    endif
 Return hMenu
+
+
+/** Function para obtener una imagen desde un servidor TPuy.
+ *  cImgName:  Nombre de la imagen a solicitar. 
+ *             Se debe incluir la extensión. (sin ruta).
+ */
+Function GetImage( cImgName )
+   local lRes := .f.
+   local rApp, cImg
+
+   if oTpuy:lNetIO .and. !Empty(oTPuy:rApp)
+      rApp := oTPuy:rApp
+      if ~~rApp:ImageExist( cImgName )
+         cImg := ~~rApp:GetImage( cImgName )
+         if !FILE( oTPuy:cImages + cImgName )
+            return hb_MemoWrit( oTPuy:cImages + cImgName, cImg )
+         else
+            if !( cImg == MemoRead( oTpuy:cImages + cImgName ) )
+               return hb_MemoWrit( oTPuy:cImages + cImgName, cImg )
+            endif
+         endif
+      endif
+   endif
+Return lRes
+
 
 //EOF

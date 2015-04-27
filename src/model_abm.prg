@@ -73,6 +73,7 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 
    DATA hOldValues 
    DATA hPreValues
+   DATA hNewValues
    DATA aFields
 //   DATA aVars
    DATA aReg
@@ -103,7 +104,7 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 
    DATA cImage
 
-   METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight, cId, uGlade, cBox, lNew )
+   METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight, cId, uGlade, cBox, lNew, lRemote )
    METHOD End( lForce )
    METHOD Active( bAction, bInit )
    METHOD ACantGet()
@@ -127,9 +128,13 @@ CLASS TPY_ABM2 //FROM TPUBLIC
    METHOD SetRefTable(uField,cTable)   INLINE  ::Set( 9,uField,cTable)
    METHOD SetRefDescri(uField,cField)  INLINE  ::Set(11,uField,cField)
    METHOD SetRefField(uField,cField)   INLINE  ::Set(10,uField,cField)
-   METHOD SetEditable(uField,lVal)     INLINE  ::Set( 3,uField,lVal)
+   METHOD SetEditable(uField,lVal)     //INLINE  ::Set( 3,uField,lVal)
    METHOD SetViewable(uField,lVal)     INLINE  ::Set( 4,uField,lVal)
    METHOD SetNavigable(uField,lVal)    INLINE  ::Set( 5,uField,lVal)
+
+   METHOD SetValue( cField, uValue )   //INLINE  ::hNewValues[ cField ] := uValue
+
+   METHOD SetImage( cImgName )
 
    METHOD IsDef( cField )              INLINE  HHasKey( ::hWidGet, cField )
 
@@ -138,8 +143,75 @@ CLASS TPY_ABM2 //FROM TPUBLIC
 ENDCLASS
 
 
-METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
-            cId, uGlade, cBox, lNew )  CLASS TPY_ABM2  
+/** SetImage( cImgName ) Asigna una imagen al formulario. 
+ *  Si la imagen no existe localmente, la solicita al servidor. En caso 
+ *  de existir la imagen, la envia al servidor para ser guardada.
+ *
+ *  cImgName: Nombre del archivo contenedor de la imagen.
+ */
+METHOD SETIMAGE( cImgName )  CLASS TPY_ABM2
+   local rApp
+   If !File( oTPuy:cImages + cImgname )
+      GetImage( cImgName )
+      if File( oTpuy:cImages + cImgName )
+         ::oImage:SetFile( oTPuy:cImages + cImgName )
+         Return .t.
+      endif
+   else
+      if oTpuy:lNetIO .and. !Empty(oTpuy:rApp)
+         rApp := oTPuy:rApp
+         ~~rApp:SetImage( cImgName, MemoRead( oTPuy:cImages + cImgName ) )
+      endif
+      ::oImage:SetFile( oTPuy:cImages + cImgName )
+   EndIf
+RETURN .f.
+
+
+METHOD SETEDITABLE( cField, lValue )
+   default cField to ""
+
+   if ValType(lValue) != "L" ; return nil ; endif
+   if empty(cField) ; return nil ; endif
+
+   ::oBoxes:hVars[cField]:Show()
+   ::hWidget[cField+"_label"]:Show()
+   ::hWidget[cField]:Show()
+   if lValue
+      ::hWidget[cField]:Enable()
+      ::hWidget[cField]:Enable()
+   else
+      ::hWidget[cField]:Disable()
+      ::hWidget[cField]:Disable()
+   endif
+RETURN nil
+
+
+/**
+*/
+METHOD SETVALUE( cField, uValue )
+   local cClassName
+if !( hb_HHasKey( ::hWidget, cField ) )
+   View( HGetKeys(::hWidget) )
+endif
+   if hb_HHasKey( ::hWidget, cField )
+      cClassName := ::hWidget[cField]:ClassName()
+      if cClassName="GENTRY" .or. cClassName="GGET"
+         ::hWidget[cField]:SetText( uValue )
+      elseif cClassName="GCHECKBOX"
+         ::hWidget[cField]:SetValue(uValue) 
+      else
+MsgAlert(cClassName, procname() )
+         ::hNewValues[ cField ] := uValue
+      endif
+   else
+MsgAlert(cClassName, procname() )
+      ::hNewValues[ cField ] := uValue
+   endif
+Return nil
+
+
+METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
+            cId, uGlade, cBox, lNew, lRemote )  CLASS TPY_ABM2  
 
    Local aColumn, oColumn//, xDefault
    Local cTemp
@@ -150,6 +222,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
    Local oEventBox
    Local oWndParent, cScript
    Local lIni := .T.
+   Local rApp
 
    
    ::lFromListBox := .f.
@@ -209,6 +282,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
    ::hOldValues := Hash()
    ::hPreValues := Hash()
+   ::hNewValues := Hash()
 
    ::cImage  := "logo_gnome_64x64.png"
    ::bSave   := {|| .T. }
@@ -302,8 +376,20 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
       //  DEFINE SEPARATOR OF ::oBox VERTICAL PADDING 15 //EXPAND FILL
       //end
       ::oBoxes:oBoxMain:SetBorder( 8 )
-      DEFINE IMAGE ::oImage FILE oTpuy:cImages+::cImage OF ::oBoxes:oBoxMain
-      DEFINE SEPARATOR ::oSeparator OF ::oBoxes:oBoxMain VERTICAL PADDING 15 //EXPAND FILL
+      if !FILE( oTPuy:cImages+::cImage )
+         if oTPuy:lNetIO .and. !Empty( oTPuy:rApp )
+            rApp := oTPuy:rApp
+            GetImage( ::cImage )
+            DEFINE IMAGE ::oImage FILE oTpuy:cImages+::cImage ;
+                   OF ::oBoxes:oBoxMain
+            
+         endif
+      else
+         DEFINE IMAGE ::oImage FILE oTpuy:cImages+::cImage ;
+                OF ::oBoxes:oBoxMain
+      endif
+      DEFINE SEPARATOR ::oSeparator OF ::oBoxes:oBoxMain ;
+             VERTICAL PADDING 15 //EXPAND FILL
    EndIf
 
    DEFINE BOX ::oBoxes:oBoxTable VERTICAL OF ::oBoxes:oBoxMain EXPAND FILL HOMOGENEOUS
@@ -371,11 +457,16 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
             //cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetValue( aColumn:__EnumIndex(), "", pPath, @aIter ) ) )
             if ::lFromListBox
                cTemp := ::oListBox:GetValue( oColumn:Name )
+               if ValType(cTemp)="C"
+                  cTemp := ALLTRIM( cTemp )
+               endif
             else
-? "aqui...  revisar. (model_abm.prg)"
-               cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) ) )
+View( "aqui...  revisar. (model_abm.prg)" )
+               cTemp := CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) )
             endif
-            ::hOldValues[ oColumn:Name ] := cTemp
+//View( iif( !Empty(cTemp), ALLTRIM( cTemp ), cTemp ) )
+
+            ::hOldValues[ oColumn:Name ] := cTemp //iif( !Empty(cTemp), cTemp, cTemp )
          Else
             //? "no hay fila seleccionada"
             //if ::oModel:oTreeView:IsGetSelected()
@@ -498,11 +589,17 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
          endif
 
          /* Ocultamos o Desactivamos... */
+
          if !oColumn:Viewable 
             oBoxTmp:Hide()
             oWidGetTmp:Hide()
          endif
          if !oColumn:Editable 
+            oBoxTmp:Show()
+            oWidGetTmp:Show()
+//            if hb_HHasKey( ::hWidget[ oColumn:Name + "_label" ] )
+               ::hWidget[oColumn:Name+"_label"]:Show()
+//            endif
             oWidGetTmp:Disable()
          endif
 
@@ -533,7 +630,7 @@ return Self
 
 
 
-METHOD Get(cField) CLASS TPY_ABM2
+METHOD GET(cField) CLASS TPY_ABM2
    Local uRes
    
    IF ::oGet:IsDef( cField )
@@ -544,10 +641,24 @@ Return uRes
 
 
 
-METHOD GetValue(cField) CLASS TPY_ABM2
+METHOD GETVALUE(cField) CLASS TPY_ABM2
 
    Local cValue, nPosCol
+   Local cClassName 
 
+   if hb_HHasKey( ::hWidget, cField )
+
+      cClassName := ::hWidget[cField]:ClassName()
+
+      Do Case
+      Case cClassName = "GENTRY" .or. cClassName = "GGET"
+         cValue :=  ALLTRIM( ::hWidget[ cField ]:GetText() )
+      Case cClassName = "GCHECKBOX"
+         cValue :=  ::hWidget[ cField ]:GetValue() 
+      EndCase
+
+   endif
+/*
    IF ::oGet:IsDef(cField)
    
       cValue := ::oGet:Get(cField):GetValue()
@@ -570,12 +681,12 @@ METHOD GetValue(cField) CLASS TPY_ABM2
    ENDIF
    
 //   View(ValType(cValue) )
-
+*/
 Return cValue
 
 
 
-METHOD GetTitle(cField) CLASS TPY_ABM2
+METHOD GETTITLE(cField) CLASS TPY_ABM2
 
    Local nPosFld
    
@@ -589,7 +700,7 @@ Return NIL
 
 
 
-METHOD Set(nColumn,uField, cValue) CLASS TPY_ABM2
+METHOD SET(nColumn,uField, cValue) CLASS TPY_ABM2
    
    Local nPos
    
@@ -610,7 +721,7 @@ Return .F.
 
 
 
-METHOD End( lForce ) CLASS TPY_ABM2
+METHOD END( lForce ) CLASS TPY_ABM2
 
    DEFAULT lForce To .t.
 
@@ -815,7 +926,7 @@ METHOD SAVE() CLASS TPY_ABM2
    Local lRet
    Local aColumn, oColumn
    Local cClassName, cValue, uValue
-   Local hNewValues := Hash()
+//   Local hNewValues := Hash()
    Local aIter := ARRAY( 4 )
    Local pPath
    Local aUpdate := {}
@@ -853,12 +964,17 @@ METHOD SAVE() CLASS TPY_ABM2
           if Empty( ::hOldValues )  
              Do Case
              Case cClassName = "GENTRY" .or. cClassName = "GGET"
-                cValue :=  ::hWidget[oColumn:Name]:GetText()
+                cValue :=  ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
              Case cClassName = "GCHECKBOX"
-                cValue :=  ::hWidget[oColumn:Name]:GetValue()
+                cValue :=  ::hWidget[oColumn:Name]:GetValue() 
              EndCase
 
-             hb_HSet( hNewValues, oColumn:Name, cValue )
+             hb_HSet( ::hNewValues, oColumn:Name, cValue )
+if ValType(cValue) = "C"
+  MsgInfo("Valor nuevo...  " + oColumn:Name + " = " + cValue)
+else
+  MsgInfo("Valor nuevo...  " + oColumn:Name + " = " + CStr(cValue))
+endif
              
           /* Modificar */
           else  
@@ -868,9 +984,9 @@ METHOD SAVE() CLASS TPY_ABM2
                 Do Case
                 Case cClassName = "GENTRY" .or. cClassName = "GGET" 
                    
-                   cValue := ::hWidget[oColumn:Name]:GetText()
-
-                   hb_HSet( hNewValues, oColumn:Name, cValue )
+                   cValue := ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
+//View( cValue )
+                   hb_HSet( ::hNewValues, oColumn:Name, cValue )
 //? hb_valtoexp( ::hOldValues )
 //? ValType( ::oModel:oTreeView )
 //                   if !Empty( ::hOldValues )
@@ -882,7 +998,7 @@ METHOD SAVE() CLASS TPY_ABM2
 //                   endif          
                 Case cClassName = "GCHECKBOX"
                    uValue := ::hWidget[oColumn:Name]:GetValue()
-                   hb_HSet( hNewValues, oColumn:Name, uValue )
+                   hb_HSet( ::hNewValues, oColumn:Name, uValue )
                    if !(::hOldValues[ oColumn:Name ] == uValue )
                       AADD( aUpdate, { aColumn:__EnumIndex, uValue } )
                    endif
@@ -890,6 +1006,13 @@ METHOD SAVE() CLASS TPY_ABM2
 ? ::hWidget[oColumn:Name]:ClassName()  
                 EndCase
 
+             else
+                //-- puede ser no editable pero es posible que se asignara 
+                //   un valor desde el script de trabajo.
+
+//MsgInfo( ::oModel:GetValue( oColumn:Name ), oColumn:Name )
+                uValue := ::oModel:GetValue( oColumn:Name )
+                hb_HSet( ::hNewValues[ oColumn:Name ], uValue )
              endif
 
           endif
@@ -898,11 +1021,12 @@ METHOD SAVE() CLASS TPY_ABM2
 
 //View( aUpdate )
       if ::lNew 
-         Return ::oModel:Insert(hNewValues) 
+//View( ::hNewValues )
+         Return ::oModel:Insert(::hNewValues) 
       endif
 
       //-- Mandamos a Actualizar el Modelo
-      if ::oModel:Set( hNewValues, ::hOldValues ) .and. ;
+      if ::oModel:Set( ::hNewValues, ::hOldValues ) .and. ;
          ::oModel:oTreeView:IsGetSelected(aIter)
 
          pPath := ::oModel:oTreeView:GetPath( aIter )
@@ -922,7 +1046,7 @@ METHOD SAVE() CLASS TPY_ABM2
 Return lRet
 
 
-METHOD GenOldValues()  CLASS TPY_ABM2
+METHOD GENOLDVALUES()  CLASS TPY_ABM2
    Local aColumn, oColumn, cTemp
 
    FOR EACH aColumn IN ::oModel:aTpyStruct
@@ -937,9 +1061,9 @@ METHOD GenOldValues()  CLASS TPY_ABM2
                if ::lFromListBox
                   cTemp := ::oListBox:GetValue( oColumn:Name )
                else
-                  cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) ) )
+                  cTemp := CStr( ::oModel:oGtkModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() ) ) 
                endif
-               ::hOldValues[ oColumn:Name ] := cTemp
+               ::hOldValues[ oColumn:Name ] := iif( ValType(cTemp)="C", ALLTRIM( cTemp ), cTemp )
             endif
 
 //         endif
@@ -948,7 +1072,7 @@ METHOD GenOldValues()  CLASS TPY_ABM2
 RETURN .t.
 
 
-METHOD aCantGet(  ) CLASS TPY_ABM2
+METHOD ACANTGET(  ) CLASS TPY_ABM2
    Local x, i
    Local x2 := 0
 
@@ -977,7 +1101,7 @@ RETURN x2
 
 
 
-METHOD UpdateBuffer( ) CLASS TPY_ABM2
+METHOD UPDATEBUFFER( ) CLASS TPY_ABM2
    Local x, ctext
 
    for x=1 to Len(::aGet)
@@ -1001,7 +1125,7 @@ RETURN nil
 
 
 
-METHOD PosField( cField ) CLASS TPY_ABM2
+METHOD POSFIELD( cField ) CLASS TPY_ABM2
 
    Local n:=0
    Local aReg:={}
@@ -1026,7 +1150,7 @@ Return NIL
 
 
 
-METHOD OnError( uValue ) CLASS TPY_ABM2
+METHOD ONERROR( uValue ) CLASS TPY_ABM2
   Local cMsg   := Lower( ALLTRIM(__GetMessage()) )
 
   If ::IsDef( cMsg )

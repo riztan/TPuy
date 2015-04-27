@@ -166,6 +166,7 @@ Function Main( ... )
 
    oTpuy:cPassword  := "Sarisariñama"
    
+   oTPuy:lNetIO     := .F.  // Conexion con servicio de TPuy
    //-- Modo Debug
    oTpuy:lDebug     := .T.  // Activa o Desactiva en View()
 

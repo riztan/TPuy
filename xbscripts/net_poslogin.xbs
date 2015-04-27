@@ -29,6 +29,7 @@ function net_poslogin()
     */
 
    ::aApps := ~oServer:GetApplications()
+View(::aApps)
    ::aComboApps := {}
    AEVAL( ::aApps, { |a| AADD( ::aComboApps, a[5] ) } )
    

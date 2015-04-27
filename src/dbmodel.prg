@@ -18,6 +18,12 @@ memvar oTpuy
 
 CLASS MODELQUERY FROM TPUBLIC
 
+//   PROTECTED:
+   DATA cColFilter   INIT ""
+   DATA uValFilter
+   DATA lEqual       INIT .t.
+ 
+//   EXPORTED:
    DATA oGtkModel
    DATA oTreeView
    DATA oQuery
@@ -36,7 +42,7 @@ CLASS MODELQUERY FROM TPUBLIC
 
    DATA lRemote
    DATA lMute
- 
+
    DATA pPath
 
    DATA aTables
@@ -69,13 +75,41 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
    METHOD Value( uColumn, aIter ) INLINE ::GetValue( uColumn, aIter )
    METHOD GetColPos( cColName ) 
    METHOD GetPosCol( cColName )   INLINE ::GetColPos( cColName ) 
-   METHOD Eval( bBlock )
+   METHOD Eval( bBlock, ... )
+   METHOD ClearModel()
+
+   METHOD SetFilter(cColName, uValue, lEqual)  
+
    METHOD ObjFree()
    METHOD Destroy() INLINE ::ObjFree()
 
 //   ERROR HANDLER OnError( cMsg, nError )
 
 ENDCLASS
+
+
+
+METHOD CLEARMODEL()  CLASS MODELQUERY
+
+   if IsObject( ::oTreeView )
+      ::oTreeView:ClearModel() //::oGtkModel:Release()
+      ::Refresh( lAppend )
+   else
+      ::oGtkModel:Clear()
+   endif
+RETURN nil
+
+
+
+METHOD SETFILTER( cColName, uValue, lEqual )  CLASS MODELQUERY
+   ::cColFilter := cColName
+   ::uValFilter := uValue
+   ::lEqual     := lEqual
+
+   ::ClearModel()
+   ::Refresh(.t.)
+RETURN
+
 
 
 METHOD OBJFREE() CLASS MODELQUERY
@@ -86,7 +120,9 @@ METHOD OBJFREE() CLASS MODELQUERY
       oQry:=NIL
    endif
    ::Release()
+   self := nil
 RETURN NIL
+
 
 
 METHOD UPDATE( cColName, uNewValue )
@@ -114,13 +150,14 @@ METHOD UPDATE( cColName, uNewValue )
 RETURN lRes
 
 
-METHOD EVAL( bBlock ) CLASS ModelQuery
+
+METHOD EVAL( bBlock, ... ) CLASS ModelQuery
 
    if !hb_IsBlock( bBlock ) ; return .f. ; endif
 
    ::GoTop()
    While .t.
-      Eval( bBlock, self )
+      Eval( bBlock, self, ... )
       if !::Next() ; exit ; endif
    EndDo
 RETURN .t.
@@ -146,6 +183,7 @@ METHOD GetColPos( cColName )
       nColPos := ::oTreeView:GetPosCol( cColName )
    endif
 RETURN (nColPos)
+
 
 
 METHOD GetValue( uColumn, aIter ) CLASS ModelQuery
@@ -305,7 +343,7 @@ METHOD INSERT( hNewValues )  CLASS ModelQuery
       return NIL
    endif
 
-   //MsgInfo("Metodo Insert en ModelQuery", "dbmodel.prg")
+//   MsgInfo("Metodo Insert en ModelQuery", "dbmodel.prg")
 
    if ::lRemote
       //MsgInfo("El Objeto Query es Remoto...  vamos a refrescar como llamar a un metodo del objeto..")
@@ -462,7 +500,8 @@ METHOD NEWFROMREMOTE( cSchema, uQry, lRemote, lMute )  CLASS MODELQUERY
          if ( " " $ uQry )  //-- Si no hay espacio en blanco no es una consulta, es identificador de obj remoto.
             ::oQuery := ~oServer:ModelQuery( uQry, cSchema )
          else
-            ::cQry := ~~uQry:cQuery
+            //::cQry := ~~uQry:cQuery
+            ::cQry := "" // No hay acceso a la cadena del query remoto. 
          endif
 
 /* inicializamos el conteo para verificar conexion netIO */
@@ -536,6 +575,8 @@ oTpuy:tLastNetIO := hb_DateTime()
 //View( self )
 RETURN self
 
+
+
 METHOD QRYREFRESH()  CLASS MODELQUERY
    Local oQry
    Local lAppend := .t.
@@ -549,9 +590,7 @@ METHOD QRYREFRESH()  CLASS MODELQUERY
       ::oQuery:Refresh( .t. )
    endif
 
-   //View(::oGtkModel)
-   ::oGtkModel:Release()
-   ::Refresh( lAppend )
+   ::ClearModel()
 //View( ~~oQry:aData )
 RETURN .t.
 
@@ -560,7 +599,7 @@ METHOD REFRESH( lAppend )  CLASS MODELQUERY
 
    local aRow
    //local oColumn//, cCol, cValue
-   local oMsgRun, oQry
+   local oMsgRun, oQry, nColPos := 0
 
    DEFAULT lAppend TO .F.
 
@@ -569,7 +608,9 @@ METHOD REFRESH( lAppend )  CLASS MODELQUERY
 //   ::aData := _QUERY_:aData
    if ::lRemote
       oQry := ::oQuery
+//      ~~oQry:Refresh()
       ::aData := ~~oQry:GetData()
+//View(::aData)
 oTpuy:tLastNetIO := hb_DateTime()
    else
       ::aData := ::oQuery:aData
@@ -578,24 +619,50 @@ oTpuy:tLastNetIO := hb_DateTime()
 
    ::aIter := ARRAY( ::nRecNo )
 
+//View(::aData)
+//View(::aStruct)
+   if !Empty( ::cColFilter )
+      nColPos := ASCAN(::aStruct, {|a| a[1]=::cColFilter } ) 
+   endif
+
    if !::lMute ; oMsgRun := MsgRunStart("Actualizando Información...") ; endif
    FOR EACH aRow IN ::aData
 
       /* aqui, deberiamos ir buscando la informacion correspondiente a campos que son referencia en otra tabla */
       /* mejor..  esto ya nos lo debe proveer nuestro servidor de netio */
       /* 06/10/2012 - Ya lo provee el servidor... proceso en pruebas */
-      
-      if lAppend 
-         APPEND LIST_STORE ::oGtkModel ITER ::aIter
+//View( { ::cColFilter, ::uValFilter, nColPos} ) 
+      if nColPos != 0
+
+//View( { ::cColfilter, ::uValFilter, ::lEqual, aRow[nColPos], (::uValFilter = aRow[nColPos] ), ;
+//        (::uValFilter = aRow[nColPos]) = ::lEqual } ) 
+
+         if ( ::uValFilter = aRow[nColPos] ) = ::lEqual
+            
+            __Registra( lAppend, ::oGtkModel, ::aIter, aRow )
+
+         endif
+
+      else
+
+         __Registra( lAppend, ::oGtkModel, ::aIter, aRow )
+         
       endif
-      
-      SET VALUES LIST_STORE ::oGtkModel ITER ::aIter ;
-          VALUES aRow
 
    NEXT
    if !::lMute ; MsgRunStop( oMsgRun ) ; endif
 
 RETURN .t.
+
+
+STATIC PROCEDURE __REGISTRA( lAppend, oGtkModel, aIter, aRow )
+   if lAppend 
+      APPEND LIST_STORE oGtkModel ITER aIter
+   endif
+
+   SET VALUES LIST_STORE oGtkModel ITER aIter ;
+       VALUES aRow
+RETURN
 
 /*
 METHOD SERIALIZE(cMsg)

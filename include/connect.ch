@@ -3,6 +3,6 @@
  *
 */
 
-#define NETSERVER "host"
+#define NETSERVER "riztan.dyndns.org"
 #define NETPORT   2941
-#define NETPASSWD "mypassword"
+#define NETPASSWD "topsecret"
