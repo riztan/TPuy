@@ -93,7 +93,7 @@ METHOD CLEARMODEL()  CLASS MODELQUERY
 
    if IsObject( ::oTreeView )
       ::oTreeView:ClearModel() //::oGtkModel:Release()
-      ::Refresh( lAppend )
+//      ::Refresh( lAppend )
    else
       ::oGtkModel:Clear()
    endif
@@ -583,6 +583,8 @@ METHOD QRYREFRESH()  CLASS MODELQUERY
 
    ::aData := {}
 
+   ::ClearModel()
+
    if ::lRemote
       oQry := ::oQuery
       ~~oQry:Refresh()
@@ -590,7 +592,8 @@ METHOD QRYREFRESH()  CLASS MODELQUERY
       ::oQuery:Refresh( .t. )
    endif
 
-   ::ClearModel()
+   ::Refresh( .t. )
+
 //View( ~~oQry:aData )
 RETURN .t.
 
