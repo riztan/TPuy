@@ -19,6 +19,16 @@
 #include "proandsys.ch"
 //#include "pc-soft.ch"
 
+/*
+#xuncommand SET RESOURCES <uGlade> FROM FILE <cFile> [ ROOT <root> ];
+  	      => ;
+	      <uGlade> := glade_xml_new( <cFile>, <root> )
+
+#xcommand SET RESOURCES <uGlade> FROM FILE <cFile> [ ROOT <root> ];
+  	      => ;
+	      <uGlade> := tpy_glade( <cFile>, <root> )
+*/
+
 #xuncommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
                                [ ICON_NAME <cIconName>];
                                [ ICON_FILE <cIconFile>];
