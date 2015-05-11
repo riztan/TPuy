@@ -25,26 +25,28 @@
 */
 
 
-//#include "hbclass.ch"
-//#include "common.ch"
+#include "tepuy.ch"
 
 memvar  oTpuy
 
 
 FUNCTION tpy_glade( cResFile, ... )
 
-   Local uResm, rApp
+   Local uRes, rApp
+   Local cResName, cRes, cSep := "/"
 
    default cResFile to ""
+
+   cResName := ExtName( cResFile )
+   if oTPuy:lNetIO ;  rApp := oTPuy:rApp ; endif
 
    if !FILE( cResFile )
 
       if oTPuy:lNetIO
 
-         // Intentamos obtener el fichero desde el servidor TPuy.
-         rApp := oTPuy:rApp
-
-         ~~rApp:GetResource( /*Obtener Nombre del fichero de Resurso*/ )
+         if GetResource( cResName )
+            return glade_xml_new( cResFile, ... )
+         endif
 
       else
 
@@ -56,20 +58,32 @@ FUNCTION tpy_glade( cResFile, ... )
 
       if oTpuy:lNetIO
          /* Verificar si el recurso existe en el servidor, para registrar o actualizar */
-         if ~IsDeveloper()
-            if !~~rApp:ResourceExist( /* Obtener Nombre del archivo de recurso */ )
+//View("verificando si el usuario es desarrollador")
+         if ~oServer:IsDeveloper()
+            if !( ~~rApp:ResourceExist( cResName ) )
                /* debe preguntar al programador */
-               if MsgNOYES( "¿Desea actualizar " )
+               if MsgNOYES( "¿Desea actualizar el servidor? " )
                   /* Actualizar el recurso en el servidor */
+                  ~~rApp:SetResource( cResName, MemoRead( cResFile ) )
                endif
             else
                /* Verificar si el fichero de recurso tiene diferencia con el del servidor*/
+View("hacer rutina para verificar si hay diferencias en fichero de recursos...")
                if .f. // Si hay diferencia, preguntar si actualiza
-                  if MsgNOYES( "¿Desea actualizar " )
+                  if MsgNOYES( "¿Desea actualizar el servidor?" )
                      /* Actualizar el recurso en el servidor */
+View("Actualizar el recurso en el servidor")
+                  elseif MsgNOYES( "¿Actualizar la copia local?" )
+View("Actualiza el fichero local")
                   endif
                endif
             endif
+         else
+View("No es desarrollador... actualizamos desde el servidor")
+            if GetResource( cResName )
+               return glade_xml_new( cResFile, ... )
+            endif
+
          endif
       endif
 
@@ -79,5 +93,21 @@ FUNCTION tpy_glade( cResFile, ... )
    
 
 RETURN uRes
+
+
+
+
+FUNCTION ExtName( cFileName )
+   local nPos, cSep := "/"
+
+   if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
+
+   nPos := RAT( cSep, cFileName )
+
+   if nPos > 0
+      cFileName := RIGHT( cFileName, LEN( cFileName ) - nPos )
+   endif
+
+RETURN cFileName
 
 //eof
