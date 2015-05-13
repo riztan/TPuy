@@ -56,9 +56,9 @@ FUNCTION tpy_glade( cResFile, ... )
 
    else
 
-      if oTpuy:lNetIO
+      /* si existe conexion con el servidor y el usuario está identificado */
+      if oTpuy:lNetIO .and. oTpuy:IsDef( "oUser" )
          /* Verificar si el recurso existe en el servidor, para registrar o actualizar */
-//View("verificando si el usuario es desarrollador")
          if ~oServer:IsDeveloper()
             if !( ~~rApp:ResourceExist( cResName ) )
                /* debe preguntar al programador */
@@ -68,23 +68,25 @@ FUNCTION tpy_glade( cResFile, ... )
                endif
             else
                /* Verificar si el fichero de recurso tiene diferencia con el del servidor*/
-View("hacer rutina para verificar si hay diferencias en fichero de recursos...")
-               if .f. // Si hay diferencia, preguntar si actualiza
+               if !(~~rApp:ResourceHash(cResName) == hb_MD5File( cResFile ) ) 
                   if MsgNOYES( "¿Desea actualizar el servidor?" )
                      /* Actualizar el recurso en el servidor */
-View("Actualizar el recurso en el servidor")
+                     ~~rApp:SetResource( cResName, MemoRead( cResFile ) )
+
                   elseif MsgNOYES( "¿Actualizar la copia local?" )
-View("Actualiza el fichero local")
+                     if GetResource( cResName )
+                        return glade_xml_new( cResFile, ... )
+                     endif
                   endif
                endif
             endif
          else
-View("No es desarrollador... actualizamos desde el servidor")
             if GetResource( cResName )
                return glade_xml_new( cResFile, ... )
             endif
 
          endif
+
       endif
 
       uRes := glade_xml_new( cResFile, ... )
@@ -109,5 +111,30 @@ FUNCTION ExtName( cFileName )
    endif
 
 RETURN cFileName
+
+
+
+/** Obtener archivo de recursos.
+ */
+Function GetResource( cResName )
+   local lRes := .f.
+   local rApp, cRes
+
+   if oTpuy:lNetIO .and. !Empty(oTPuy:rApp)
+      rApp := oTPuy:rApp
+      if ~~rApp:ResourceExist( cResName )
+         cRes := ~~rApp:GetResource( cResName )
+         if !FILE( oTPuy:cResources + cResName )
+            return hb_MemoWrit( oTPuy:cResources + cResName, cRes )
+         else
+            if !( cRes == MemoRead( oTpuy:cResources + cResName ) )
+               return hb_MemoWrit( oTPuy:cResources + cResName, cRes )
+            endif
+         endif
+      endif
+   endif
+Return lRes
+
+
 
 //eof

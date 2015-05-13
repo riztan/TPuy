@@ -732,24 +732,4 @@ Function GetImage( cImgName )
    endif
 Return lRes
 
-
-Function GetResource( cResName )
-   local lRes := .f.
-   local rApp, cRes
-
-   if oTpuy:lNetIO .and. !Empty(oTPuy:rApp)
-      rApp := oTPuy:rApp
-      if ~~rApp:ResourceExist( cResName )
-         cRes := ~~rApp:GetResource( cResName )
-         if !FILE( oTPuy:cResources + cResName )
-            return hb_MemoWrit( oTPuy:cResources + cResName, cRes )
-         else
-            if !( cRes == MemoRead( oTpuy:cResources + cResName ) )
-               return hb_MemoWrit( oTPuy:cResources + cResName, cRes )
-            endif
-         endif
-      endif
-   endif
-Return lRes
-
 //EOF
