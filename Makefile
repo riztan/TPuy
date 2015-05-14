@@ -42,6 +42,8 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)pctapiz.prg       \
            $(SRCPATH)tpywin.prg        \
            $(SRCPATH)tpywindow.prg     \
+           $(SRCPATH)glade.prg         \
+           $(SRCPATH)tpy_image.prg     \
            $(SRCPATH)model_abm.prg     \
            $(SRCPATH)tpy_dp.prg
 
