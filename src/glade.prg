@@ -99,21 +99,6 @@ RETURN uRes
 
 
 
-FUNCTION ExtName( cFileName )
-   local nPos, cSep := "/"
-
-   if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
-
-   nPos := RAT( cSep, cFileName )
-
-   if nPos > 0
-      cFileName := RIGHT( cFileName, LEN( cFileName ) - nPos )
-   endif
-
-RETURN cFileName
-
-
-
 /** Obtener archivo de recursos.
  */
 Function GetResource( cResName )

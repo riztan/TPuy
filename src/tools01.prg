@@ -709,27 +709,23 @@ Function GetMenu(cMenuName)
 Return hMenu
 
 
-/** Function para obtener una imagen desde un servidor TPuy.
- *  cImgName:  Nombre de la imagen a solicitar. 
- *             Se debe incluir la extensión. (sin ruta).
- */
-Function GetImage( cImgName )
-   local lRes := .f.
-   local rApp, cImg
 
-   if oTpuy:lNetIO .and. !Empty(oTPuy:rApp)
-      rApp := oTPuy:rApp
-      if ~~rApp:ImageExist( cImgName )
-         cImg := ~~rApp:GetImage( cImgName )
-         if !FILE( oTPuy:cImages + cImgName )
-            return hb_MemoWrit( oTPuy:cImages + cImgName, cImg )
-         else
-            if !( cImg == MemoRead( oTpuy:cImages + cImgName ) )
-               return hb_MemoWrit( oTPuy:cImages + cImgName, cImg )
-            endif
-         endif
-      endif
+
+/** \brief Funcion para extraer el nombre de un archivo cuando la 
+ *  cadena contiene toda la ruta
+ */
+FUNCTION ExtName( cFileName )
+   local nPos, cSep := "/"
+
+   if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
+
+   nPos := RAT( cSep, cFileName )
+
+   if nPos > 0
+      cFileName := RIGHT( cFileName, LEN( cFileName ) - nPos )
    endif
-Return lRes
+
+RETURN cFileName
+
 
 //EOF

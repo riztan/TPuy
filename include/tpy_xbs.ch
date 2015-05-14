@@ -56,6 +56,64 @@
                               [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
 
 
+#xuncommand DEFINE IMAGE [ <oImage> ] ;
+               [ FILE <cFileImage> ] ;
+               [ FROM STOCK <cFromStock> [ SIZE_ICON <nIcon_Size> ] ];
+               [ <lExpand: EXPAND> ] ;
+               [ <lFill: FILL> ] ;
+               [ PADDING <nPadding> ];
+               [ <lContainer: CONTAINER> ] ;
+               [ OF <oParent> ] ;
+               [ ID <cId> ;
+               [ RESOURCE <uGlade> ] ];
+               [ POS <x>,<y>  ];
+               [ LABELNOTEBOOK <uLabelBook> ];
+               [ SIZE <nWidth>, <nHeight> ] ;
+               [ <lEnd: INSERT_END> ] ;
+               [ <lSecond: SECOND_PANED > ] ;
+               [ <lResize: RESIZE > ] ;
+               [ <lShrink: SHRINK > ] ;
+               [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ];
+               [ HALIGN <nHor> ];
+               [ VALIGN <nVer> ];
+               [ <lLoad: LOAD> ] ;
+      => ;
+ [ <oImage> := ] GImage():New( [<cFileImage>] , <oParent>, <.lExpand.>, <.lFill.>, <nPadding> , <.lContainer.>,;
+                                <x>, <y>, <cId>, <uGlade>, <uLabelBook>, <nWidth>, <nHeight>,;
+                                <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
+                                <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, <yOptions_ta>, <nHor>, <nVer>,;
+                                <cFromStock>, <nIcon_Size>, <.lLoad.>  )
+
+
+
+#xcommand DEFINE IMAGE [ <oImage> ] ;
+               [ FILE <cFileImage> ] ;
+               [ FROM STOCK <cFromStock> [ SIZE_ICON <nIcon_Size> ] ];
+               [ <lExpand: EXPAND> ] ;
+               [ <lFill: FILL> ] ;
+               [ PADDING <nPadding> ];
+               [ <lContainer: CONTAINER> ] ;
+               [ OF <oParent> ] ;
+               [ ID <cId> ;
+               [ RESOURCE <uGlade> ] ];
+               [ POS <x>,<y>  ];
+               [ LABELNOTEBOOK <uLabelBook> ];
+               [ SIZE <nWidth>, <nHeight> ] ;
+               [ <lEnd: INSERT_END> ] ;
+               [ <lSecond: SECOND_PANED > ] ;
+               [ <lResize: RESIZE > ] ;
+               [ <lShrink: SHRINK > ] ;
+               [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ];
+               [ HALIGN <nHor> ];
+               [ VALIGN <nVer> ];
+               [ <lLoad: LOAD> ] ;
+      => ;
+ [ <oImage> := ] tpy_Image():New( [<cFileImage>] , <oParent>, <.lExpand.>, <.lFill.>, <nPadding> , <.lContainer.>,;
+                                <x>, <y>, <cId>, <uGlade>, <uLabelBook>, <nWidth>, <nHeight>,;
+                                <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
+                                <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, <yOptions_ta>, <nHor>, <nVer>,;
+                                <cFromStock>, <nIcon_Size>, <.lLoad.>  )
+
 
 
 #xtranslate ::<exp> => oForm:<exp>
