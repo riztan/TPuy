@@ -146,7 +146,14 @@ METHOD ACTIVATE( oParentMenu )
       if FILE( oTpuy:cImages+::cImage ) 
          ::cImage := oTpuy:cImages+::cImage
       else
-         ::cImage := oTpuy:cImages+"tpuy-logo.png"
+         if oTPuy:lNetIO .and. !Empty(oTPuy:rApp)
+            GetImage( ::cImage )
+            if FILE( oTpuy:cImages + ::cImage ) 
+               ::cImage := oTpuy:cImages + ::cImage
+            endif
+         else
+            ::cImage := oTpuy:cImages+"tpuy-logo.png"
+         endif
       endif
    ENDIF
 

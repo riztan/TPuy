@@ -717,7 +717,11 @@ Return hMenu
 FUNCTION ExtName( cFileName )
    local nPos, cSep := "/"
 
-   if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
+   //if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
+   if oTpuy:cOS="WINDOWS" 
+      //cSep := "\" 
+      cFileName := STRTRAN(cFileName,"\","/")
+   endif
 
    nPos := RAT( cSep, cFileName )
 
