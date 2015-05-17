@@ -732,4 +732,42 @@ FUNCTION ExtName( cFileName )
 RETURN cFileName
 
 
+function Check_Version( cRuta )
+   local cHash
+   local cFile, cOS := lower( OS() )
+   local aFiles, cPath := GetEnv("TMP")
+   local cBat,cBatFile:="tl.bat"
+
+
+
+//   if oTPuy:lNetIO 
+      if "windows" $ cOS
+         default cRuta to CurDrive()+":\"+CurDir()+"\bin"
+
+         cBat := '@start /B tasklist | find "tpuy" > %TMP%\tl.log'
+         hb_MemoWrit( cPath+"\"+cBatFile, cBat ) 
+         wapi_shellexecute(,"open", cPath+"\"+cBatFile,,,0 )
+         cFile := MemoRead( cPath + "/" + "tl.log" )
+         cFile := LEFT( cFile, AT( " ", cFile )-1 )
+
+         if FILE( cRuta + "/" + cFile )
+            cHash := hb_MD5File( cRuta + "/" + cFile )
+            if !( cHash == net:tpycli_version() )
+View("Hay que Actualizar")
+//View( cHash + CRLF + net:tpycli_version() )
+               return cHash
+            endif
+else
+         endif
+
+      else
+/*
+  Preparar el caso GNU/Linux
+*/
+      endif
+      
+//   endif
+return nil
+
+
 //EOF
