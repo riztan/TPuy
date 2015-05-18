@@ -740,7 +740,8 @@ function Check_Version( cRuta )
 
 
 
-//   if oTPuy:lNetIO 
+   if oTPuy:lNetIO 
+#ifdef __PLATFORM__WINDOWS
       if "windows" $ cOS
          default cRuta to CurDrive()+":\"+CurDir()+"\bin"
 
@@ -757,16 +758,19 @@ View("Hay que Actualizar")
 //View( cHash + CRLF + net:tpycli_version() )
                return cHash
             endif
-else
+
+
          endif
 
-      else
+      endif
+
+#else
 /*
   Preparar el caso GNU/Linux
 */
-      endif
+#endif
       
-//   endif
+   endif
 return nil
 
 
