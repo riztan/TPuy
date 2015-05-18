@@ -109,6 +109,9 @@ QOUT( ::cDirective )
 #ifdef __PLATFORM__UNIX
       AADD( s_aIncDir, "-I/usr/include/harbour" )
       AADD( s_aIncDir, "-I/usr/local/include/harbour" )
+      AADD( s_aIncDir, "-I/usr/local/include/tgtk" )
+      AADD( s_aIncDir, "-I"+GetEnv("HOME")+"/t-gtk/include" )
+      AADD( s_aIncDir, "-I/usr/local/share/harbour/contrib/xhb" )
 #endif
 
    endif
