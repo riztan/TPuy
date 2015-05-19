@@ -25,6 +25,7 @@
 #include "proandsys.ch"
 #include "gclass.ch"
 #include "tgtkext.ch"
+#include "tepuy.ch"
 
 memvar oTpuy
 
@@ -91,7 +92,7 @@ Function TpuyAbout()
 
    
    cText := "Versión " + TPUY_VERSION + CRLF + CRLF + ;
-            "(c) 2008 - 2014 tpuy.org  "+ CRLF + ;
+            "(c) 2008 - 2015 tpuy.org  "+ CRLF + ;
             "Desarrolladores: " 
 
    oTextView2:Insert_Tag( TPUY_NAME+CRLF, "title"   , aStart )
@@ -114,7 +115,7 @@ Function TpuyAbout()
    oTextView2:Insert_Pixbuf( aStart, oImageVE )
    oTextView2:Insert_Tag( "   Caracas. Venezuela"+CRLF, "text" , aStart )
    oTextView2:Insert_Tag( "      Teléfono: +58 (412) 756.30.82 " + CRLF, "text" , aStart )
-   oTextView2:Insert_Tag( "      twitter: @tepuysoft @riztanivan " + CRLF, "text" , aStart )
+   oTextView2:Insert_Tag( "      twitter: @tpuy_project @riztanivan " + CRLF, "text" , aStart )
 
       DEFINE BOX oBoxV VERTICAL EXPAND FILL
       DEFINE LABEL oTitu PROMPT "Licencia Traducida"
@@ -126,7 +127,7 @@ Function TpuyAbout()
 
    oTextView:Insert( "     "+ CRLF )
    oTextView:Insert( "     "+ CRLF )
-   oTextView:Insert( "      Copyright (C) 2014"+ CRLF )
+   oTextView:Insert( "      Copyright (C) 2015"+ CRLF )
    oTextView:Insert( "     "+ CRLF )
    oTextView:Insert( "      Licencia LGPL."+ CRLF )
    oTextView:Insert( "     "+ CRLF )
@@ -165,7 +166,7 @@ Function TpuyAbout()
 
    oTextViewA:Insert( "     "+ CRLF )
    oTextViewA:Insert( "     "+ CRLF )
-   oTextViewA:Insert( "      Copyright (C) 2014"+ CRLF )
+   oTextViewA:Insert( "      Copyright (C) 2015"+ CRLF )
    oTextViewA:Insert( "     "+ CRLF )
    oTextViewA:Insert( "      LGPL Licence."+ CRLF )
    oTextViewA:Insert( "     "+ CRLF )

@@ -74,7 +74,7 @@ Function Main( ... )
 //Function Main(  )
 
    Local oError, uReturn
-   Local cVersion:="0.1 (Alfa)"
+   Local cVersion:=TPUY_VERSION
    Local cSystem_Name:=TPUY_NAME+" v"+cVersion
 
    Local tValor := hb_DateTime() //ROUND(SECONDS()+50,0)

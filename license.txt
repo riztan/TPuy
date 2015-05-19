@@ -1,5 +1,5 @@
-TPuy Versión 0.1 (Alfa)
-Copyright (c) 2008 - 2014 tpuy.org
+TPuy Versión 0.2 (Alfa)
+Copyright (c) 2008 - 2015 tpuy.org
 
 Desarrolladores:
        Riztan Gutierrez.
