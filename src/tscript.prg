@@ -40,6 +40,8 @@ METHOD New( cFile, cBuffer, cPath, cFunc, lRun, ... )  CLASS TScript
    Local uRes
    Local cExt
    Local FuncHandle
+   Local cVarPATH := GetEnv("PATH")
+   Local aVarPath, cValue
 
    ::lError  := .f.
    ::cError  := ""
@@ -102,9 +104,16 @@ QOUT( ::cDirective )
          AADD( s_aIncDir, "-I" + cPath )
       ENDIF
 
-
+/*
       AEVAL( HB_aTokens( GetEnv("PATH"), hb_osPathListSeparator() ), ;
              {|a| IIF( "inc"$a, AADD( s_aIncDir, "-I" + a ),) } )
+*/
+      aVarPath := hb_aTokens( cVarPATH, hb_osPathListSeparator() )
+      FOR EACH cValue IN aVarPath
+         if !( cValue $ s_aIncDir )
+            AADD( s_aIncDir, "-I" + cValue )
+         endif
+      NEXT
 
 #ifdef __PLATFORM__UNIX
       AADD( s_aIncDir, "-I/usr/include/harbour" )
@@ -112,6 +121,19 @@ QOUT( ::cDirective )
       AADD( s_aIncDir, "-I/usr/local/include/tgtk" )
       AADD( s_aIncDir, "-I"+GetEnv("HOME")+"/t-gtk/include" )
       AADD( s_aIncDir, "-I/usr/local/share/harbour/contrib/xhb" )
+#endif
+#ifdef __PLATFORM__WINDOWS
+      if !("t-gtk" $ cVarPATH)
+         if FILE( "/t-gtk/include/gclass.ch" )
+            AADD( s_aIncDir, "-I/t-gtk/include" )
+         endif
+      endif
+      if !("harbour/contrib" $ cVarPATH)
+         AADD( s_aIncDir, "-I/harbour/contrib/xhb" )
+         AADD( s_aIncDir, "-I/harbour/contrib/hbtip" )
+         AADD( s_aIncDir, "-I/harbour-project/contrib/xhb" )
+         AADD( s_aIncDir, "-I/harbour-project/contrib/hbtip" )
+      endif
 #endif
 
    endif
