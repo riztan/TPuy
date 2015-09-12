@@ -219,15 +219,15 @@ Function Main( ... )
 
 //   MemoToXML() // Guardamos los valores de conexion.
 
-   TRY
+//   TRY
      uReturn := oTpuy:RunXBS('begin')
      Salir( .f., uReturn )
-   CATCH oError
-     MsgStop("Se ha presentado un problema durante la ejecución del script '<b>begin</b>'",;
-             "Fin de Ejecución.")
-     Eval( ErrorBlock(), oError ) 
-     RETURN NIL
-   END
+//   CATCH oError
+//     MsgStop("Se ha presentado un problema durante la ejecución del script '<b>begin</b>'",;
+//             "Fin de Ejecución.")
+//     Eval( ErrorBlock(), oError ) 
+//     RETURN NIL
+//   END
 Return uReturn
 
 

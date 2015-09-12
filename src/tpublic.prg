@@ -528,22 +528,27 @@ METHOD RunXBS( cFile, ... ) CLASS TApp
       if !::oScript:IsDef(cScriptFile)
          ::oScript:Add(cScriptFile,oScript)
       endif
-      TRY
+//      TRY
          ::oScript:uResult := oScript:Run(cFile,...)
-      CATCH oError
-Eval( ErrorBlock(), oError )
-         If !MsgNoYes("Se ha presentado un problema al intentar ejecutar cFile, ¿Desea continuar? ","Atención")
-            oTpuy:Exit(.f.)
-         EndIf
-         Return NIL
-      END
+//      CATCH oError
+//Eval( ErrorBlock(), oError )
+//         If !MsgNoYes("Se ha presentado un problema al intentar ejecutar cFile, ¿Desea continuar? ","Atención")
+//            oTpuy:Exit(.f.)
+//         EndIf
+//         Return NIL
+//      END
       if oScript:lError 
          MsgStop( oScript:cError, "Funcion no encontrada" ) 
          return nil
       endif
       
    else
-? "falta procesar el error..."
+      if file("comp.log")
+         MsgStop( "No se puede ejecutar el script <b>"+cFile+"</b>"+;
+                  CRLF+MemoRead("comp.log"),;
+                  'Script "'+cFile+'"')
+         Salida(.t.) 
+      endif
    endif
 
    result := ::oScript:uResult
@@ -763,37 +768,37 @@ METHOD Exit( lForce ) CLASS TApp
 
    if !hb_IsObject(oTpuy) ; return .t. ; endif
    
-   If MsgNoYes("Realmente desea Salir de <b>"+;
-                oTpuy:cSystem_Name+"</b>",oTpuy:cSystem_Name)
+   if !lForce
+      If MsgNoYes("Realmente desea Salir de <b>"+;
+                   oTpuy:cSystem_Name+"</b>",oTpuy:cSystem_Name)
+         return .f.
+      endif
+   endif
 
-      if ::lNetio
-         TRY
-            //PQClose(oTpuy:conn)
-            /* Acá debe liberar del servidor todos los objetos del usuario...
-               igualmente al iniciar (netio_check) debe inicializar todo lo 
-               que posiblemente ha dejado abierto.. 
-             */
-            //~oServer:ObjFree( "oServer" ) --> no permitir matar el objeto oServer.
-            ~oServer:Logout()
-            NETIO_DISCONNECT( NETSERVER, NETPORT )
-         CATCH
-            MsgStop("Problema al intentar salir...")
-         END
-      end
+   if ::lNetio
+      TRY
+         //PQClose(oTpuy:conn)
+         /* Acá debe liberar del servidor todos los objetos del usuario...
+            igualmente al iniciar (netio_check) debe inicializar todo lo 
+            que posiblemente ha dejado abierto.. 
+          */
+         //~oServer:ObjFree( "oServer" ) --> no permitir matar el objeto oServer.
+         ~oServer:Logout()
+         NETIO_DISCONNECT( NETSERVER, NETPORT )
+      CATCH
+         MsgStop("Problema al intentar salir...")
+      END
+   end
 
 //?? oTpuy:ClassName()
-      if oTpuy:IsDef( "oUser" )
-         oTpuy:oUser:End()
-      endif
-      oTpuy := NIL
-      gtk_main_quit()
-      Quit
-      Return .F.
+   if oTpuy:IsDef( "oUser" )
+      oTpuy:oUser:End()
+   endif
+   oTpuy := NIL
+   gtk_main_quit()
+   Quit
+   Return .F.
 
-   ELSE
-      Return .F.
-   EndIf
-   
 Return .T.
 
 //EOF
