@@ -9,8 +9,10 @@
   !include "WordFunc.nsh"
   !include "EnvVarUpdate.nsh"
 
-  !insertmacro MUI_DEFAULT MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
-  !insertmacro MUI_DEFAULT MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
+;  !insertmacro MUI_DEFAULT MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
+;  !insertmacro MUI_DEFAULT MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
+  !insertmacro MUI_DEFAULT MUI_ICON "installer.ico"
+  !insertmacro MUI_DEFAULT MUI_UNICON "installer.ico"
 
 ;--------------------------------
 ;Include Macros
@@ -21,6 +23,7 @@
 ;General
 
   !define NOMBRE "TPuy"
+  !define TPUY_EXE "tpuy_win_x86_hb31.exe"
   !define VERSION "0.1(a)"
   !define FOLDER "TPuy"
 
@@ -31,12 +34,14 @@
 
   ;Name and file
   Name "${NOMBRE}-${VERSION}" 
+  Icon "${SOURCE}\install\installer.ico"
   OutFile "${NOMBRE}_${VERSION}_setup.exe"
 
   XPStyle on
 
   ;Default installation folder
-  InstallDir "${DRIVE}\${FOLDER}"
+  InstallDir "$PROGRAMFILES\${FOLDER}"
+  ;InstallDir "${DRIVE}\${FOLDER}"
 
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\Orseit\${NOMBRE}" ""
@@ -44,14 +49,16 @@
   SetCompressor /SOLID lzma
 
   Var INI
-  Var HWND
-  Var STATE
+;  Var HWND
+;  Var THEME
 
 ;--------------------------------
 ;Funciones
 Function .onInit
 
-        StrCpy $1 "Mayo 2014"
+;        StrCpy $THEME "MS-Windows"
+
+        StrCpy $1 "Enero 2015"
 
         # the plugins dir is automatically deleted when the installer exits
         InitPluginsDir
@@ -60,7 +67,7 @@ Function .onInit
 
         File /oname=$PLUGINSDIR\splash.bmp "${SOURCE}\install\tpuy-logo.bmp"
         #optional
-;        File /oname=$PLUGINSDIR\splash.wav "${ROOT}\images\adaptapro.wav"
+;        File /oname=$PLUGINSDIR\splash.wav "${ROOT}\images\tpuy.wav"
 
 ;        File /oname=$PLUGINSDIR\splash.bmp "${SOURCE}\install\tepuyes.bmp"
         advsplash::show 3500 2000 900 0xFDA1FA $PLUGINSDIR\splash
@@ -71,7 +78,7 @@ Function .onInit
         NoAbort:
 
         Delete $PLUGINSDIR\tepuyes.bmp
-;        Delete $PLUGINSDIR\adaptapro.wav
+;        Delete $PLUGINSDIR\tpuy.wav
 FunctionEnd
 
 ;--------------------------------
@@ -110,12 +117,12 @@ FunctionEnd
 
 ;--------------------------------
 ;Funciones de Pagina Custom
-Function ShowCustom
-	InstallOptions::initDialog /NOUNLOAD "$INI"
-	Pop $hwnd
-	InstallOptions::show
-	Pop $0
-FunctionEnd
+;Function ShowCustom
+;	InstallOptions::initDialog /NOUNLOAD "$INI"
+;	Pop $hwnd
+;	InstallOptions::show
+;	Pop $0
+;FunctionEnd
 
 ;--------------------------------
 ;Installer Sections
@@ -124,66 +131,130 @@ Section "Base Tpuy " SecDummy
 
   SetOutPath "$INSTDIR"
 
-  File ${SOURCE}\install\TPuy.lnk
+;  File ${SOURCE}\install\TPuy.lnk
   File ${SOURCE}\*
 
   ;Delete "C:\tpuy\*.*"
   ;ADD YOUR OWN FILES HERE...
   ;File /nonfatal /r /x CVS
 
-SetOverwrite on
+  SetOverwrite on
 
-SetOutPath $INSTDIR\bin
-File /r ${SOURCE}\bin\*
+  SetOutPath $INSTDIR\bin
+  File /r ${SOURCE}\bin\*
 
-SetOutPath $INSTDIR\etc
-File /r ${SOURCE}\etc\*
+  SetOutPath $INSTDIR\etc
+  File /r ${SOURCE}\etc\*
+  FileOpen   $0 $INSTDIR\etc\gtk-2.0\gtkrc w
+  FileWrite  $0 'gtk-theme-name = "MS-Windows"$\r$\n'
+  FileWrite  $0 'gtk-fallback-icon-theme = "Tango"$\r$\n'
+  FileClose  $0
 
-SetOutPath $INSTDIR\images
-File /r ${SOURCE}\images\*
 
-SetOutPath $INSTDIR\include
-File /r ${SOURCE}\include\*
+  SetOutPath $INSTDIR\images
+  File /r ${SOURCE}\images\*
 
-SetOutPath $INSTDIR\lib
-File /r ${SOURCE}\lib\*
+  SetOutPath $INSTDIR\include
+  File /r ${SOURCE}\include\*
 
-SetOutPath $INSTDIR\menu
-File /r ${SOURCE}\menu\*
+  SetOutPath $INSTDIR\lib
+  File /r ${SOURCE}\lib\*
 
-SetOutPath $INSTDIR\resources
-File /r ${SOURCE}\resources\*
+  SetOutPath $INSTDIR\menu
+  File /r ${SOURCE}\menu\*
 
-SetOutPath $INSTDIR\share
-File /r ${SOURCE}\share\*
+  SetOutPath $INSTDIR\resources
+  File /r ${SOURCE}\resources\*
 
-SetOutPath $INSTDIR\xbscripts
-File /r ${SOURCE}\xbscripts\*
+  SetOutPath $INSTDIR\share
+  File /r ${SOURCE}\share\*
 
-SetOutPath $QUICKLAUNCH
-Delete Tpuy.lnk
-File ${SOURCE}\install\Tpuy.lnk
-SetOutPath $DESKTOP
-Delete TPuy.lnk
-File ${SOURCE}\install\Tpuy.lnk
+  SetOutPath $INSTDIR\xbscripts
+  File /r ${SOURCE}\xbscripts\*
+
+;SetOutPath $QUICKLAUNCH
+;Delete Tpuy.lnk
+;File ${SOURCE}\install\Tpuy.lnk
+;SetOutPath $DESKTOP
+;Delete TPuy.lnk
+;File ${SOURCE}\install\Tpuy.lnk
+
+  ;Crear acceso directo
+  SetOutPath $INSTDIR
+  CreateShortCut "$DESKTOP\${NOMBRE}.lnk" "$INSTDIR\bin\${TPUY_EXE}"
+  CreateShortCut "$INSTDIR\${NOMBRE}.lnk" "$INSTDIR\bin\${TPUY_EXE}"
+
+  ;Escribir en el registro del sistema
+  WriteRegStr HKCR ".xbs" "" "xbsfile"
+  WriteRegStr HKCR "xbsfile" "" "${NOMBRE} Script File"
+;  WriteRegStr HKCR "xbsfile\DefaultIcon" "" "Shell32.dll,72"
+  WriteRegStr HKCR "xbsfile\DefaultIcon" "" "$INSTDIR\${NOMBRE}.ico"
+  WriteRegStr HKCR "xbsfileshell" "" "Abrir"
+  WriteRegStr HKCR "xbsfileshellAbrircommand" "" '"$INSTDIR\${NOMBRE}.Lnk" "%1"'
+
+
+  ;Crear acceso directos
+  CreateDirectory "$SMPROGRAMS\${NOMBRE}"
+  CreateShortCut  "$SMPROGRAMS\${NOMBRE}\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+  Sleep 500
+  CreateShortCut  "$SMPROGRAMS\${NOMBRE}\${NOMBRE} (Command line).lnk" "cmd.exe" "/k cd $INSTDIR" "cmd.exe" 0
+  CreateShortCut  "$SMPROGRAMS\${NOMBRE}\${NOMBRE}.lnk" "$INSTDIR\bin\${TPUY_EXE}"
+  CreateDirectory "$SMPROGRAMS\${NOMBRE}\Internet"
+  WriteINIStr     "$SMPROGRAMS\${NOMBRE}\Internet\TPuy en gTxBase.url"  "InternetShortcut" "URL" "http://www.gtxbase.org/"
+  WriteINIStr     "$SMPROGRAMS\${NOMBRE}\Internet\Foro.url"             "InternetShortcut" "URL" "http://www.gtxbase.org/forums"
+
+  ;Crea .bat con nombre corto
+  FileOpen   $0 $INSTDIR\bin\${NOMBRE}.bat w
+  FileWrite  $0 '@echo off$\r$\n'
+  FileWrite  $0 '"$INSTDIR\bin\${TPUY_EXE}"$\r$\n'
+  FileClose  $0
 
 
   ;Store installation folder
   WriteRegStr HKCU "Software\Orseit\${NOMBRE}" "" $INSTDIR
 
   ;Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall2.exe"
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
   
   ;Eliminando Archivos
   ;Delete "$INSTDIR\*"
 
-${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\bin;$INSTDIR\include" ; Append 
+  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\bin;$INSTDIR\include" ; Append 
+
 
 SectionEnd
 
 ;--------------------------------
+;Themes
+Section /o "Tema para Windows 8" SecII
+
+;   StrCpy $THEME "Win8"
+
+  SetOutPath $INSTDIR\share\themes\Win8\gtk-2.0
+  File /r ${SOURCE}\themes\Win8\gtk-2.0\*
+;  SetOutPath $INSTDIR\share\themes\Win8\gtk-3.0
+;  File /r ${SOURCE}\themes\Win8\gtk-3.0\*
+  SetOutPath $INSTDIR\share\etc\gtk-2.0
+;   File /r ${SOURCE}\themes\Win8\gtkrc
+
+  FileOpen   $0 $INSTDIR\etc\gtk-2.0\gtkrc w
+  FileWrite  $0 'gtk-theme-name = "Win8"$\r$\n'
+  FileWrite  $0 'gtk-fallback-icon-theme = "Tango"$\r$\n'
+  FileClose  $0
+
+SectionEnd
+
+
+
+;--------------------------------
 ;Examples
-Section /o "Ejemplos, Turoriales, etc." SecII
+Section /o "Ejemplos, Turoriales, etc." SecIII
+
+  SetOutPath $INSTDIR\images
+  File /r ${SOURCE}\ejemplos\images\*
+
+  SetOutPath $INSTDIR\xbscripts
+  File /r ${SOURCE}\ejemplos\xbscripts\*
 
 SectionEnd
 
@@ -192,12 +263,14 @@ SectionEnd
 
   ;Language strings
   LangString DESC_SecDummy ${LANG_SPANISH} "Base principal TPuy."
-  LangString DESC_SecII    ${LANG_SPANISH} "Tutoriales, Ejemplos, etc."
+  LangString DESC_SecII    ${LANG_SPANISH} "Instala el tema para Windows 8 y lo asigna como predeterminado"
+  LangString DESC_SecIII   ${LANG_SPANISH} "Tutoriales, Ejemplos, etc."
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDummy} $(DESC_SecDummy)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecII} $(DESC_SecII)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecIII} $(DESC_SecIII)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -216,6 +289,8 @@ Section "Uninstall"
   RMDir "$INSTDIR\images"
   Delete "$INSTDIR\etc\*"
   RMDir "$INSTDIR\etc"
+  Delete "$INSTDIR\share\themes"
+  RMDir "$INSTDIR\share\themes"
   Delete "$INSTDIR\share\*"
   RMDir "$INSTDIR\share"
   Delete "$INSTDIR\lib\*"
@@ -224,13 +299,29 @@ Section "Uninstall"
 
 
   SetOutPath $QUICKLAUNCH
-  Delete Tpuy.lnk
+  Delete ${NOMBRE}.lnk
   SetOutPath $DESKTOP
-  Delete TPuy.lnk
+  Delete ${NOMBRE}.lnk
+
+  Delete "$SMPROGRAMS\${NOMBRE}\Internet\*" 
+  RMDir  "$SMPROGRAMS\${NOMBRE}\Internet"
+  Delete "$SMPROGRAMS\${NOMBRE}\Uninstall.lnk" 
+  Delete "$SMPROGRAMS\${NOMBRE}\${NOMBRE}.lnk" 
+  Delete "$SMPROGRAMS\${NOMBRE}\*" 
+  RMDir  "$SMPROGRAMS\${NOMBRE}"
+
 
   DeleteRegKey /ifempty HKCU "Software\Orseit\${NOMBRE}"
 
-  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin;$INSTDIR\include" 
+  DeleteRegKey HKCR ".xbs" 
+  DeleteRegKey HKCR "xbsfile" 
+  DeleteRegKey HKCR "xbsfileDefaultIcon" 
+  DeleteRegKey HKCR "xbsfileshell" 
+  DeleteRegKey HKCR "xbsfileshellAbrircommand" 
+
+  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin" 
+  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\include" 
+
 
 SectionEnd
 
