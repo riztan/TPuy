@@ -1,0 +1,45 @@
+" Inicio
+
+set nocompatible
+filetype off
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+
+"Colocar plugins entre esta línea y filetype indent on
+Plugin 'gmarik/vundle'
+
+Plugin 'scrooloose/nerdtree.git'
+
+Plugin 'Buffergator'
+
+Plugin 'jistr/vim-nerdtree-tabs'
+
+Plugin 'SnipMate'
+
+
+" Final de lista de plugins
+filetype plugin indent on
+
+" Numeración de líneas
+set number
+
+" Activar uso del ratón
+set mouse=a
+
+" Nombre del tema ubicado en ~/.vim/colors
+colorscheme darkblue
+
+" Comentar esta línea si no se quiere que cargue nerdtree al abrir pestañas nuevas
+let g:nerdtree_tabs_open_on_console_startup=1
+
+setf tpuy
+
+" Colorear la sintaxis
+syntax on
+"cal SetSyn("clipper")
+"set filetype=clipper
+set filetype=tpuy
+set syntax=tpuy
+cal SetSyn("tpuy")
+
+"Fin
