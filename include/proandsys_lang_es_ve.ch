@@ -19,7 +19,6 @@
 /* Formatos Numericos (Pictures) */
 #define P_60   "@E 999,999"
 #define P_62   "@E 999,999.99"
-#define P_63   "@E 999,999.999"
 #define P_65   "@E 999,999.99999"
 
 #define P_92   "@E 999,999,999.99"

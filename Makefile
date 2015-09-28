@@ -62,6 +62,8 @@ ifeq ($(XBASE_COMPILER),HARBOUR)
 endif
 
 PRGFLAGS=-I./include 
+PRGFLAGS+=-I/harbour-project/contrib/xhb
+PRGFLAGS+=-I/harbour-project/contrib/hbtip
 
 include $(ROOT)Rules.make
 
