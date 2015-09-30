@@ -717,11 +717,7 @@ Return hMenu
 FUNCTION ExtName( cFileName )
    local nPos, cSep := "/"
 
-   //if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
-   if oTpuy:cOS="WINDOWS" 
-      //cSep := "\" 
-      cFileName := STRTRAN(cFileName,"\","/")
-   endif
+   if oTpuy:cOS="WINDOWS" ; cSep := "\" ; endif
 
    nPos := RAT( cSep, cFileName )
 
@@ -732,89 +728,42 @@ FUNCTION ExtName( cFileName )
 RETURN cFileName
 
 
-function Check_Version( cRuta )
-   local cHash
-   local cFile, cOS := lower( OS() )
-   local aFiles, cPath := GetEnv("TMP")
-   local cBat,cBatFile:="tl.bat"
-   local uTpyVersion, cFilePath
+/** \brief Convierte un texto numerico formateado tipo 999.999,99 a
+ *         numerico
+ */
+FUNCTION ToNum( cValue, nDec )
+   local cPatron 
 
-   if oTPuy:lNetIO 
-#ifdef __PLATFORM__WINDOWS
-      if "windows" $ cOS
-         cOS := "windows"
-         default cRuta to CurDrive()+":\"+CurDir()+"\bin"
+   default nDec := oTPuy:nDecimals
 
-         cBat := '@start /B tasklist | find "tpuy" > %TMP%\tl.log'
-         hb_MemoWrit( cPath+"\"+cBatFile, cBat ) 
-         wapi_shellexecute(,"open", cPath+"\"+cBatFile,,,0 )
-         cFile := MemoRead( cPath + "/" + "tl.log" )
-         cFile := LEFT( cFile, AT( " ", cFile )-1 )
-         cFilePath := cRuta + "/" +cFile
-
-#else
-      if "linux" $ cOS
-         cOS := "ubuntu"  // ya se cambiara cuando se trabaje otra distribucion.
-         default cRuta to "/"+CurDir()+"/bin"
-
-         cFile := "tpuy_Ubuntu_14041_x86_64_hb32"
-         cFilePath := cRuta + "/" + cFile
-#endif
-         if FILE( cFilePath )
-            cHash := hb_MD5File( cFilePath )
-            if !( cHash == net:tpycli_version( cOS ) )
-
-               if MsgYesNo("¿Desea continuar con el proceso de actualización?",;
-                           "Se ha detectado diferencia en la versión del binario TPuy")
-
-                  MsgInfo("Iniciar Descarga. (puede tardar algunos minutos) ",;
-                          "Actualización del componente binario.")
-                  inkey(.2)
-                  uTpyVersion :=  net:tpycli_get_version( cOS ) 
-                  MsgInfo("Finalizado el proceso de descarga!","Descarga completada.")
-
-                  if !empty( uTpyVersion )
-
-                     if FILE( cFilePath+"__before" ) ; FERASE( cFilePath+"__before" ) ; endif
-#ifdef __PLATFORM__WINDOWS
-                     FRENAME( cFilePath, STRTRAN(cFilePath,".exe","") + "__before.exe" ) 
-//                     hb_MemoWrit( STRTRAN( cFilePath,".exe","") + "__before.exe", MemoRead( cFilePath ) ) 
-                     
-#else
-                     hb_Run( "mv "+cFilePath+" "+cFilePath+"__before" )
-#endif
-
-                     if hb_MemoWrit( cFilePath, uTpyVersion  )
-//                     if hb_MemoWrit( (cFilePath + "__before"), MemoRead(cFilePath) )
-//                     if FRENAME( cRuta + "/" + cFile, (cRuta + "/" + cFile + "__before") )
-#ifdef __PLATFORM__LINUX
-                        hb_Run( "chmod 755 "+cFilePath )
-#endif
-                        MsgAlert("Se cerrará el sistema...","Atención")
-//                        Salida(.t.)
-                        oTPuy:End()
-                        gtk_main_quit()
-                        QUIT
-                     else
-                        MsgAlert("No fue posible reescribir el binario.","Atención")
-                        return "revisar"
-                     endif
-                  endif
-               else
-                  MsgAlert("Posiblemente esté ejecutando una versión desactualizada. "+;
-                           "Se recomienda actualizar lo antes posible.", "Atención")
-                  return .f.
-               endif
-               return cHash
-
-            endif
-         else
-View( "No localiza el archivo " + cFilePath + " para verificar version." )
-         endif
-      endif
-      
+   if cValue == NIL .or. empty(cValue) .or. ValType!="C"
+      return "" 
    endif
-return nil
 
+   // Patron de coma decimal
+   cPatron := "^[\.0-9]{1,9}(\,[0-9]{0,"+nDec+"})?$"
+
+   if !hb_RegExMatch( cPatron, cValue )
+      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+   endif
+
+   // Patron de punto decimal
+   cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+nDec+"})?$"
+   if !hb_RegExMatch( cPatron, cValue )
+      return VAL( STRTRAN( cValue, ",", "" ) )
+   endif
+
+RETURN 0
+
+
+/** \brief Convierte un valor numerico a texto formateado 
+ *         y sin espacios.
+ */
+FUNCTION ToStrF( nValue, cFormat )
+   default cFormat := P_92
+   if nValue = NIL .or. nValue=0 .or. VALTYPE(nValue)!="N"
+      return ""
+   endif
+RETURN ALLTRIM( TRANSFORM( nValue, cFormat ) )
 
 //EOF
