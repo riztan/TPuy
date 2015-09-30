@@ -736,7 +736,7 @@ FUNCTION ToNum( cValue, nDec )
 
    default nDec := oTPuy:nDecimals
 
-   if cValue == NIL .or. empty(cValue) .or. ValType!="C"
+   if cValue == NIL .or. empty(cValue) .or. ValType(cValue)!="C"
       return "" 
    endif
 
