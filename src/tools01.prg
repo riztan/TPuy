@@ -732,24 +732,26 @@ RETURN cFileName
  *         numerico
  */
 FUNCTION ToNum( cValue, nDec )
-   local cPatron 
+   local cPatron, cDec
 
    default nDec := oTPuy:nDecimals
 
    if cValue == NIL .or. empty(cValue) .or. ValType(cValue)!="C"
-      return "" 
+      return 0
    endif
 
-   // Patron de coma decimal
-   cPatron := "^[\.0-9]{1,9}(\,[0-9]{0,"+nDec+"})?$"
+   cDec := ALLTRIM(STR(nDec))
 
-   if !hb_RegExMatch( cPatron, cValue )
+   // Patron de coma decimal
+   cPatron := "^[\.0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
+
+   if hb_RegExMatch( cPatron, cValue )
       return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
    endif
 
    // Patron de punto decimal
-   cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+nDec+"})?$"
-   if !hb_RegExMatch( cPatron, cValue )
+   cPatron := "^[\,0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
+   if hb_RegExMatch( cPatron, cValue )
       return VAL( STRTRAN( cValue, ",", "" ) )
    endif
 
@@ -759,11 +761,12 @@ RETURN 0
 /** \brief Convierte un valor numerico a texto formateado 
  *         y sin espacios.
  */
-FUNCTION ToStrF( nValue, cFormat )
-   default cFormat := P_92
+FUNCTION ToStrF( nValue, cMask )
+   default cMask := P_92
    if nValue = NIL .or. nValue=0 .or. VALTYPE(nValue)!="N"
       return ""
    endif
-RETURN ALLTRIM( TRANSFORM( nValue, cFormat ) )
+RETURN ALLTRIM( TRANSFORM( nValue, cMask
+ ) )
 
 //EOF
