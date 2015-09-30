@@ -96,7 +96,7 @@ Function Main( ... )
    SET BELL OFF
    SET SOFT ON
    SET EXCL OFF
-   SET DECI TO 2
+//   SET DECI TO 2
    SET DATE FORMAT TO TPY_DATEFORMAT
    SET CENTURY ON
    SET EPOCH TO ( YEAR( DATE() ) - 50 )
@@ -170,7 +170,9 @@ Function Main( ... )
    //-- Modo Debug
    oTpuy:lDebug     := .T.  // Activa o Desactiva en View()
 
-   oTpuy:lMainRun := .f.
+   oTpuy:lMainRun   := .f.
+
+   oTpuy:nDecimals  := 2
 
    TRY
      RUNXBS( "init.conf" )
@@ -178,6 +180,8 @@ Function Main( ... )
      MsgStop("Hay problemas para leer el archivo <b>'init.conf'</b>","Finalizado.") 
      RETURN NIL
    END
+
+   SET DECIMALS TO oTpuy:nDecimals
 
    // Debemos resetear nombre de la aplicacion luego de ejecutar el init.conf 
    oTpuy:SetAppName( TPUY_NAME )
@@ -424,5 +428,3 @@ RETURN
 
 
 //EOF
-
-

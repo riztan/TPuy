@@ -40,6 +40,8 @@ METHOD New( cFile, cBuffer, cPath, cFunc, lRun, ... )  CLASS TScript
    Local uRes
    Local cExt
    Local FuncHandle
+   Local cVarPATH := GetEnv("PATH")
+   Local aVarPath, cValue
 
    ::lError  := .f.
    ::cError  := ""
@@ -102,13 +104,36 @@ QOUT( ::cDirective )
          AADD( s_aIncDir, "-I" + cPath )
       ENDIF
 
-
+/*
       AEVAL( HB_aTokens( GetEnv("PATH"), hb_osPathListSeparator() ), ;
              {|a| IIF( "inc"$a, AADD( s_aIncDir, "-I" + a ),) } )
+*/
+      aVarPath := hb_aTokens( cVarPATH, hb_osPathListSeparator() )
+      FOR EACH cValue IN aVarPath
+         if !( cValue $ s_aIncDir )
+            AADD( s_aIncDir, "-I" + cValue )
+         endif
+      NEXT
 
 #ifdef __PLATFORM__UNIX
       AADD( s_aIncDir, "-I/usr/include/harbour" )
       AADD( s_aIncDir, "-I/usr/local/include/harbour" )
+      AADD( s_aIncDir, "-I/usr/local/include/tgtk" )
+      AADD( s_aIncDir, "-I"+GetEnv("HOME")+"/t-gtk/include" )
+      AADD( s_aIncDir, "-I/usr/local/share/harbour/contrib/xhb" )
+#endif
+#ifdef __PLATFORM__WINDOWS
+      if !("t-gtk" $ cVarPATH)
+         if FILE( "/t-gtk/include/gclass.ch" )
+            AADD( s_aIncDir, "-I/t-gtk/include" )
+         endif
+      endif
+      if !("harbour/contrib" $ cVarPATH)
+         AADD( s_aIncDir, "-I/harbour/contrib/xhb" )
+         AADD( s_aIncDir, "-I/harbour/contrib/hbtip" )
+         AADD( s_aIncDir, "-I/harbour-project/contrib/xhb" )
+         AADD( s_aIncDir, "-I/harbour-project/contrib/hbtip" )
+      endif
 #endif
 
    endif
@@ -169,7 +194,7 @@ METHOD Refresh( cPrgCode ) CLASS TScript
       ::cPrgCode := ::cDirective + hb_eol() + ::cPrgCode
    endif
 
-
+/*
    BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cPrgCode ) }
 
       if ISNIL(::hrbCODE) .or. Empty( ::hrbCODE ) .or. lCompile
@@ -180,7 +205,7 @@ METHOD Refresh( cPrgCode ) CLASS TScript
 // ? "no compilamos "+::cFile+"."
       endif
       IF ::hrbCODE == NIL
-         EVAL( ErrorBlock(), "Syntax error." )
+         EVAL( ErrorBlock(), oErr ) //"Syntax error." )
       ELSE
          ::hrbHANDLE := hb_hrbLoad( ::hrbCODE )
          IF ::hrbHANDLE = NIL
@@ -190,8 +215,8 @@ METHOD Refresh( cPrgCode ) CLASS TScript
       ENDIF
 
    ENDSEQUENCE
+*/
 
-/*
    ::hrbCODE := NIL
    ::hrbCODE := hb_CompileFromBuf( ::cPrgCode, "harbour", "-n2", "-w0", "-es2", "-q0", ;
                                    s_aIncDir, "-I" + FNameDirGet( ::cFile ) )
@@ -201,7 +226,7 @@ METHOD Refresh( cPrgCode ) CLASS TScript
       ::lError := .t.
       ::cError := "Posible error de Sintaxis"
    endif
-*/
+
 RETURN !::lError
 
 
@@ -211,7 +236,9 @@ METHOD Run( cFunc, ... ) CLASS TScript
 
    DEFAULT cFunc TO ::cName
 
+if !hb_IsNIL( ::hrbHANDLE )
    FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, cFunc )
+endif
    If !hb_ISNIL( FuncHandle )
       ::uResult := EVAL( FuncHandle, ... )
    Else

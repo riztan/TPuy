@@ -45,7 +45,8 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)glade.prg         \
            $(SRCPATH)tpy_image.prg     \
            $(SRCPATH)model_abm.prg     \
-           $(SRCPATH)tpy_dp.prg
+           $(SRCPATH)tpy_dp.prg      \
+	   $(SRCPATH)tpyentry.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq
 
@@ -63,6 +64,8 @@ ifeq ($(XBASE_COMPILER),HARBOUR)
 endif
 
 PRGFLAGS=-I./include 
+PRGFLAGS+=-I/harbour-project/contrib/xhb
+PRGFLAGS+=-I/harbour-project/contrib/hbtip
 
 include $(ROOT)Rules.make
 

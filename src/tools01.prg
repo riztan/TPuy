@@ -728,4 +728,42 @@ FUNCTION ExtName( cFileName )
 RETURN cFileName
 
 
+/** \brief Convierte un texto numerico formateado tipo 999.999,99 a
+ *         numerico
+ */
+FUNCTION ToNum( cValue, nDec )
+   local cPatron 
+
+   default nDec := oTPuy:nDecimals
+
+   if cValue == NIL .or. empty(cValue) .or. ValType!="C"
+      return "" 
+   endif
+
+   // Patron de coma decimal
+   cPatron := "^[\.0-9]{1,9}(\,[0-9]{0,"+nDec+"})?$"
+
+   if !hb_RegExMatch( cPatron, cValue )
+      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+   endif
+
+   // Patron de punto decimal
+   cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+nDec+"})?$"
+   if !hb_RegExMatch( cPatron, cValue )
+      return VAL( STRTRAN( cValue, ",", "" ) )
+   endif
+
+RETURN 0
+
+
+/** \brief Convierte un valor numerico a texto formateado 
+ *         y sin espacios.
+ */
+FUNCTION ToStrF( nValue, cFormat )
+   default cFormat := P_92
+   if nValue = NIL .or. nValue=0 .or. VALTYPE(nValue)!="N"
+      return ""
+   endif
+RETURN ALLTRIM( TRANSFORM( nValue, cFormat ) )
+
 //EOF

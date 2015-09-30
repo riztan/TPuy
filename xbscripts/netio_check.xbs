@@ -34,6 +34,7 @@ FUNCTION netio_check()
      EndIf
 
      oTpuy:lNetIO := .t.
+     Check_Version()
      oTpuy:tLastNetIO := hb_DateTime()
 
   endif

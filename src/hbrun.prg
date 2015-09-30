@@ -112,6 +112,8 @@ PROCEDURE RUNXBS( cFile, ... )
 #ifdef __PLATFORM__UNIX
       AADD( s_aIncDir, "-I/usr/include/harbour" )
       AADD( s_aIncDir, "-I/usr/local/include/harbour" )
+      //AADD( s_aIncDir, "-I/usr/local/include/tgtk" )
+      //AADD( s_aIncDir, "-I/usr/local/include/hbcontrib" )
 #endif
 
       If ( !File(cFile) .and. !File(hb_DirBase(cFile)) ) .and. Len(cFile)>5

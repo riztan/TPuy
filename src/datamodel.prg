@@ -389,7 +389,7 @@ METHOD SetColEditable( nCol, bAction )  CLASS TPY_DATA_MODEL
 
    if hb_IsBlock( bAction )
       ::aCol[nCol]:oRenderer:SetEditable(.T.)
-      ::aCol[nCol]:oRenderer:bEdited( bAction )
+      ::aCol[nCol]:oRenderer:bEdited := bAction 
       ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
    endif
 

@@ -42,7 +42,7 @@ FUNCTION tpy_glade( cResFile, ... )
 
    if !FILE( cResFile )
 
-      if oTPuy:lNetIO
+      if oTPuy:lNetIO .and. !Empty(rApp)
 
          if GetResource( cResName )
             return glade_xml_new( cResFile, ... )
@@ -62,18 +62,20 @@ FUNCTION tpy_glade( cResFile, ... )
          if ~oServer:IsDeveloper()
             if !( ~~rApp:ResourceExist( cResName ) )
                /* debe preguntar al programador */
-               if MsgNOYES( "¿Desea actualizar el servidor? " )
+               if MsgNOYES( "¿Desea actualizar el servidor con el archivo de recursos local? ",;
+                            "No existe el fichero " + cResName + " en el servidor." )
                   /* Actualizar el recurso en el servidor */
                   ~~rApp:SetResource( cResName, MemoRead( cResFile ) )
                endif
             else
                /* Verificar si el fichero de recurso tiene diferencia con el del servidor*/
                if !(~~rApp:ResourceHash(cResName) == hb_MD5File( cResFile ) ) 
-                  if MsgNOYES( "¿Desea actualizar el servidor?" )
+                  if MsgNOYES( "El archivo de recursos es diferente. "+CRLF+;
+                               "¿Desea actualizar el servidor?" )
                      /* Actualizar el recurso en el servidor */
                      ~~rApp:SetResource( cResName, MemoRead( cResFile ) )
 
-                  elseif MsgNOYES( "¿Actualizar la copia local?" )
+                  elseif MsgNOYES( "¿Actualizar la copia local del archivo de recursos "+cResName+"?" )
                      if GetResource( cResName )
                         return glade_xml_new( cResFile, ... )
                      endif
