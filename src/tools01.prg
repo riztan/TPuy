@@ -766,7 +766,6 @@ FUNCTION ToStrF( nValue, cMask )
    if nValue = NIL .or. nValue=0 .or. VALTYPE(nValue)!="N"
       return ""
    endif
-RETURN ALLTRIM( TRANSFORM( nValue, cMask
- ) )
+RETURN ALLTRIM( TRANSFORM( nValue, cMask ) )
 
 //EOF
