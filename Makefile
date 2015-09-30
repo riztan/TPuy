@@ -44,7 +44,8 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)tpywindow.prg     \
            $(SRCPATH)glade.prg         \
            $(SRCPATH)tpy_image.prg     \
-           $(SRCPATH)model_abm.prg     
+           $(SRCPATH)model_abm.prg     \
+	   $(SRCPATH)tpyentry.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq
 

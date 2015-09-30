@@ -121,4 +121,74 @@
 #xtranslate tracelog( <uValue> )  => tpyLog( <uValue>, ProcName() )
 
 
+
+
+// Entry/Get
+#xuncommand DEFINE ENTRY [ <oBtn> ]  ;
+                 [ VAR <uVar> ];
+                 [ <lPassword: PASSWORD> ] ;
+                 [ PICTURE <cPicture> ];
+                 [ VALID <bValid> ];
+                 [ COMPLETION <aCompletion> ];
+                 [ FONT <oFont> ];
+                 [ <lExpand: EXPAND> ] ;
+                 [ <lFill: FILL> ] ;
+                 [ PADDING <nPadding> ];
+                 [ <lContainer: CONTAINER> ] ;
+                 [ OF <oParent> ] ;
+                 [ ID <cId> ;
+                 [ RESOURCE <uGlade> ] ];
+                 [ POS <x>,<y>  ];
+                 [ LABELNOTEBOOK <uLabelBook> ];
+                 [ <lEnd: INSERT_END> ] ;
+                 [ <lSecond: SECOND_PANED > ] ;
+                 [ <lResize: RESIZE > ] ;
+                 [ <lShrink: SHRINK > ] ;
+                 [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ] ;
+                 [ ACTION <bAction> ];
+                 [ LEFT BUTTON <ulButton> ];
+                 [ RIGHT BUTTON <urButton> ];
+      => ;
+  [ <oBtn> := ] GEntry():New( bSetGet( <uVar> ), <cPicture>, [ \{|o| <bValid> \} ],;
+                   <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, <nPadding>,<.lContainer.>,;
+                   <x>,<y>, <cId>, <uGlade>, <uLabelBook>,<.lPassword.>,;
+                   <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
+                   <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, <yOptions_ta>,;
+                   [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
+
+
+// Entry/Get
+#xcommand DEFINE ENTRY [ <oBtn> ]  ;
+                 [ VAR <uVar> ];
+                 [ <lPassword: PASSWORD> ] ;
+                 [ PICTURE <cPicture> ];
+                 [ VALID <bValid> ];
+                 [ COMPLETION <aCompletion> ];
+                 [ FONT <oFont> ];
+                 [ <lExpand: EXPAND> ] ;
+                 [ <lFill: FILL> ] ;
+                 [ PADDING <nPadding> ];
+                 [ <lContainer: CONTAINER> ] ;
+                 [ OF <oParent> ] ;
+                 [ ID <cId> ;
+                 [ RESOURCE <uGlade> ] ];
+                 [ POS <x>,<y>  ];
+                 [ LABELNOTEBOOK <uLabelBook> ];
+                 [ <lEnd: INSERT_END> ] ;
+                 [ <lSecond: SECOND_PANED > ] ;
+                 [ <lResize: RESIZE > ] ;
+                 [ <lShrink: SHRINK > ] ;
+                 [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ] ;
+                 [ ACTION <bAction> ];
+                 [ LEFT BUTTON <ulButton> ];
+                 [ RIGHT BUTTON <urButton> ];
+      => ;
+  [ <oBtn> := ] tpy_Entry():New( bSetGet( <uVar> ), <cPicture>, [ \{|o| <bValid> \} ],;
+                   <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, <nPadding>,<.lContainer.>,;
+                   <x>,<y>, <cId>, <uGlade>, <uLabelBook>,<.lPassword.>,;
+                   <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
+                   <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, <yOptions_ta>,;
+                   [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
+
+
 //eof
