@@ -743,14 +743,14 @@ FUNCTION ToNum( cValue, nDec )
    cDec := ALLTRIM(STR(nDec))
 
    // Patron de coma decimal
-   cPatron := "^[\.0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
+   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
 
    if hb_RegExMatch( cPatron, cValue )
       return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
    endif
 
    // Patron de punto decimal
-   cPatron := "^[\,0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
+   cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
    if hb_RegExMatch( cPatron, cValue )
       return VAL( STRTRAN( cValue, ",", "" ) )
    endif
