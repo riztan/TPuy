@@ -478,7 +478,12 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
              EndIf
 
           EndIf
-          SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE UTF_8(cValTmp)
+          
+          If aStruct[n,2] == "L"
+             SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE aItems[nColumn,n]
+          else
+             SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE UTF_8(cValTmp)
+          endif
           //SET VALUES LIST_STORE ::oLbx ITER ::aIter VALUES aItems[nColumn]
        next
    Next
