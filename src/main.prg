@@ -49,6 +49,7 @@
 // #include "hblang.ch"
 
 EXTERNAL HB_LANGSELECT
+REQUEST ERRORSYS
 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
@@ -171,6 +172,8 @@ Function Main( ... )
    END
 
    SET DECIMALS TO oTpuy:nDecimals
+
+   oTpuy:cDefDecMask := "@E 999,999,999."+REPLICATE( '9', oTpuy:nDecimals )
 
    // Debemos resetear nombre de la aplicacion luego de ejecutar el init.conf 
    oTpuy:SetAppName( TPUY_NAME )

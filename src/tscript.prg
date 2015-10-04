@@ -232,7 +232,7 @@ RETURN !::lError
 
 
 METHOD Run( cFunc, ... ) CLASS TScript
-   Local FuncHandle
+   Local FuncHandle, oErr
 
    DEFAULT cFunc TO ::cName
 
@@ -240,7 +240,9 @@ if !hb_IsNIL( ::hrbHANDLE )
    FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, cFunc )
 endif
    If !hb_ISNIL( FuncHandle )
+//      BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cFunc ) }
       ::uResult := EVAL( FuncHandle, ... )
+//      ENDSEQUENCE
    Else
       FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, "xbsmain" )
       if hb_IsNIL( FuncHandle )

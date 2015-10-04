@@ -742,17 +742,26 @@ FUNCTION ToNum( cValue, nDec )
 
    cDec := ALLTRIM(STR(nDec))
 
+   if ( "," $ cValue ) .and. !( "." $ cValue ) 
+      // esto hace que si tenemos mas decimales, 
+      // sean tomados en cuenta.
+      cValue := STRTRAN( cValue, ",", "." )
+   endif
+
+   if ( "." $ cValue ) .and. !( "," $ cValue ) 
+      // '.' como separador
+      cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
+      if hb_RegExMatch( cPatron, cValue )
+         return VAL( STRTRAN( cValue, ",", "" ) )
+      endif
+   endif
+
    // Patron de coma decimal
-   cPatron := "^[\.0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
+//   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
+   cPatron := "^(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
 
    if hb_RegExMatch( cPatron, cValue )
       return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
-   endif
-
-   // Patron de punto decimal
-   cPatron := "^[\,0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
-   if hb_RegExMatch( cPatron, cValue )
-      return VAL( STRTRAN( cValue, ",", "" ) )
    endif
 
 RETURN 0
@@ -767,5 +776,120 @@ FUNCTION ToStrF( nValue, cMask )
       return ""
    endif
 RETURN ALLTRIM( TRANSFORM( nValue, cMask ) )
+
+
+/** \brief Convierte un texto numerico formateado tipo 999.999,99 a
+ *         numerico
+ */
+FUNCTION Str2Num( cValue, nDec )
+   local cPatron, cDec
+
+   default nDec to oTPuy:nDecimals
+
+   if cValue == NIL .or. empty(cValue) .or. ValType(cValue)!="C"
+      return 0
+   endif
+
+   cDec := ALLTRIM(STR(nDec))
+
+   if ( "," $ cValue ) .and. !( "." $ cValue ) 
+      // esto hace que si tenemos mas decimales, 
+      // sean tomados en cuenta.
+      cValue := STRTRAN( cValue, ",", "." )
+//View( cValue )
+   endif
+
+   if ( "." $ cValue ) .and. !( "," $ cValue ) 
+      // '.' como separador
+      cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
+      if hb_RegExMatch( cPatron, cValue )
+//View( "punto decimal" )
+         return VAL( STRTRAN( cValue, ",", "" ) )
+      endif
+   endif
+
+   // Patron de coma decimal
+   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
+   cPatron := "^(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
+
+   if hb_RegExMatch( cPatron, cValue )
+//View( "coma decimal" )
+      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+   endif
+
+   // Patron de punto decimal
+RETURN 0
+
+
+
+/** \brief Convierte un valor dado en su equivalente de cadena tipo SQL segun el motor
+ *         de base de datos indicado. Por defecto devuelve cadena compatible con MySql
+ * 
+ */
+FUNCTION ToSql( uValue, nDbType )
+
+   Local cResult := 'NULL'
+   Local xValue 
+   Local cType
+
+   default nDBType to 0
+   
+   if nDBType < 0  .or.  nDBType > 1 
+      nDBType := 0
+   endif
+
+   cType := VALTYPE( uValue )
+
+   if cType = "C"
+
+      if !Empty(uValue)
+         cResult := "'"+ StrTran(uValue, "'", ' ') + "'"
+      endif
+           
+   elseif cType = "D" .and. ! Empty(uValue)
+      if nDbType = 1 //Postgresql
+         cResult := "'" + StrZero( MONTH( uValue ), 2 ) + '/'
+         cResult +=       StrZero(   DAY( uValue ), 2 ) + '/'
+         cResult +=       StrZero(  YEAR( uValue ), 4 ) + "'"
+      else  // MySQL
+         cResult := "'" + StrZero(  YEAR( uValue ), 4 ) + '-'
+         cResult +=       StrZero( MONTH( uValue ), 2 ) + '-'
+         cResult +=       StrZero(   DAY( uValue ), 2 ) + "'"
+      endif
+
+   elseif cType ="N"
+      cResult := "'"+ALLTRIM(STR( uValue ))+"'"
+
+   elseif cType == "L"
+      if nDbType = 1 //Postgresql
+         cResult := iif( uValue, "'t'", "'f'" )
+      else
+         cResult := iif( uValue, "1", "0" )
+      endif
+
+   elseif cType ="O" .and. uValue:ClassName()="TPYENTRY"
+      cResult := ToSql( uValue:Get() )
+   endif
+        
+return cResult    
+
+
+
+/** \brief Recibe un arreglo con datos u objetos tpyentry y
+ *         retorna una cadena compatible con SQL con el motor de base de datos indicado.
+ *         Por defecto devuelve cadena compatible con MySql
+ */
+FUNCTION AToSql( aDatos, nDbType )
+   local xValue, cSql := ""
+
+   FOR EACH xValue IN aDatos
+      if Empty( cSql )
+         cSql += ToSql( xValue, nDbType )
+      else
+         cSql += ", " + ToSql( xValue, nDbType )
+      endif
+   NEXT
+RETURN cSql
+
 
 //EOF

@@ -34,7 +34,7 @@ au BufNewFile,BufReadPost *.xbs			setf tpuy
    Es el fichero (copia de clipper.vim) que contiene la sintaxis para tpuy.
    Debemos copiarlo en:
      (gnu/linux): /usr/share/vim/vim72/syntax/tpuy.vim
-     (windows): 
+     (windows): Program Files/Vim/vim7x/syntax/
 
 4. snippets/tpuy.snippet 
    Este fichero de recortes puede ser agregado cuando el plugin SnipMate 
