@@ -50,6 +50,10 @@
 
 EXTERNAL HB_LANGSELECT
 REQUEST ERRORSYS
+#ifdef __PLATFORM__UNIX
+  //soporte a GDLib (de momento solo GNU/Linux)
+  REQUEST GDIMAGE
+#endif
 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */

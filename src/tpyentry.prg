@@ -17,7 +17,7 @@
    http://www.gnu.org/licenses/
 */
 
-/** \file tpywindow.prg.
+/** \file tpyentry.prg.
  *  \brief Clase pare entry desde tpuy (complemento de gentry)
  *  \author Riztan Gutierrez. riztan@gmail.com
  *  \date 2015
