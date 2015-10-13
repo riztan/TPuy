@@ -769,9 +769,9 @@ METHOD Exit( lForce ) CLASS TApp
    if !hb_IsObject(oTpuy) ; return .t. ; endif
    
    if !lForce
-      If MsgNoYes("Realmente desea Salir de <b>"+;
+      If !MsgNoYes("Realmente desea Salir de <b>"+;
                    oTpuy:cSystem_Name+"</b>",oTpuy:cSystem_Name)
-         return .f.
+         return .F.
       endif
    endif
 
