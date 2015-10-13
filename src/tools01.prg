@@ -745,26 +745,29 @@ FUNCTION ToNum( cValue, nDec )
    if ( "," $ cValue ) .and. !( "." $ cValue ) 
       // esto hace que si tenemos mas decimales, 
       // sean tomados en cuenta.
-      cValue := STRTRAN( cValue, ",", "." )
-   endif
-
-   if ( "." $ cValue ) .and. !( "," $ cValue ) 
-      // '.' como separador
-      cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
-      if hb_RegExMatch( cPatron, cValue )
-         return VAL( STRTRAN( cValue, ",", "" ) )
+      if oTPuy:cSepDec==","
+         cValue := STRTRAN( cValue, ",", "." )
       endif
    endif
 
+//   if ( "." $ cValue ) .and. !( "," $ cValue ) 
+      // '.' como separador
+      cPatron := "^-?[\,0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
+      if hb_RegExMatch( cPatron, cValue )
+         return VAL( STRTRAN( cValue, ",", "" ) )
+      endif
+//   endif
+
    // Patron de coma decimal
 //   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
-   cPatron := "^(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
-
+   cPatron := "^-?(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
    if hb_RegExMatch( cPatron, cValue )
-      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+      if oTpuy:cSepDec==","
+         return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+      endif
    endif
 
-RETURN 0
+RETURN VAL( cValue )
 
 
 /** \brief Convierte un valor numerico a texto formateado 
@@ -776,49 +779,6 @@ FUNCTION ToStrF( nValue, cMask )
       return ""
    endif
 RETURN ALLTRIM( TRANSFORM( nValue, cMask ) )
-
-
-/** \brief Convierte un texto numerico formateado tipo 999.999,99 a
- *         numerico
- */
-FUNCTION Str2Num( cValue, nDec )
-   local cPatron, cDec
-
-   default nDec to oTPuy:nDecimals
-
-   if cValue == NIL .or. empty(cValue) .or. ValType(cValue)!="C"
-      return 0
-   endif
-
-   cDec := ALLTRIM(STR(nDec))
-
-   if ( "," $ cValue ) .and. !( "." $ cValue ) 
-      // esto hace que si tenemos mas decimales, 
-      // sean tomados en cuenta.
-      cValue := STRTRAN( cValue, ",", "." )
-//View( cValue )
-   endif
-
-   if ( "." $ cValue ) .and. !( "," $ cValue ) 
-      // '.' como separador
-      cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
-      if hb_RegExMatch( cPatron, cValue )
-//View( "punto decimal" )
-         return VAL( STRTRAN( cValue, ",", "" ) )
-      endif
-   endif
-
-   // Patron de coma decimal
-   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
-   cPatron := "^(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
-
-   if hb_RegExMatch( cPatron, cValue )
-//View( "coma decimal" )
-      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
-   endif
-
-   // Patron de punto decimal
-RETURN 0
 
 
 
@@ -843,7 +803,22 @@ FUNCTION ToSql( uValue, nDbType )
    if cType = "C"
 
       if !Empty(uValue)
-         cResult := "'"+ StrTran(uValue, "'", ' ') + "'"
+         if nDbType = 0 // MySql
+            cResult := uValue
+            if AT( "'", cResult ) > 0
+               cResult := StrTran(uValue, "'", "\'")
+            endif
+            if AT( '"', cResult ) > 0
+               cResult := StrTran(uValue, '"', '\"')
+            endif
+            if AT( "#", cResult ) > 0
+               cResult := StrTran(uValue, '#', '\#')
+            endif
+            cResult := "'"+ uValue + "'"
+         else
+            // aun por revisar como escapar caracteres especiales en pgsql
+            cResult := "'"+ StrTran(uValue, "'", ' ') + "'"
+         endif
       endif
            
    elseif cType = "D" .and. ! Empty(uValue)
@@ -871,8 +846,7 @@ FUNCTION ToSql( uValue, nDbType )
       cResult := ToSql( uValue:Get() )
    endif
         
-return cResult    
-
+return cResult   
 
 
 /** \brief Recibe un arreglo con datos u objetos tpyentry y

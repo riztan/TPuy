@@ -521,7 +521,11 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
                 TYPE cType SORT OF ::oTreeView
          if aStruct[nColumn,2] == "L"
                /* Indicamos la accion a ejecutar al click de la fila.*/
-               oTemp:oRenderer:bAction := {| o, cPath| fixed_toggled( o, cPath, ::oTreeview, ::oLbx ) }
+               if hb_IsNil( ::oTreeView:bAction )
+                  oTemp:oRenderer:bAction := {| o, cPath| fixed_toggled( o, cPath, ::oTreeview, ::oLbx ) }
+               else
+                  oTemp:oRenderer:bAction := {| o, cPath| EVAL( ::oTreeView:bAction, o, cPath, ::oTreeView, ::oLbx ) }
+               endif
                // oTemp:oRenderer:bAction := EVAL( oListBox:bEdit, o, cPath, ::oTreeView, ::oLbx )
          endif
 

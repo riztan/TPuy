@@ -17,7 +17,7 @@
    http://www.gnu.org/licenses/
 */
 
-/** \file tpywindow.prg.
+/** \file tpyentry.prg.
  *  \brief Clase pare entry desde tpuy (complemento de gentry)
  *  \author Riztan Gutierrez. riztan@gmail.com
  *  \date 2015
@@ -43,30 +43,37 @@ memvar  oTpuy
 #define TPYENTRY_TIME       8
 #define TPYENTRY_IP         9
 #define TPYENTRY_OTHER      10
+
+// evaluar incorporar los siguientes:
 #define TPYENTRY_FILE       11
 #define TPYENTRY_FILEPATH   12
+#define TPYENTRY_NAME       13
 */
 
 CLASS TpyEntry FROM GEntry
 
-   DATA nType        INIT 10  // TPYENTRY_TYPE
-   DATA cDataType             // Tipo de Dato: "N"umeric  "C"haracter  "D"ate  
-   DATA cPicture     INIT ""  // Mascara para evaluar y transformar datos.
-   DATA cRegExFilter INIT ""  // Filtro de expresion regular
-   DATA oMsgWidget            // Contenedor para mostrar mensajes
+   DATA nType        INIT 10     // TPYENTRY_TYPE
+   DATA cDataType                // Tipo de Dato: "N"umeric  "C"haracter  
+                                 //               "D"ate  
+   DATA cPicture     INIT ""     // Mascara para evaluar y transformar datos.
+   DATA cRegExFilter INIT ""     // Filtro de expresion regular
+   DATA oMsgWidget               // Contenedor para mostrar mensajes
    DATA cMessage     INIT "El dato es inválido."
    DATA bError       INIT {|| .t. }
 
-   DATA bPosValid    
+   DATA bPosValid    INIT {|| .t. } 
 
-   DATA nDecimals    INIT  oTPuy:nDecimals   // decimales en caso de ser tipo numerico
+   DATA nDecimals    INIT  oTPuy:nDecimals   // decimales en caso de ser 
+                                             // tipo numerico
    DATA lRound       INIT .T.                
-   DATA nLen         INIT 0                  // Cantidad Maxima de Caracteres
+   DATA nLen         INIT 15                 // Cantidad Maxima de Caracteres
    DATA lZero        INIT .F.                // Rellenar con ceros?
-   DATA lYearsLimit  INIT 20                 // Limite en filtro de Años (Entry tipo fecha)
+   DATA lYearsLimit  INIT 20                 // Limite en filtro de Años 
+                                             // (Entry tipo fecha)
 
-   DATA cDbVarName   INIT  "" // Nombre de variable en base de datos.
-   DATA cTitle       INIT  "" // Titulo o Nombre que visualmente representaria este objeto.
+   DATA cDbVarName   INIT  ""    // Nombre de variable en base de datos.
+   DATA cTitle       INIT  ""    // Titulo o Nombre que visualmente 
+                                 // representaria este objeto.
    
 
    METHOD New( bSetGet, cPicture, bValid, aCompletion, oFont, oParent, lExpand,;
@@ -86,7 +93,7 @@ CLASS TpyEntry FROM GEntry
    METHOD SetValue( cText )   INLINE  ::SetText( cText )
    METHOD Set( cText )        
 
-   METHOD SetDecimals( nDecimals )  INLINE ::nDecimals := nDecimals
+   METHOD SetDecimals( nDecimals )  
 
    METHOD Empty()             INLINE  Empty( ::GetText() )
 
@@ -113,6 +120,8 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
    ::nType := nType
    ::nLen  := nLen
    ::lZero := lZero
+
+   ::SetMaxLength( ::nLen )
 
    if ::nType = TPYENTRY_DOCUMENT .or. ;
       ::nType = TPYENTRY_EMAIL    .or. ;
@@ -149,6 +158,10 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
       ::oMsgWidget := oMsgWidget
    endif
 
+   if hb_IsBlock( bValid )
+      ::bPosValid := bValid
+   endif
+
 //   if hb_IsNil( bValid )
       Do Case 
       Case ::nType = TPYENTRY_DOCUMENT
@@ -158,21 +171,21 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
                               "+[0-9A-Z-]{0,}"  +;  // Cuerpo: numero, letras o guiones. 
                               "([0-9A-Z])$"    // último caracter solo numero o letra
          endif
-         if hb_IsBlock( bValid )
-            ::bPosValid := bValid
-            ::bValid := { | this | iif( __VALDOCUMENT( this ),       ;
-                                        EVAL( this:bPosValid, this ),;
-                                        .f. )  }
-         else
-            ::bValid := { | this | __VALDOCUMENT( this )  }
-         endif
+         ::bValid    := { | this | __VALDOCUMENT( this ) }
 
       Case ::nType = TPYENTRY_DATE
          ::nDecimals := 0
+         ::bValid    := { | this | __VALDATE( this )     }
+
+      Case ::cDataType = "N"
+//::nType = TPYENTRY_DECIMAL
+         ::bValid    := { | this | __VALNUMERIC( this )  }
+
+      Other      
          if hb_IsBlock( bValid )
             ::bPosValid := bValid
          endif
-         ::bValid    := {| this | __VALDATE( this ) }
+         ::bValid    := {| this | __VALOTHER( this )     }
       EndCase
 //   endif
 
@@ -204,7 +217,7 @@ METHOD Set( xValue )  CLASS TPYENTRY
 
    if ::cDataType = "N"
       if cType = "C" 
-         ::SetText( TRANSFORM( Str2Num( xValue ), ::cPicture ) )
+         ::SetText( TRANSFORM( ToNum( xValue ), ::cPicture ) )
          return .T.
       endif
       if cType = "N"
@@ -241,11 +254,36 @@ METHOD Get()  CLASS TPYENTRY
       xValue := CTOD( ::GetValue() )
 
    elseif ::cDataType ="N"
-      xValue := Str2Num( ::GetValue() )
+      xValue := ToNum( ::GetValue() )
 
    endif
 
 RETURN xValue
+
+
+/** \brief Reasigna la mascara del formato numerico de acuerdo al nro de decimales indicado
+ */
+METHOD SetDecimals( nDecimals )  CLASS TPYENTRY
+
+   default nDecimals to oTpuy:nDecimals
+
+   ::cPicture := iif( oTpuy:cSepDec == ",", "@E ", "@R " )
+
+   if nDecimals == ::nDecimals; return .t. ; endif
+
+   ::nDecimals := nDecimals
+   if nDecimals = 0
+      ::cPicture += "999,999,999"
+   else 
+      ::cPicture += "999,999,999."+REPLICATE( '9', ::nDecimals )
+   endif
+Return .t.
+
+
+
+/**
+ *  FUNCIONES PARA VALIDACION
+ */
 
 
 
@@ -253,29 +291,47 @@ RETURN xValue
  */
 STATIC FUNCTION __VALDOCUMENT( oEntry )
    local nVal
-   if !Empty( oEntry:cRegExFilter ) .and. !oEntry:Empty()
+   if !oEntry:Empty() //!Empty( oEntry:cRegExFilter ) .and. !oEntry:Empty()
 
-      if !hb_RegExMatch( oEntry:cRegExFilter, oEntry:GetText() )
-         if hb_IsObject( oEntry:oMsgWidget )
-            oEntry:oMsgWidget:SetText( oEntry:cMessage )
+      if !Empty( oENtry:cRegExFilter )
+         if !hb_RegExMatch( oEntry:cRegExFilter, oEntry:GetText() )
+            if hb_IsObject( oEntry:oMsgWidget )
+               oEntry:oMsgWidget:SetText( oEntry:cMessage )
+            endif
+            if hb_IsBlock( oEntry:bError )
+               EVAL( oEntry:bError, oEntry )
+            else
+//               oEntry:SetText('')
+               if !EVAL( oEntry:bPosValid, oEntry )
+                  if hb_IsBlock( oEntry:bActionBtn )
+                     oEntry:SetFocus()
+                     EVAL( oEntry:bActionBtn, oEntry )
+                  endif
+               endif
+            endif
+            return .F.
          endif
-         if hb_IsBlock( oEntry:bError )
-            EVAL( oEntry:bError, oEntry )
-         endif
-         return .F.
       endif
 
       if oEntry:nLen>0 .and. oEntry:lZero
-         nVal := VAL(oEntry:GetText())
+         nVal := ABS( VAL(oEntry:GetText()) )  // Evitamos un monto negativo.
          if nVal != 0
             oEntry:Set( STRZERO( nVal, oEntry:nLen ) )
          endif
+      endif
+      if !EVAL( oEntry:bPosValid, oEntry ) 
+         oEntry:SetFocus()
+         return .F.
       endif
 
       if hb_IsObject( oEntry:oMsgWidGet() )
          oEntry:oMsgWidget:SetText('')
       endif
 
+   else
+      if hb_IsBlock(oEntry:bPosValid)
+         return EVAL( oEntry:bPosValid, oEntry )
+      endif
    endif
 RETURN .T.
 
@@ -306,7 +362,9 @@ STATIC FUNCTION __VALDATE( oEntry )
 
 
       if cValue == ".." .and. hb_IsBlock( oEntry:bActionBtn )
+         oEntry:SetText('')
          EVAL( oEntry:bActionBtn, oEntry )
+         oEntry:SetFocus()
          if hb_IsBlock(oEntry:bPosValid)
             return EVAL( oEntry:bPosValid, oEntry )
          endif
@@ -335,7 +393,7 @@ STATIC FUNCTION __VALDATE( oEntry )
 
       else
 
-         if ABS( YEAR( oTPuy:dFecha ) - YEAR( dValue ) ) > oEntry:lLimitYears
+         if ABS( YEAR( oTPuy:dFecha ) - YEAR( dValue ) ) > oEntry:lYearsLimit
             oEntry:SetText('')
             if hb_IsObject( oEntry:oMsgWidget )
                oEntry:oMsgWidget:SetText( oEntry:cMessage )
@@ -362,5 +420,77 @@ STATIC FUNCTION __VALDATE( oEntry )
 
 RETURN .T.
 
+
+STATIC FUNCTION __VALNUMERIC( oEntry )
+
+   local cValue, cRegExp, nValue, cDec
+
+   if oEntry:Empty() ; return .t. ; endif
+
+   cValue := oEntry:GetText()
+   cDec := ALLTRIM(STR( oEntry:nDecimals ))
+
+   cRegExp := "^-?[\"+oTpuy:cSepMiles+"0-9]{1,9}(\"
+   cRegExp += oTpuy:cSepDec+"[0-9]{0,"+cDec+"})?$"
+   if oEntry:nType = TPYENTRY_MONEY
+      cRegExp := "^[\"+oTpuy:cSepMiles+"0-9]{1,9}(\"
+      cRegExp += oTpuy:cSepDec+"[0-9]{0,"+cDec+"})?$"
+   endif
+
+   nValue := ToNum( cValue )
+   if hb_RegExMatch( cRegExp, cValue )
+      oEntry:SetText( iif(left(cValue,1)=="+","+","") + ToStrF( nValue, oEntry:cPicture ) )
+   else
+      if LEN( cValue ) > 0 .and. VAL( cValue ) != 0
+         oEntry:SetText( iif(left(cValue,1)=="+","+","") + ToStrF( nValue, oEntry:cPicture ) )
+      endif
+      if hb_IsObject( oEntry:oMsgWidget )
+         oEntry:oMsgWidget:SetText( oEntry:cMessage )
+      endif
+      return EVAL( oEntry:bPosValid, oEntry )
+   endif
+   if !EVAL( oEntry:bPosValid, oEntry )
+      if hb_IsObject( oEntry:oMsgWidget )
+         oEntry:oMsgWidget:SetText( oEntry:cMessage )
+      endif
+      return .F.
+   endif
+   if hb_IsObject( oEntry:oMsgWidget )
+      oEntry:oMsgWidget:SetText( '' )
+   endif
+
+RETURN .t.
+
+
+/** \brief Validacion predeterminada para entry no definido.
+ *         El objetivo en este caso es tratar de evitar una inyeccion sql.
+ */
+STATIC FUNCTION __VALOTHER( oEntry )
+
+   local cValue, dValue
+
+   if oEntry:Empty() ; return .t. ; endif
+      
+   cValue := oEntry:GetText()
+
+   if AT("'", cValue)>0 
+      cValue := STRTRAN( cValue, "'", "\'" )
+   endif
+
+   if AT("\", cValue)>0 
+      cValue := STRTRAN( cValue, "\", "\\" )
+   endif
+
+   if AT('"', cValue)>0 
+      cValue := STRTRAN( cValue, '"', '\"' )
+   endif
+
+   cValue := oEntry:SetText( cValue )
+
+   if hb_IsBlock(oEntry:bPosValid)
+      return EVAL( oEntry:bPosValid, oEntry )
+   endif
+
+return .t.
 
 //eof
