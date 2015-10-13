@@ -7,6 +7,15 @@
  *  Clase para manipulación de datos al estilo de TPublic.
  *  
  */
+
+#include "gclass.ch"
+#include "hbclass.ch"
+#include "proandsys.ch"
+
+// GLOBAL EXTERNAL oTpuy
+memvar oTpuy
+
+
 CLASS TObject
 
    VISIBLE:
