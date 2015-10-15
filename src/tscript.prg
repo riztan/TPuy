@@ -194,8 +194,7 @@ METHOD Refresh( cPrgCode ) CLASS TScript
       ::cPrgCode := ::cDirective + hb_eol() + ::cPrgCode
    endif
 
-/*
-   BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cPrgCode ) }
+
 
       if ISNIL(::hrbCODE) .or. Empty( ::hrbCODE ) .or. lCompile
             ::hrbCODE := NIL
@@ -205,18 +204,22 @@ METHOD Refresh( cPrgCode ) CLASS TScript
 // ? "no compilamos "+::cFile+"."
       endif
       IF ::hrbCODE == NIL
-         EVAL( ErrorBlock(), oErr ) //"Syntax error." )
+         ::lError := .t.
+         ::cError := "Error de sintaxis"
+         return nil
+//         EVAL( ErrorBlock(), oErr ) //"Syntax error." )
       ELSE
+   BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cPrgCode ) }
          ::hrbHANDLE := hb_hrbLoad( ::hrbCODE )
+   ENDSEQUENCE
          IF ::hrbHANDLE = NIL
             ::lError := .t.
             ::cError := "Posible error de Sintaxis"
          ENDIF
       ENDIF
 
-   ENDSEQUENCE
-*/
 
+/*
    ::hrbCODE := NIL
    ::hrbCODE := hb_CompileFromBuf( ::cPrgCode, "harbour", "-n2", "-w0", "-es2", "-q0", ;
                                    s_aIncDir, "-I" + FNameDirGet( ::cFile ) )
@@ -226,24 +229,38 @@ METHOD Refresh( cPrgCode ) CLASS TScript
       ::lError := .t.
       ::cError := "Posible error de Sintaxis"
    endif
-
+*/
 RETURN !::lError
 
 
 
 METHOD Run( cFunc, ... ) CLASS TScript
-   Local FuncHandle, oErr
+   Local FuncHandle, oErr, aFunctions
 
    DEFAULT cFunc TO ::cName
 
 if !hb_IsNIL( ::hrbHANDLE )
-   FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, cFunc )
-endif
-   If !hb_ISNIL( FuncHandle )
-//      BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cFunc ) }
+   aFunctions := hb_hrbGetFunList( ::hrbHANDLE )
+   if (UPPER(cFunc) $ aFunctions)
+      FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, cFunc )
       ::uResult := EVAL( FuncHandle, ... )
-//      ENDSEQUENCE
+   else
+      ::lError := .t.
+      ::cError := "No existe el simbolo "+cFunc
+      return nil
+   endif
+else
+   If !hb_ISNIL( FuncHandle )
+      BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cFunc ) }
+      ::uResult := EVAL( FuncHandle, ... )
+      ENDSEQUENCE
    Else
+//View( hb_hrbGetFunList(::hrbHANDLE) )
+if hb_ISNIL( ::hrbHANDLE )
+   ::lError := .t.
+   ::cError := "Funcion no localizada"
+   return nil
+endif
       FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, "xbsmain" )
       if hb_IsNIL( FuncHandle )
          ::lError := .t.
@@ -252,6 +269,7 @@ endif
       endif
       ::uResult := EVAL( FuncHandle, ... )
    EndIf
+endif
 Return ::uResult
 
 
@@ -332,6 +350,16 @@ STATIC PROCEDURE hbrun_Err( oErr, cCommand )
 
    LOCAL xArg, cMessage
 
+   TPDefError( oErr, cCommand )
+return
+View(oErr)
+//View(oErr:Operation)
+View( oErr:FILENAME )
+View( oErr:GenCode )
+View( oErr:OsCode )
+View( oErr:Severity )
+View( oErr:SubCode )
+View( oErr:SubSystem )
    cMessage := "Sorry, could not execute:;;" + cCommand + ";;"
    IF oErr:ClassName == "ERROR"
       cMessage += oErr:Description
@@ -346,7 +374,7 @@ STATIC PROCEDURE hbrun_Err( oErr, cCommand )
    ENDIF
    cMessage += ";;" + ProcName( 2 ) + "(" + hb_NToS( ProcLine( 2 ) ) + ")"
 
-   Alert( cMessage )
+   View( cMessage )
 
    BREAK( oErr )
 

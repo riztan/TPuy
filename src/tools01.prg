@@ -347,11 +347,12 @@ Return NIL
 /** \brief Equivalente a DefError de T-Gtk para Tepuy.
  *  \par oError
  */
-/*
+
 #include "common.ch"
 #include "error.ch"
 
 FUNCTION TPDefError( oError )
+   LOCAL cIconFile :=  oTpuy:cImages+"tpuy-icon-16.png"//oTpuy:cIconMain
    LOCAL cMessage
    LOCAL cDOSError
 
@@ -455,6 +456,8 @@ FUNCTION TPDefError( oError )
     DEFINE WINDOW oWnd TITLE "Errorsys Tepuy/T-Gtk MultiSystem"
            oWnd:lInitiate := .F. //Fuerzo a entrar en otro bucles de procesos.
 
+           if FILE( cIconFile ) ; oWnd:SetIconFile( cIconFile ) ; endif
+
            DEFINE BOX oBox VERTICAL OF oWnd CONTAINER
                       cMessage := '<span foreground="blue"><i>'+;
                                   MSG_ERROR_DESCRIPTION + ":"+"</i>"+CRLF+;
@@ -503,7 +506,7 @@ FUNCTION TPDefError( oError )
 
 
 RETURN lReturn
-*/
+
 // SALIR DEL PROGRAMA Eliminando todo residuo memorial ;-)
 // Salimos 'limpiamente' de la memoria del ordenador
 /** \brief Realiza la Salida desde el programa de control de errores TPDefError()
