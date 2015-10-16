@@ -346,12 +346,14 @@ Return NIL
 
 /** \brief Equivalente a DefError de T-Gtk para Tepuy.
  *  \par oError
+ *  \par cCommand  Nombre de la instruccion en ejecucion
+ *  \par lEVal     Indica si el error proviene de un bloque de codigo.
  */
 
 #include "common.ch"
 #include "error.ch"
 
-FUNCTION TPDefError( oError )
+FUNCTION TPDefError( oError, cCommand, lEVal )
    LOCAL cIconFile :=  oTpuy:cImages+"tpuy-icon-16.png"//oTpuy:cIconMain
    LOCAL cMessage
    LOCAL cDOSError
@@ -363,7 +365,8 @@ FUNCTION TPDefError( oError )
    LOCAL nArea
    Local lReturn := .F.
 
-   Local cText := "", oWnd, oScrool,hView, hBuffer, oBox, oBtn, oBoxH, expand, oFont, oExpand, oMemo
+   Local cText  := "", oWnd, oScrool,hView, hBuffer, oBox, oBtn, oBoxH, expand, oFont, oExpand, oMemo
+   Local cRText := ""
    Local cTextExpand := '<span foreground="orange" background="black" size="large"><b>'+MESSAGE_PULSE+' <span foreground="red"'+;
                         ' size="large" ><i>'+MESSAGE_DETAILS+'</i></span></b>!</span>'
    Local aStyle := { { "red" ,    BGCOLOR , STATE_NORMAL },;
@@ -372,6 +375,7 @@ FUNCTION TPDefError( oError )
    Local aStyleChild := { { "white", FGCOLOR , STATE_NORMAL },;
                           { "red",   FGCOLOR , STATE_PRELIGHT }}
 
+   Default lEval to .F.
 
    // By default, division by zero results in zero
    IF oError:genCode == EG_ZERODIV
@@ -385,6 +389,7 @@ FUNCTION TPDefError( oError )
       NetErr( .T. )
       RETURN .F.
    ENDIF
+
 
    // Set NetErr() if there was a lock error on dbAppend()
    IF oError:genCode == EG_APPENDLOCK .AND. ;
@@ -421,40 +426,61 @@ FUNCTION TPDefError( oError )
 
 *   MsgStop( cMessage, "Error" )
 
-   cText += MSG_APPLICATION + CRLF
-   cText += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
-   cText += "   "+MSG_PATH_NAME+": " + HB_ArgV( 0 ) + " (32 bits)" + HB_OsNewLine()
+   cText  += MSG_APPLICATION + CRLF
+   cRText += "<b>"+MSG_APPLICATION+"</b>" + CRLF
+   cText  += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
+   cRText += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
+   cText  += "   "+MSG_PATH_NAME+" (script): " + HB_ArgV( 0 ) + HB_OsNewLine()
+   cRText += "   "+MSG_PATH_NAME+" (script): <b>" + HB_ArgV( 0 ) + "</b>" + HB_OsNewLine()
 
 
-   cText += "   "+MSG_ERROR_AT+": " + ;
-                DToC( Date() ) + ", " + Time() + CRLF
+   cText += "   "+MSG_ERROR_AT+": " 
+   cText += DToC( Date() ) + ", " + Time() + CRLF
+   cRText += "   "+MSG_ERROR_AT+": " 
+   cRText += "<b>" + DToC( Date() ) + ", " + Time() + "</b>" + CRLF
 
    // Error object analysis
    cMessage   = ErrorMessage( oError ) + CRLF
-   cText += "   " + MSG_ERROR_DESCRIPTION + ":" + cMessage
+   cText  += "   " + MSG_ERROR_DESCRIPTION + ": " + cMessage
+   cRText += "   " + MSG_ERROR_DESCRIPTION + ": <b>" + cMessage + "</b>"
 
    if ValType( oError:Args ) == "A"
-      cText += "   "+MSG_ARGS+":" + CRLF
+      cText  += "   "+MSG_ARGS+": " + CRLF
+      cRText += "   "+MSG_ARGS+": " + CRLF
       for n = 1 to Len( oError:Args )
-         cText += "     [" + Str( n, 4 ) + "] = " + ;
-	                ValType( oError:Args[ n ] ) + "   " + ;
-	                cValToChar( oError:Args[ n ] ) + CRLF
+         cText  += "     [" + Str( n, 4 ) + "] = " + ;
+	                 ValType( oError:Args[ n ] ) + "   " + ;
+	                 cValToChar( oError:Args[ n ] ) + CRLF
+         cRText += "     [" + Str( n, 4 ) + "] = " + ;
+	                 ValType( oError:Args[ n ] ) + "   " + ;
+	                 cValToChar( oError:Args[ n ] ) + CRLF
       next
    endif
 
    cText += CRLF + MSG_STACK_CALLS + CRLF
    cText += Replicate( "=", Len( MSG_STACK_CALLS ) ) + CRLF
 
+   cRText += CRLF + "<b>" + MSG_STACK_CALLS + "</b>" + CRLF
+   cRText += Replicate( "=", Len( MSG_STACK_CALLS ) ) + CRLF
+
    n := 2
 
+   g_print( CRLF + cText + CRLF )
    WHILE ! Empty( ProcName( n ) )
-			cText += MSG_CALLED_FROM + ProcFile( n ) + "->" + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + CRLF
+			cText  += MSG_CALLED_FROM + ProcFile( n ) + "->" + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + CRLF
+			cRText += MSG_CALLED_FROM + ProcFile( n ) + "->" +;
+                                  iif(n=3,"<b>","") + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + iif(n=3,"</b>","") + CRLF
 			g_print( MSG_CALLED_FROM + ProcFile( n ) + "->" + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + CRLF )
       n++
    ENDDO
+   g_print( CRLF )
+
+if lEval
+      MsgStop( cRText, "SCRIPT ERROR " + "[" + HB_ArgV( 0 ) + "]" )
+else
 
     DEFINE WINDOW oWnd TITLE "Errorsys Tepuy/T-Gtk MultiSystem"
-           oWnd:lInitiate := .F. //Fuerzo a entrar en otro bucles de procesos.
+           oWnd:lInitiate := .T. //Fuerzo a entrar en otro bucles de procesos.
 
            if FILE( cIconFile ) ; oWnd:SetIconFile( cIconFile ) ; endif
 
@@ -465,7 +491,7 @@ FUNCTION TPDefError( oError )
 
                       DEFINE LABEL TEXT cMessage MARKUP OF oBox
 
-                      DEFINE EXPANDER oExpand ;
+                      DEFINE EXPANDER oExpand OPEN ;
                                       TEXT cTextExpand MARKUP ;
                                       EXPAND FILL OF oBox ;
                                       ACTION oWnd:Center( GTK_WIN_POS_CENTER_ALWAYS )
@@ -503,7 +529,8 @@ FUNCTION TPDefError( oError )
                                  OF oBoxH
 
     ACTIVATE WINDOW oWnd CENTER MODAL
-
+endif
+//BREAK(oError)
 
 RETURN lReturn
 

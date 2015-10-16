@@ -198,14 +198,24 @@ METHOD Refresh( cPrgCode ) CLASS TScript
 
       if ISNIL(::hrbCODE) .or. Empty( ::hrbCODE ) .or. lCompile
             ::hrbCODE := NIL
-            ::hrbCODE := hb_CompileFromBuf( ::cPrgCode, "harbour", "-n2", "-w0", "-es2", "-q0", ;
-                                      s_aIncDir, "-I" + FNameDirGet( ::cFile ) )
+            ::hrbCODE := hb_CompileFromBuf( ::cPrgCode, ;
+                         "harbour", "-n2", "-w0", "-es2", "-q0", ;
+                         s_aIncDir, "-I" + FNameDirGet( ::cFile ) )
 //else
 // ? "no compilamos "+::cFile+"."
       endif
       IF ::hrbCODE == NIL
-         ::lError := .t.
-         ::cError := "Error de sintaxis"
+//         ::lError := .t.
+//         ::cError := "Error de sintaxis"
+//View("pa fuera!")
+         oErr := ErrorNew()
+         oErr:SubSystem   := "BASE"
+         oErr:SubCode     := 0
+         oErr:Severity    := 2
+         oErr:Description := "Error de Sintaxis "  
+         oErr:Operation   := STRTRAN(cPrgCode,oTPuy:cXBScripts,"")
+         //EVAL( ErrorBlock(), oErr, cPrgCode, .T. ) //"Syntax error." )
+         hbrun_Err( oErr, cPrgCode ) //"Syntax error." )
          return nil
 //         EVAL( ErrorBlock(), oErr ) //"Syntax error." )
       ELSE
@@ -243,7 +253,9 @@ if !hb_IsNIL( ::hrbHANDLE )
    aFunctions := hb_hrbGetFunList( ::hrbHANDLE )
    if (UPPER(cFunc) $ aFunctions)
       FuncHandle := hb_hrbGetFunSym( ::hrbHANDLE, cFunc )
-      ::uResult := EVAL( FuncHandle, ... )
+      BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cFunc, .T. ) }
+        ::uResult := EVAL( FuncHandle, ... )
+      ENDSEQUENCE
    else
       ::lError := .t.
       ::cError := "No existe el simbolo "+cFunc
@@ -251,8 +263,8 @@ if !hb_IsNIL( ::hrbHANDLE )
    endif
 else
    If !hb_ISNIL( FuncHandle )
-      BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cFunc ) }
-      ::uResult := EVAL( FuncHandle, ... )
+      BEGIN SEQUENCE WITH {|oErr| hbrun_Err( oErr, cFunc, .T. ) }
+        ::uResult := EVAL( FuncHandle, ... )
       ENDSEQUENCE
    Else
 //View( hb_hrbGetFunList(::hrbHANDLE) )
@@ -346,36 +358,9 @@ STATIC FUNCTION hbrun_StrStripQuote( cString )
                cString )
 
 
-STATIC PROCEDURE hbrun_Err( oErr, cCommand )
+STATIC PROCEDURE hbrun_Err( oErr, cCommand, lEval )
 
-   LOCAL xArg, cMessage
-
-   TPDefError( oErr, cCommand )
-return
-View(oErr)
-//View(oErr:Operation)
-View( oErr:FILENAME )
-View( oErr:GenCode )
-View( oErr:OsCode )
-View( oErr:Severity )
-View( oErr:SubCode )
-View( oErr:SubSystem )
-   cMessage := "Sorry, could not execute:;;" + cCommand + ";;"
-   IF oErr:ClassName == "ERROR"
-      cMessage += oErr:Description
-      IF ISARRAY( oErr:Args ) .AND. Len( oErr:Args ) > 0
-         cMessage += ";Arguments:"
-         FOR EACH xArg IN oErr:Args
-            cMessage += ";" + HB_CStr( xArg )
-         NEXT
-      ENDIF
-   ELSEIF ISCHARACTER( oErr )
-      cMessage += oErr
-   ENDIF
-   cMessage += ";;" + ProcName( 2 ) + "(" + hb_NToS( ProcLine( 2 ) ) + ")"
-
-   View( cMessage )
-
-   BREAK( oErr )
+   TPDefError( oErr, cCommand, lEval )
+   //BREAK( oErr )
 
 //EOF

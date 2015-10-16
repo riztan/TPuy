@@ -43,11 +43,11 @@
 
 #define MSG_APPLICATION               "Aplicación"
 #define MSG_PATH_NAME                 "Ruta y Nombre"
-#define MSG_ERROR_AT                  "Error ocurrido en"
+#define MSG_ERROR_AT                  "Error ocurrido el dia"
 #define MSG_ERROR_DESCRIPTION         "Descripción"
 #define MSG_ARGS                      "Argumentos"
 #define MSG_CALLED_FROM               "Llamado desde "
-#define MSG_STACK_CALLS               "Stack Calls"
+#define MSG_STACK_CALLS               "Grupo de Llamadas"
 
 #define MSG_STATUS_CONNECTION         "Estatus de la conexión"
 #define MSG_ERROR_CONNECTION          "Error en la conexión"
