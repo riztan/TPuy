@@ -409,7 +409,7 @@ FUNCTION TPDefError( oError, cCommand, lEVal )
    ENDIF
 
    IF ! Empty( oError:subsystem )
-      cMessage += " " + oError:subsystem + "/" + Ltrim(Str(oError:subCode))
+      cMessage += " " + oError:subsystem + "/" + Ltrim(Str(oError:subCode)) 
    END
 
    IF ! Empty(oError:description)
@@ -429,20 +429,24 @@ FUNCTION TPDefError( oError, cCommand, lEVal )
    cText  += MSG_APPLICATION + CRLF
    cRText += "<b>"+MSG_APPLICATION+"</b>" + CRLF
    cText  += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
-   cRText += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
+   cRText += Replicate("=", Len(MSG_APPLICATION) ) + CRLF 
    cText  += "   "+MSG_PATH_NAME+" (script): " + HB_ArgV( 0 ) + HB_OsNewLine()
    cRText += "   "+MSG_PATH_NAME+" (script): <b>" + HB_ArgV( 0 ) + "</b>" + HB_OsNewLine()
 
 
    cText += "   "+MSG_ERROR_AT+": " 
-   cText += DToC( Date() ) + ", " + Time() + CRLF
+   cText += DToC( Date() ) + ", " + Time() + CRLF + CRLF
    cRText += "   "+MSG_ERROR_AT+": " 
-   cRText += "<b>" + DToC( Date() ) + ", " + Time() + "</b>" + CRLF
+   cRText += "<b>" + DToC( Date() ) + ", " + Time() + "</b>" + CRLF + CRLF
 
    // Error object analysis
    cMessage   = ErrorMessage( oError ) + CRLF
-   cText  += "   " + MSG_ERROR_DESCRIPTION + ": " + cMessage
-   cRText += "   " + MSG_ERROR_DESCRIPTION + ": <b>" + cMessage + "</b>"
+   cText  += MSG_ERROR_DESCRIPTION + CRLF
+   cText  += Replicate("=", Len(MSG_ERROR_DESCRIPTION) ) + CRLF 
+   cText  += "   " + cMessage
+   cRText += "<b>" + MSG_ERROR_DESCRIPTION + "</b>" + CRLF
+   cRText += Replicate("=", Len(MSG_ERROR_DESCRIPTION) ) + CRLF 
+   cRText += "<b>" + cMessage + "</b>"
 
    if ValType( oError:Args ) == "A"
       cText  += "   "+MSG_ARGS+": " + CRLF
