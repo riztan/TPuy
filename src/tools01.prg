@@ -346,12 +346,15 @@ Return NIL
 
 /** \brief Equivalente a DefError de T-Gtk para Tepuy.
  *  \par oError
+ *  \par cCommand  Nombre de la instruccion en ejecucion
+ *  \par lEVal     Indica si el error proviene de un bloque de codigo.
  */
-/*
+
 #include "common.ch"
 #include "error.ch"
 
-FUNCTION TPDefError( oError )
+FUNCTION TPDefError( oError, cCommand, lEVal )
+   LOCAL cIconFile :=  oTpuy:cImages+"tpuy-icon-16.png"//oTpuy:cIconMain
    LOCAL cMessage
    LOCAL cDOSError
 
@@ -362,7 +365,8 @@ FUNCTION TPDefError( oError )
    LOCAL nArea
    Local lReturn := .F.
 
-   Local cText := "", oWnd, oScrool,hView, hBuffer, oBox, oBtn, oBoxH, expand, oFont, oExpand, oMemo
+   Local cText  := "", oWnd, oScrool,hView, hBuffer, oBox, oBtn, oBoxH, expand, oFont, oExpand, oMemo
+   Local cRText := ""
    Local cTextExpand := '<span foreground="orange" background="black" size="large"><b>'+MESSAGE_PULSE+' <span foreground="red"'+;
                         ' size="large" ><i>'+MESSAGE_DETAILS+'</i></span></b>!</span>'
    Local aStyle := { { "red" ,    BGCOLOR , STATE_NORMAL },;
@@ -371,6 +375,7 @@ FUNCTION TPDefError( oError )
    Local aStyleChild := { { "white", FGCOLOR , STATE_NORMAL },;
                           { "red",   FGCOLOR , STATE_PRELIGHT }}
 
+   Default lEval to .F.
 
    // By default, division by zero results in zero
    IF oError:genCode == EG_ZERODIV
@@ -384,6 +389,7 @@ FUNCTION TPDefError( oError )
       NetErr( .T. )
       RETURN .F.
    ENDIF
+
 
    // Set NetErr() if there was a lock error on dbAppend()
    IF oError:genCode == EG_APPENDLOCK .AND. ;
@@ -403,7 +409,7 @@ FUNCTION TPDefError( oError )
    ENDIF
 
    IF ! Empty( oError:subsystem )
-      cMessage += " " + oError:subsystem + "/" + Ltrim(Str(oError:subCode))
+      cMessage += " " + oError:subsystem + "/" + Ltrim(Str(oError:subCode)) 
    END
 
    IF ! Empty(oError:description)
@@ -420,40 +426,67 @@ FUNCTION TPDefError( oError )
 
 *   MsgStop( cMessage, "Error" )
 
-   cText += MSG_APPLICATION + CRLF
-   cText += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
-   cText += "   "+MSG_PATH_NAME+": " + HB_ArgV( 0 ) + " (32 bits)" + HB_OsNewLine()
+   cText  += MSG_APPLICATION + CRLF
+   cRText += "<b>"+MSG_APPLICATION+"</b>" + CRLF
+   cText  += Replicate("=", Len(MSG_APPLICATION) ) + CRLF
+   cRText += Replicate("=", Len(MSG_APPLICATION) ) + CRLF 
+   cText  += "   "+MSG_PATH_NAME+" (script): " + HB_ArgV( 0 ) + HB_OsNewLine()
+   cRText += "   "+MSG_PATH_NAME+" (script): <b>" + HB_ArgV( 0 ) + "</b>" + HB_OsNewLine()
 
 
-   cText += "   "+MSG_ERROR_AT+": " + ;
-                DToC( Date() ) + ", " + Time() + CRLF
+   cText += "   "+MSG_ERROR_AT+": " 
+   cText += DToC( Date() ) + ", " + Time() + CRLF + CRLF
+   cRText += "   "+MSG_ERROR_AT+": " 
+   cRText += "<b>" + DToC( Date() ) + ", " + Time() + "</b>" + CRLF + CRLF
 
    // Error object analysis
    cMessage   = ErrorMessage( oError ) + CRLF
-   cText += "   " + MSG_ERROR_DESCRIPTION + ":" + cMessage
+   cText  += MSG_ERROR_DESCRIPTION + CRLF
+   cText  += Replicate("=", Len(MSG_ERROR_DESCRIPTION) ) + CRLF 
+   cText  += "   " + cMessage
+   cRText += "<b>" + MSG_ERROR_DESCRIPTION + "</b>" + CRLF
+   cRText += Replicate("=", Len(MSG_ERROR_DESCRIPTION) ) + CRLF 
+   cRText += "<b>" + cMessage + "</b>"
 
    if ValType( oError:Args ) == "A"
-      cText += "   "+MSG_ARGS+":" + CRLF
+      cText  += "   "+MSG_ARGS+": " + CRLF
+      cRText += "   "+MSG_ARGS+": " + CRLF
       for n = 1 to Len( oError:Args )
-         cText += "     [" + Str( n, 4 ) + "] = " + ;
-	                ValType( oError:Args[ n ] ) + "   " + ;
-	                cValToChar( oError:Args[ n ] ) + CRLF
+         cText  += "     [" + Str( n, 4 ) + "] = " + ;
+	                 ValType( oError:Args[ n ] ) + "   " + ;
+	                 cValToChar( oError:Args[ n ] ) + CRLF
+         cRText += "     [" + Str( n, 4 ) + "] = " + ;
+	                 ValType( oError:Args[ n ] ) + "   " + ;
+	                 cValToChar( oError:Args[ n ] ) + CRLF
       next
    endif
 
    cText += CRLF + MSG_STACK_CALLS + CRLF
    cText += Replicate( "=", Len( MSG_STACK_CALLS ) ) + CRLF
 
+   cRText += CRLF + "<b>" + MSG_STACK_CALLS + "</b>" + CRLF
+   cRText += Replicate( "=", Len( MSG_STACK_CALLS ) ) + CRLF
+
    n := 2
 
+   g_print( CRLF + cText + CRLF )
    WHILE ! Empty( ProcName( n ) )
-			cText += MSG_CALLED_FROM + ProcFile( n ) + "->" + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + CRLF
+			cText  += MSG_CALLED_FROM + ProcFile( n ) + "->" + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + CRLF
+			cRText += MSG_CALLED_FROM + ProcFile( n ) + "->" +;
+                                  iif(n=3,"<b>","") + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + iif(n=3,"</b>","") + CRLF
 			g_print( MSG_CALLED_FROM + ProcFile( n ) + "->" + ProcName(n) + "(" + AllTrim( Str( ProcLine( n ) ) ) + ")" + CRLF )
       n++
    ENDDO
+   g_print( CRLF )
+
+if lEval
+      MsgStop( cRText, "SCRIPT ERROR " + "[" + HB_ArgV( 0 ) + "]" )
+else
 
     DEFINE WINDOW oWnd TITLE "Errorsys Tepuy/T-Gtk MultiSystem"
-           oWnd:lInitiate := .F. //Fuerzo a entrar en otro bucles de procesos.
+           oWnd:lInitiate := .T. //Fuerzo a entrar en otro bucles de procesos.
+
+           if FILE( cIconFile ) ; oWnd:SetIconFile( cIconFile ) ; endif
 
            DEFINE BOX oBox VERTICAL OF oWnd CONTAINER
                       cMessage := '<span foreground="blue"><i>'+;
@@ -462,7 +495,7 @@ FUNCTION TPDefError( oError )
 
                       DEFINE LABEL TEXT cMessage MARKUP OF oBox
 
-                      DEFINE EXPANDER oExpand ;
+                      DEFINE EXPANDER oExpand OPEN ;
                                       TEXT cTextExpand MARKUP ;
                                       EXPAND FILL OF oBox ;
                                       ACTION oWnd:Center( GTK_WIN_POS_CENTER_ALWAYS )
@@ -500,10 +533,11 @@ FUNCTION TPDefError( oError )
                                  OF oBoxH
 
     ACTIVATE WINDOW oWnd CENTER MODAL
-
+endif
+//BREAK(oError)
 
 RETURN lReturn
-*/
+
 // SALIR DEL PROGRAMA Eliminando todo residuo memorial ;-)
 // Salimos 'limpiamente' de la memoria del ordenador
 /** \brief Realiza la Salida desde el programa de control de errores TPDefError()
@@ -728,6 +762,92 @@ FUNCTION ExtName( cFileName )
 RETURN cFileName
 
 
+
+FUNCTION Check_Version( cRuta )
+   local cHash
+   local cFile, cOS := lower( OS() )
+   local aFiles, cPath := GetEnv("TMP")
+   local cBat,cBatFile:="tl.bat"
+   local uTpyVersion, cFilePath
+
+   if oTPuy:lNetIO 
+#ifdef __PLATFORM__WINDOWS
+      if "windows" $ cOS
+         cOS := "windows"
+         default cRuta to CurDrive()+":\"+CurDir()+"\bin"
+
+         cBat := '@start /B tasklist | find "tpuy" > %TMP%\tl.log'
+         hb_MemoWrit( cPath+"\"+cBatFile, cBat ) 
+         wapi_shellexecute(,"open", cPath+"\"+cBatFile,,,0 )
+         cFile := MemoRead( cPath + "/" + "tl.log" )
+         cFile := LEFT( cFile, AT( " ", cFile )-1 )
+         cFilePath := cRuta + "/" +cFile
+
+#else
+      if "linux" $ cOS
+         cOS := "ubuntu"  // ya se cambiara cuando se trabaje otra distribucion.
+         default cRuta to "/"+CurDir()+"/bin"
+
+         cFile := "tpuy_Ubuntu_14041_x86_64_hb32"
+         cFilePath := cRuta + "/" + cFile
+#endif
+         if FILE( cFilePath )
+            cHash := hb_MD5File( cFilePath )
+            if !( cHash == net:tpycli_version( cOS ) )
+
+               if MsgYesNo("¿Desea continuar con el proceso de actualización?",;
+                           "Se ha detectado diferencia en la versión del binario TPuy")
+
+                  MsgInfo("Iniciar Descarga. (puede tardar algunos minutos) ",;
+                          "Actualización del componente binario.")
+                  inkey(.2)
+                  uTpyVersion :=  net:tpycli_get_version( cOS ) 
+                  MsgInfo("Finalizado el proceso de descarga!","Descarga completada.")
+
+                  if !empty( uTpyVersion )
+
+                     if FILE( cFilePath+"__before" ) ; FERASE( cFilePath+"__before" ) ; endif
+#ifdef __PLATFORM__WINDOWS
+                     FRENAME( cFilePath, STRTRAN(cFilePath,".exe","") + "__before.exe" ) 
+//                     hb_MemoWrit( STRTRAN( cFilePath,".exe","") + "__before.exe", MemoRead( cFilePath ) ) 
+                     
+#else
+                     hb_Run( "mv "+cFilePath+" "+cFilePath+"__before" )
+#endif
+
+                     if hb_MemoWrit( cFilePath, uTpyVersion  )
+//                     if hb_MemoWrit( (cFilePath + "__before"), MemoRead(cFilePath) )
+//                     if FRENAME( cRuta + "/" + cFile, (cRuta + "/" + cFile + "__before") )
+#ifdef __PLATFORM__LINUX
+                        hb_Run( "chmod 755 "+cFilePath )
+#endif
+                        MsgAlert("Se cerrará el sistema...","Atención")
+//                        Salida(.t.)
+                        oTPuy:End()
+                        gtk_main_quit()
+                        QUIT
+                     else
+                        MsgAlert("No fue posible reescribir el binario.","Atención")
+                        return "revisar"
+                     endif
+                  endif
+               else
+                  MsgAlert("Posiblemente esté ejecutando una versión desactualizada. "+;
+                           "Se recomienda actualizar lo antes posible.", "Atención")
+                  return .f.
+               endif
+               return cHash
+
+            endif
+         else
+View( "No localiza el archivo " + cFilePath + " para verificar version." )
+         endif
+      endif
+      
+   endif
+return nil
+
+
 /** \brief Convierte un texto numerico formateado tipo 999.999,99 a
  *         numerico
  */
@@ -745,26 +865,29 @@ FUNCTION ToNum( cValue, nDec )
    if ( "," $ cValue ) .and. !( "." $ cValue ) 
       // esto hace que si tenemos mas decimales, 
       // sean tomados en cuenta.
-      cValue := STRTRAN( cValue, ",", "." )
-   endif
-
-   if ( "." $ cValue ) .and. !( "," $ cValue ) 
-      // '.' como separador
-      cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
-      if hb_RegExMatch( cPatron, cValue )
-         return VAL( STRTRAN( cValue, ",", "" ) )
+      if oTPuy:cSepDec==","
+         cValue := STRTRAN( cValue, ",", "." )
       endif
    endif
 
+//   if ( "." $ cValue ) .and. !( "," $ cValue ) 
+      // '.' como separador
+      cPatron := "^-?[\,0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
+      if hb_RegExMatch( cPatron, cValue )
+         return VAL( STRTRAN( cValue, ",", "" ) )
+      endif
+//   endif
+
    // Patron de coma decimal
 //   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
-   cPatron := "^(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
-
+   cPatron := "^-?(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
    if hb_RegExMatch( cPatron, cValue )
-      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+      if oTpuy:cSepDec==","
+         return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+      endif
    endif
 
-RETURN 0
+RETURN VAL( cValue )
 
 
 /** \brief Convierte un valor numerico a texto formateado 
@@ -776,49 +899,6 @@ FUNCTION ToStrF( nValue, cMask )
       return ""
    endif
 RETURN ALLTRIM( TRANSFORM( nValue, cMask ) )
-
-
-/** \brief Convierte un texto numerico formateado tipo 999.999,99 a
- *         numerico
- */
-FUNCTION Str2Num( cValue, nDec )
-   local cPatron, cDec
-
-   default nDec to oTPuy:nDecimals
-
-   if cValue == NIL .or. empty(cValue) .or. ValType(cValue)!="C"
-      return 0
-   endif
-
-   cDec := ALLTRIM(STR(nDec))
-
-   if ( "," $ cValue ) .and. !( "." $ cValue ) 
-      // esto hace que si tenemos mas decimales, 
-      // sean tomados en cuenta.
-      cValue := STRTRAN( cValue, ",", "." )
-//View( cValue )
-   endif
-
-   if ( "." $ cValue ) .and. !( "," $ cValue ) 
-      // '.' como separador
-      cPatron := "^[\.0-9]{1,9}(\.[0-9]{0,"+cDec+"})?$"
-      if hb_RegExMatch( cPatron, cValue )
-//View( "punto decimal" )
-         return VAL( STRTRAN( cValue, ",", "" ) )
-      endif
-   endif
-
-   // Patron de coma decimal
-   cPatron := "^[\,0-9]{1,9}(\,[0-9]{0,"+cDec+"})?$"
-   cPatron := "^(\d{1}\.)?(\d+\.?)+(,\d{0,"+cDec+"})?$"
-
-   if hb_RegExMatch( cPatron, cValue )
-//View( "coma decimal" )
-      return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
-   endif
-
-   // Patron de punto decimal
-RETURN 0
 
 
 
@@ -843,7 +923,22 @@ FUNCTION ToSql( uValue, nDbType )
    if cType = "C"
 
       if !Empty(uValue)
-         cResult := "'"+ StrTran(uValue, "'", ' ') + "'"
+         if nDbType = 0 // MySql
+            cResult := uValue
+            if AT( "'", cResult ) > 0
+               cResult := StrTran(uValue, "'", "\'")
+            endif
+            if AT( '"', cResult ) > 0
+               cResult := StrTran(uValue, '"', '\"')
+            endif
+            if AT( "#", cResult ) > 0
+               cResult := StrTran(uValue, '#', '\#')
+            endif
+            cResult := "'"+ uValue + "'"
+         else
+            // aun por revisar como escapar caracteres especiales en pgsql
+            cResult := "'"+ StrTran(uValue, "'", ' ') + "'"
+         endif
       endif
            
    elseif cType = "D" .and. ! Empty(uValue)
@@ -871,8 +966,7 @@ FUNCTION ToSql( uValue, nDbType )
       cResult := ToSql( uValue:Get() )
    endif
         
-return cResult    
-
+return cResult   
 
 
 /** \brief Recibe un arreglo con datos u objetos tpyentry y

@@ -50,6 +50,10 @@
 
 EXTERNAL HB_LANGSELECT
 REQUEST ERRORSYS
+#ifdef __PLATFORM__UNIX
+  //soporte a GDLib (de momento solo GNU/Linux)
+  REQUEST GDIMAGE
+#endif
 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
@@ -163,6 +167,8 @@ Function Main( ... )
    oTpuy:lMainRun   := .f.
 
    oTpuy:nDecimals  := 2
+   oTpuy:cSepMiles  := "."   // Separador de Miles
+   oTpuy:cSepDec    := ","   // Separador decimal
 
    TRY
      RUNXBS( "init.conf" )
@@ -173,7 +179,11 @@ Function Main( ... )
 
    SET DECIMALS TO oTpuy:nDecimals
 
-   oTpuy:cDefDecMask := "@E 999,999,999."+REPLICATE( '9', oTpuy:nDecimals )
+   if oTpuy:cSepDec == ","
+      oTpuy:cDefDecMask := "@E 999,999,999."+REPLICATE( '9', oTpuy:nDecimals )
+   else
+      oTpuy:cDefDecMask := "@R 999,999,999."+REPLICATE( '9', oTpuy:nDecimals )
+   endif
 
    // Debemos resetear nombre de la aplicacion luego de ejecutar el init.conf 
    oTpuy:SetAppName( TPUY_NAME )

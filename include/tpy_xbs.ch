@@ -158,11 +158,14 @@
 
 
 // Entry/Get
-#xcommand DEFINE ENTRY [ <oBtn> ]  ;
+#xcommand DEFINE [<cType>] ENTRY [ <oBtn> ]  ;
                  [ VAR <uVar> ];
                  [ <lPassword: PASSWORD> ] ;
+                 [ FILTER <cRegExFilter> ] ;
+                 [ MSGWIDGET <oMsgWidget> ];
                  [ PICTURE <cPicture> ];
                  [ VALID <bValid> ];
+                 [ LENGHT <nLen> [ <lZero: ZERO> ] ];
                  [ COMPLETION <aCompletion> ];
                  [ FONT <oFont> ];
                  [ <lExpand: EXPAND> ] ;
@@ -183,12 +186,18 @@
                  [ LEFT BUTTON <ulButton> ];
                  [ RIGHT BUTTON <urButton> ];
       => ;
-  [ <oBtn> := ] tpy_Entry():New( bSetGet( <uVar> ), <cPicture>, [ \{|o| <bValid> \} ],;
-                   <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, <nPadding>,<.lContainer.>,;
+  [ <oBtn> := ] tpyEntry():New( [TPYENTRY_<cType>], ;
+                   bSetGet( <uVar> ), <cRegExFilter>, <oMsgWidget>, <cPicture>,;
+                   [ \{|o| <bValid> \} ],;
+                   <nLen>,<.lZero.>,;
+                   <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, ;
+                   <nPadding>,<.lContainer.>,;
                    <x>,<y>, <cId>, <uGlade>, <uLabelBook>,<.lPassword.>,;
                    <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
-                   <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, <yOptions_ta>,;
+                   <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, ;
+                   <yOptions_ta>,;
                    [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
+
 
 
 //eof
