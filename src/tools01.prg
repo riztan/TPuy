@@ -762,7 +762,6 @@ FUNCTION ExtName( cFileName )
 RETURN cFileName
 
 
-
 FUNCTION Check_Version( cRuta )
    local cHash
    local cFile, cOS := lower( OS() )
