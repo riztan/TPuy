@@ -15,6 +15,8 @@ include ./src/genresource.mk
 
 RESOURCE_FILE =./src/resource.rc
 
+export HPDF=yes
+
 TARGET = ./bin/tpuy
 
 SRCPATH = ./src/

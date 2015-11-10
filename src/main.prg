@@ -41,6 +41,7 @@
 #include "tgtkext.ch"
 #include "tgtkext2.ch"
 #include "tpy_extern.ch"
+#include "imprimepdf_ext.ch"
 //#include "libgdaext.ch"
 #include "tip.ch"
 #include "tpy_init.ch"
