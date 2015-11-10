@@ -762,7 +762,6 @@ FUNCTION ExtName( cFileName )
 RETURN cFileName
 
 
-
 FUNCTION Check_Version( cRuta )
    local cHash
    local cFile, cOS := lower( OS() )
@@ -884,6 +883,11 @@ FUNCTION ToNum( cValue, nDec )
    if hb_RegExMatch( cPatron, cValue )
       if oTpuy:cSepDec==","
          return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
+      endif
+   else
+      if ( ( "," $ cValue ) .and. ( "." $ cValue ) ) .and. oTpuy:cSepDec==","
+         cValue := STRTRAN(cValue, ".", "")
+         cValue := STRTRAN(cValue, ",", ".")
       endif
    endif
 
