@@ -884,6 +884,11 @@ FUNCTION ToNum( cValue, nDec )
       if oTpuy:cSepDec==","
          return VAL( STRTRAN( STRTRAN( cValue, ".", "" ), ",", "." ) )
       endif
+   else
+      if ( ( "," $ cValue ) .and. ( "." $ cValue ) ) .and. oTpuy:cSepDec==","
+         cValue := STRTRAN(cValue, ".", "")
+         cValue := STRTRAN(cValue, ",", ".")
+      endif
    endif
 
 RETURN VAL( cValue )

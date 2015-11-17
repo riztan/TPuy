@@ -15,6 +15,8 @@ include ./src/genresource.mk
 
 RESOURCE_FILE =./src/resource.rc
 
+export HPDF=yes
+
 TARGET = ./bin/tpuy-dp
 
 SRCPATH = ./src/
@@ -24,8 +26,8 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)tobject.prg       \
            $(SRCPATH)tscript.prg       \
            $(SRCPATH)hbrun.prg         \
-	   $(SRCPATH)connto.prg        \
-	   $(SRCPATH)connsave.prg      \
+           $(SRCPATH)connto.prg        \
+           $(SRCPATH)connsave.prg      \
            $(SRCPATH)tools01.prg       \
            $(SRCPATH)testqry1.prg      \
            $(SRCPATH)tpostgres.prg     \
@@ -38,7 +40,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)gpctoolbutton.prg \
            $(SRCPATH)utf.prg           \
            $(SRCPATH)xml.prg           \
-	   $(SRCPATH)filechooser.prg   \
+           $(SRCPATH)filechooser.prg   \
            $(SRCPATH)about.prg         \
            $(SRCPATH)pctapiz.prg       \
            $(SRCPATH)tpywin.prg        \
@@ -47,7 +49,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)tpy_image.prg     \
            $(SRCPATH)model_abm.prg     \
            $(SRCPATH)tpy_dp.prg        \
-	   $(SRCPATH)tpyentry.prg
+           $(SRCPATH)tpyentry.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq
 
