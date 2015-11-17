@@ -27,7 +27,7 @@ PROCEDURE test_pdf(  )
 
    oHaru := TIMPRIMEPDF():New("test.pdf")                                  // Creamos documento
 
-   oHaru:PageSetSize( HPDF_PAGE_SIZE_A4, HPDF_PAGE_LANDSCAPE ) // Page format
+   oHaru:PageSetSize( HPDF_PAGE_SIZE_LETTER, HPDF_PAGE_LANDSCAPE ) // Page format
 
    UTILPDF oHaru:oUtil 1,1.5 ;
            IMAGE oTpuy:cImages+"tpuy-icon-64.png" //SIZE 8,5 
