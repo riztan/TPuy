@@ -80,7 +80,7 @@ Return .T.
  */
 Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
 
-   Local oMsgRun, pixbuf, oDraw, oErr
+   Local oMsgRun, pixbuf, oDraw, oErr, cRes, lRes := .f.
 
    Public oMsgRun_oLabel, oMsgRun_oImage
 
@@ -96,14 +96,29 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
    
    pixbuf := gdk_pixbuf_new_from_file( oTpuy:cImages+"tepuyes.png" )
 
-
-   oMsgRun := GDialog():New(,nWidth,nHeight,,,,, )
+   if FILE( oTpuy:cImages+"msgrun.ui" )
+      oMsgRun := GDialog():New(,nWidth,nHeight,,,,, )
+   else
+      lRes := .t.
+      SET RESOURCES cRes FROM FILE oTpuy:cResources+"msgrun.ui"
+      DEFINE DIALOG oMsgRun SIZE nWidth, nHeight ID "msgrun" RESOURCE cRes
+   endif
 //   oBox    := GBoxVH():New( .F.,, .F., oMsgRun, .F., .F.,, .T.,,,, .F., .F., .F.,,,,,,,, )
+
+   if lRes
+      DEFINE IMAGE oMsgRun_oImage ;
+             FILE oTpuy:cImages+"tepuyes.png" ;
+             ID "image1" RESOURCE cRes
+      DEFINE LABEL oMsgRun_oLabel ;
+             TEXT cMensaje ;
+             ID "label1" RESOURCE cRes
+   else
 
       DEFINE DRAWINGAREA oDraw ;
              EXPOSE EVENT  MsgRunDraw( oSender, pixbuf, cMensaje );
              OF oMsgRun CONTAINER
 
+   endif
 /*
    oMsgRun_oImage :=GImage():New(cImagen,oBox,.F.,.F.,,.F.;
                  ,,,,,,,, .F., .F., .F., .F.,,,,,,,,,,, .F. )
@@ -115,10 +130,11 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
    oMsgRun:SetDecorated(.F.)
 //   oMsgRun:Separator(.F.)
 
-   oMsgRun:Activate(,,,,,, ,, .T., .F. , .F., .F., .F. )
+//   oMsgRun:Activate(,,,,,, ,, .T., .F. , .F., .F., .F. )
+   ACTIVATE DIALOG oMsgRun CENTER RUN
 
-   oMsgRun:Refresh()
-   SecondsSleep(.2)
+//   oMsgRun:Refresh()
+//   SecondsSleep(.2)
    SysRefresh()
 
    TRY
@@ -127,6 +143,7 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
       MsgAlert("Se presentó un problema al realizar la acción.")
       return oMsgRun
    END
+
 Return oMsgRun
 
 
