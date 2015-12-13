@@ -49,11 +49,16 @@
 // #include "hbstruct.ch"
 // #include "hblang.ch"
 
+EXTERNAL HB_PROCESSRUN
+EXTERNAL WINEXEC
+
 EXTERNAL HB_LANGSELECT
 REQUEST ERRORSYS
 #ifdef __PLATFORM__UNIX
   //soporte a GDLib (de momento solo GNU/Linux)
   REQUEST GDIMAGE
+#else
+  EXTERNAL WAPI_SHELLEXECUTE
 #endif
 
 
@@ -69,7 +74,7 @@ Function Main( ... )
 //Function Main(  )
 
    Local oError, uReturn
-   Local cVersion:="0.1 (Alfa)"
+   Local cVersion:="0.2 (Alfa)"
    Local cSystem_Name:=TPUY_NAME+" v"+cVersion
 
    Local tValor := hb_DateTime() //ROUND(SECONDS()+50,0)
