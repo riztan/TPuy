@@ -469,6 +469,7 @@ STATIC FUNCTION __VALOTHER( oEntry )
 
    local cValue, dValue
 
+   if oEntry == NIL ; return .t. ; endif
    if oEntry:Empty() ; return .t. ; endif
       
    cValue := oEntry:GetText()
