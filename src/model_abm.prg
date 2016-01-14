@@ -95,12 +95,14 @@ CLASS TPY_ABM2 //FROM TPUBLIC
    DATA lEndSilence
    DATA nRow
    DATA nRows
+   DATA nInterline   INIT 6
 
    DATA bAction
    DATA bInit
    DATA bEnd
 
    DATA bSave
+   DATA bPosSave     INIT {|| .t. }
 
    DATA cImage
 
@@ -392,7 +394,8 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
              VERTICAL PADDING 15 //EXPAND FILL
    EndIf
 
-   DEFINE BOX ::oBoxes:oBoxTable VERTICAL OF ::oBoxes:oBoxMain EXPAND FILL HOMOGENEOUS
+   DEFINE BOX ::oBoxes:oBoxTable VERTICAL OF ::oBoxes:oBoxMain ;
+          EXPAND FILL HOMOGENEOUS SPACING ::nInterline
 
 
 //View( ::oModel:aTpyStruct )
@@ -455,8 +458,14 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
          //-- Si estamos editando, colocamos el valor desde el modelo...
          If !lNew .and. ( ::nRow > 0 .or. ::lFromListBox )
             //cTemp := AllTrim( CStr( ::oModel:oGtkModel:oTreeView:GetValue( aColumn:__EnumIndex(), "", pPath, @aIter ) ) )
+//View("deberia...")
             if ::lFromListBox
+//View("2")
                cTemp := ::oListBox:GetValue( oColumn:Name )
+//View( ::oListBox:GetValue("Nombre") )
+               if Empty(cTemp)
+                  cTemp := ::oListBox:oModel:oTreeView:GetAutoValue( aColumn:__EnumIndex() )
+               endif
                if ValType(cTemp)="C"
                   cTemp := ALLTRIM( cTemp )
                endif
@@ -479,7 +488,7 @@ View( "aqui...  revisar. (model_abm.prg)" )
 
        
          /* Preparando Elementos Visuales */
-         DEFINE BOX ::oBoxes:tmp OF oBoxTmp VERTICAL EXPAND FILL CONTAINER
+         DEFINE BOX ::oBoxes:tmp OF oBoxTmp VERTICAL EXPAND FILL SPACING 1 CONTAINER
 
          DEFINE EVENTBOX oEventBox OF ::oBoxes:tmp EXPAND FILL
                 //EXPAND FILL
@@ -614,6 +623,9 @@ View( "aqui...  revisar. (model_abm.prg)" )
 
          cTemp := ""
 
+else
+MsgInfo( aColumn[COL_NAME] )
+View( ::oModel:IsDef( aColumn[COL_NAME] ) )
       endif
    NEXT
 
@@ -970,12 +982,13 @@ METHOD SAVE() CLASS TPY_ABM2
              EndCase
 
              hb_HSet( ::hNewValues, oColumn:Name, cValue )
+/*
 if ValType(cValue) = "C"
   MsgInfo("Valor nuevo...  " + oColumn:Name + " = " + cValue)
 else
   MsgInfo("Valor nuevo...  " + oColumn:Name + " = " + CStr(cValue))
 endif
-             
+*/             
           /* Modificar */
           else  
 
@@ -990,8 +1003,16 @@ endif
 //? hb_valtoexp( ::hOldValues )
 //? ValType( ::oModel:oTreeView )
 //                   if !Empty( ::hOldValues )
-                   if !(::hOldValues[ oColumn:Name ] == cValue )
-                      AADD( aUpdate, { aColumn:__EnumIndex, cValue } )
+Do Case
+   Case oColumn:Type ="L"
+      uValue := IIF( cValue = "S" .or. cValue = "T", .t., .f. )
+   Case oColumn:Type ="D"
+      uValue := DTOC(CTOD( cValue ))
+   Other
+      uValue := cValue
+EndCase
+                   if !(::hOldValues[ oColumn:Name ] == uValue )
+                      AADD( aUpdate, { aColumn:__EnumIndex, uValue } )
                    endif
 //                   else
 //? "Insertar valores..."
@@ -1012,6 +1033,7 @@ endif
 
 //MsgInfo( ::oModel:GetValue( oColumn:Name ), oColumn:Name )
                 uValue := ::oModel:GetValue( oColumn:Name )
+//View( ::hNewValues )
                 hb_HSet( ::hNewValues[ oColumn:Name ], uValue )
              endif
 
@@ -1022,25 +1044,34 @@ endif
 //View( aUpdate )
       if ::lNew 
 //View( ::hNewValues )
-         Return ::oModel:Insert(::hNewValues) 
-      endif
+         if !::oModel:Insert(::hNewValues) 
+            return .f. 
+         endif
 
-      //-- Mandamos a Actualizar el Modelo
-      if ::oModel:Set( ::hNewValues, ::hOldValues ) .and. ;
-         ::oModel:oTreeView:IsGetSelected(aIter)
+      else
+View("aqui")
+View( ::hNewValues )
+         //-- Mandamos a Actualizar el Modelo
+         if ::oModel:Set( ::hNewValues, ::hOldValues ) .and. ;
+            ::oModel:oTreeView:IsGetSelected(aIter)
+   
+            pPath := ::oModel:oTreeView:GetPath( aIter )
+            FOR EACH aColumn IN aUpdate
+               ::oModel:oTreeView:SetValue( aColumn[1], aColumn[2], pPath, ::oModel:oGtkModel )
+            NEXT
+            gtk_tree_path_free( pPath )
 
-         pPath := ::oModel:oTreeView:GetPath( aIter )
-         FOR EACH aColumn IN aUpdate
-            ::oModel:oTreeView:SetValue( aColumn[1], aColumn[2], pPath, ::oModel:oGtkModel )
-         NEXT
-         gtk_tree_path_free( pPath )
+            ::GenOldValues()
 
-         ::GenOldValues()
-
-         //::oModel:QryRefresh()
-         //::oModel:Refresh()
+            //::oModel:QryRefresh()
+            //::oModel:Refresh()
+         endif
       endif
       
+      if hb_IsBlock( ::bPosSave )
+         return EVAL( ::bPosSave, self )
+      endif
+
    EndIf
 
 Return lRet

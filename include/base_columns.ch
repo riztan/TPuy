@@ -17,6 +17,8 @@
 
 /* Posicion de los datos en la tabla base_columns */
 
+#define COL_LEN              18
+
 #define COL_ID               1
 #define COL_SCHEMA           2
 #define COL_TABLE            3   
