@@ -340,8 +340,12 @@ METHOD NEW( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
       ::oWnd:SetSkipTaskBar( .t. )
 
-      If hb_IsObject(oIcon)
-         gtk_window_set_icon(::oWnd:pWidget, oIcon)
+      If ISNIL( oIcon ) .and. FILE( oTpuy:cImages+"tpuy-icon-16.png" )
+         ::oWnd:SetIconFile( oTpuy:cImages+"tpuy-icon-16.png" )
+      Else
+         If hb_IsObject(oIcon)
+            ::oWnd:SetIconName( oIcon )
+         EndIf
       EndIf
       
       If !IsNIL(::uGlade)
@@ -497,7 +501,7 @@ View( "aqui...  revisar. (model_abm.prg)" )
          DEFINE LABEL oWidGetTmp TEXT oColumn:description + ": " MARKUP ; 
                 FONT ::oFont ;
                 OF  oEventBox CONTAINER ; //::oBoxes:tmp ; //oBoxTmp ;
-                HALIGN 0 //JUSTIFY GTK_JUSTIFY_RIGHT
+                HALIGN .01 //JUSTIFY GTK_JUSTIFY_RIGHT
 
                 HSet( ::hWidGet, oColumn:Name+"_label", oWidGetTmp )
                 
@@ -792,7 +796,7 @@ METHOD ACTIVE( bAction, bInit ) CLASS TPY_ABM2
 
    If !::lButton .and. hb_IsOBject( ::oBoxes:oBoxBtns ) ; ::oBoxes:oBoxBtns:Hide() ; EndIf
 
-   DEFINE BOX ::oBoxes:oBoxTable VERTICAL OF ::oBoxes:oBoxMain EXPAND FILL HOMOGENEOUS
+//   DEFINE BOX ::oBoxes:oBoxTable VERTICAL OF ::oBoxes:oBoxMain EXPAND FILL HOMOGENEOUS
 
 /*
    if ::lFix .and. ::nRows > 0
@@ -879,7 +883,7 @@ METHOD ACTIVE( bAction, bInit ) CLASS TPY_ABM2
          ::oBoxes:oBoxBtns:End() 
 
          DEFINE BOX ::oBoxes:oBoxBtns OF ::oBox ;
-                EXPAND FILL HOMOGENEOUS;
+                /*EXPAND FILL*/ HOMOGENEOUS;
                 SPACING 5
 
          DEFINE BUTTON ::hButtons["oSave"] TEXT "Guardar" ;

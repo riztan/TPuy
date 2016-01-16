@@ -1521,8 +1521,12 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
       ::oWnd:SetSkipTaskBar( .t. )
 
-      If IsObject(oIcon)
-         gtk_window_set_icon(::oWnd:pWidget, oIcon)
+      If ISNIL( oIcon ) .and. FILE( oTpuy:cImages+"tpuy-icon-16.png" )
+         ::oWnd:SetIconFile( oTpuy:cImages+"tpuy-icon-16.png" )
+      Else
+         If hb_IsObject(oIcon)
+            ::oWnd:SetIconName( oIcon )
+         EndIf
       EndIf
       
       If !IsNIL(::uGlade)
