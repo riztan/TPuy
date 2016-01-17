@@ -115,6 +115,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
    Local cBaseFields, nFields, nLenStru
    Local y, nColumn, cWhere, cQuery //, oConsul,aDMStru
    Local aField, aItem, oColumn, nPos, aLin
+   Local cPicture
 
    Default aItems   := {}
    Default aStruct  := {}
@@ -255,11 +256,26 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
              ::aTpyStruct[ aLin:__EnumIndex(), COL_DESCRIPTION ] := aLin[ 1 ]
              ::aTpyStruct[ aLin:__EnumIndex(), COL_EDITABLE    ] := .t.
              ::aTpyStruct[ aLin:__EnumIndex(), COL_REFERENCE   ] := .f.
-             ::aTpyStruct[ aLin:__EnumIndex(), COL_PICTURE     ] := "X"
+             //::aTpyStruct[ aLin:__EnumIndex(), COL_PICTURE     ] := iif( aLin[ 2 ]="L", "BOOLEAN", "X" )
+//view( alin[2] )
+             Do Case // PICTURE
+             Case aLin[ 2 ] = "L" 
+                cPicture := "BOOLEAN"
+             Case aLin[ 2 ] = "D" 
+                cPicture := "99/99/9999"
+             Case aLin[ 2 ] = "C" 
+                cPicture := "X"
+             Case aLin[ 2 ] = "N" 
+                cPicture := "N"
+             Other
+                cPicture := "X"
+             EndCase
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_PICTURE     ] := cPicture
+
              ::aTpyStruct[ aLin:__EnumIndex(), COL_VIEWABLE    ] := .t.
              ::aTpyStruct[ aLin:__EnumIndex(), COL_ORDER       ] := aLin:__EnumIndex()
 
-             ::aDMStru[ aLin:__EnumIndex() ] := { aLin[1], aLin[1], .t., .t., .t., "X", "", "", "","","","","" }
+             ::aDMStru[ aLin:__EnumIndex() ] := { aLin[1], aLin[1], .t., .t., .t., cPicture, "", "", "","","","","" }
 
 
          NEXT
@@ -509,7 +525,9 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
                       EndIf
  
                    Else
-                      cValTmp := TRANSFORM( Val(aItems[nColumn,n]), ::aDMStru[n,6] )
+                      If ValType( aItems[nColumn,n] ) != "L"
+                         cValTmp := TRANSFORM( Val(aItems[nColumn,n]), ::aDMStru[n,6] )
+                      EndIf
                    EndIf
                 
                 EndIf

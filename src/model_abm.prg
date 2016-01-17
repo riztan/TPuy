@@ -1007,14 +1007,14 @@ endif
 //? hb_valtoexp( ::hOldValues )
 //? ValType( ::oModel:oTreeView )
 //                   if !Empty( ::hOldValues )
-Do Case
-   Case oColumn:Type ="L"
-      uValue := IIF( cValue = "S" .or. cValue = "T", .t., .f. )
-   Case oColumn:Type ="D"
-      uValue := DTOC(CTOD( cValue ))
-   Other
-      uValue := cValue
-EndCase
+                   Do Case
+                      Case oColumn:Type ="L"
+                         uValue := IIF( cValue = "S" .or. cValue = "T", .t., .f. )
+                      Case oColumn:Type ="D"
+                         uValue := DTOC(CTOD( cValue ))
+                      Other
+                         uValue := cValue
+                   EndCase
                    if !(::hOldValues[ oColumn:Name ] == uValue )
                       AADD( aUpdate, { aColumn:__EnumIndex, uValue } )
                    endif
@@ -1053,8 +1053,8 @@ EndCase
          endif
 
       else
-View("aqui")
-View( ::hNewValues )
+//View("aqui")
+//View( ::hNewValues )
          //-- Mandamos a Actualizar el Modelo
          if ::oModel:Set( ::hNewValues, ::hOldValues ) .and. ;
             ::oModel:oTreeView:IsGetSelected(aIter)
