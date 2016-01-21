@@ -62,9 +62,28 @@ ENDCLASS
 
 METHOD NEW( aValues, aStruct ) CLASS DBCOLUMN
 
+   local cDbType
+
    ::Super:New()
 
    Default aValues To {}
+
+   if Len( aStruct ) < 5
+      Do Case
+      Case aStruct[2]="C"
+         cDbType := "VARCHAR("+STR(aStruct[3])+")"
+      Case aStruct[2]="D"
+         cDbType := "DATE"
+      Case aStruct[2]="L"
+         cDbType := "BOOLEAN"
+      Case aStruct[2]="N" .and. aStruct[4]=0
+         cDbType := "INTEGER("+STR(aStruct[4])+")"
+      Case aStruct[2]="N" .and. aStruct[4]>0
+         cDbType := "DECIMAL("+STR(aStruct[4])+")"
+      EndCase
+   else
+      cDbType := aStruct[7]
+   endif
 
    If Len(aValues)>10
 
@@ -73,7 +92,7 @@ METHOD NEW( aValues, aStruct ) CLASS DBCOLUMN
       //::Len                  := aStruct[3]
       ::Add("len", aStruct[3])
       //::DbType               := aStruct[7]
-      ::Add("dbtype", aStruct[7])
+      ::Add("dbtype", cDbType)
       //::Schema               := aValues[COL_SCHEMA        ]
       ::Add("schema", aValues[COL_SCHEMA])
       //::Table                := aValues[COL_TABLE         ]
@@ -118,7 +137,7 @@ METHOD NEW( aValues, aStruct ) CLASS DBCOLUMN
       //::Len                  := aStruct[3]
       ::Add("len", aStruct[3])
       //::DbType               := aStruct[7]
-      ::Add("dbtype", aStruct[7])
+      ::Add("dbtype", cDbType)
       //::GtkType              := IIF( ::Type == "L", "active", "text" )
       ::Add("gtktype", iif( ::hVars[ "type" ] == "L", "active", "text" ))
       //::Schema               := ""

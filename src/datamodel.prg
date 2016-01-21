@@ -37,10 +37,12 @@
 
 //#include "tepuy.ch"
 #include "proandsys.ch"
-#include "xhb.ch"
-#include "gclass.ch"
+//#include "xhb.ch"
+//#include "gclass.ch"
 #include "hbclass.ch"
-#include "pc-soft.ch"
+//#include "pc-soft.ch"
+
+//#include "base_columns.ch"
 
 
 //#define GTK_STOCK_EDIT      "gtk-edit"
@@ -66,6 +68,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA aItems            INIT {}
       DATA aStruct           INIT {}
       DATA aDMStru           INIT {}
+      DATA aTpyStruct        INIT {}
       DATA aActions          INIT {}
       DATA aTypes
       DATA hModel
@@ -111,7 +114,8 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
 
    Local cBaseFields, nFields, nLenStru
    Local y, nColumn, cWhere, cQuery //, oConsul,aDMStru
-   Local aField, aItem
+   Local aField, aItem, oColumn, nPos, aLin
+   Local cPicture
 
    Default aItems   := {}
    Default aStruct  := {}
@@ -240,6 +244,57 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
       nLenStru  := Len(::aStruct)
       //nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
       if empty(::aDMStru) ; ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) ) ; endif
+      //if empty(::aTpyStruct) ; ::aTpyStruct := ARRAY( nLenStru, Len(::aStruct[1]) ) ; endif
+
+      ::aTypes := ARRAY( nLenStru )
+
+      if empty( ::aTpyStruct ) 
+         ::aTpyStruct := ARRAY( nLenStru, COL_LEN )
+         FOR EACH aLin IN ::aStruct
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_ID          ] := Lower( aLin[ 1 ] )
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_NAME        ] := Lower( aLin[ 1 ] )
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_DESCRIPTION ] := aLin[ 1 ]
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_EDITABLE    ] := .t.
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_REFERENCE   ] := .f.
+             //::aTpyStruct[ aLin:__EnumIndex(), COL_PICTURE     ] := iif( aLin[ 2 ]="L", "BOOLEAN", "X" )
+//view( alin[2] )
+             Do Case // PICTURE
+             Case aLin[ 2 ] = "L" 
+                cPicture := "BOOLEAN"
+             Case aLin[ 2 ] = "D" 
+                cPicture := "99/99/9999"
+             Case aLin[ 2 ] = "C" 
+                cPicture := "X"
+             Case aLin[ 2 ] = "N" 
+                cPicture := "N"
+             Other
+                cPicture := "X"
+             EndCase
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_PICTURE     ] := cPicture
+
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_VIEWABLE    ] := .t.
+             ::aTpyStruct[ aLin:__EnumIndex(), COL_ORDER       ] := aLin:__EnumIndex()
+
+             ::aDMStru[ aLin:__EnumIndex() ] := { aLin[1], aLin[1], .t., .t., .t., cPicture, "", "", "","","","","" }
+
+
+         NEXT
+      endif
+
+      FOR EACH aLin IN ::aStruct
+         nPos := AScan( ::aTpyStruct, {|a| lower(aLin[1]) == a[COL_NAME] } )
+//View( aLin )
+//View( nPos )
+         if nPos > 0
+            oColumn := DbColumn():New( ::aTpyStruct[ nPos ], aLin )
+         else
+            oColumn := DbColumn():New( aLin )
+         endif
+         ::Add( lower(aLin[1]), oColumn )
+
+         ::aTypes[ aLin:__EnumIndex() ] := oColumn:GtkNType  
+
+      NEXT
 
    EndIf
 
@@ -470,7 +525,9 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
                       EndIf
  
                    Else
-                      cValTmp := TRANSFORM( Val(aItems[nColumn,n]), ::aDMStru[n,6] )
+                      If ValType( aItems[nColumn,n] ) != "L"
+                         cValTmp := TRANSFORM( Val(aItems[nColumn,n]), ::aDMStru[n,6] )
+                      EndIf
                    EndIf
                 
                 EndIf
@@ -719,10 +776,14 @@ METHOD SET( aItems, xCol, uValue, aIter, aError ) CLASS TPY_DATA_MODEL
    Local nCont := 1
    Local lChanged := .F.
    Local aTables
+   Local hNewValues, hOldValues
+   local aColumn, oColumn
+   local aValues := ARRAY( Len( ::aTpyStruct ) )
 
    DEFAULT xCol   := 1
 //   DEFAULT uValue := "No Value"
    DEFAULT aError := ARRAY(1)
+   DEFAULT aIter := ARRAY( 4 )
 
    //-- Primero, si tenemos conexion a BD... intentamos actualizar.
    If ::lQuery .AND. !Empty(aItems)
@@ -830,29 +891,57 @@ ENDIF
 
    EndIf
    
+   If hb_IsHash( aItems )
+      /*Cuando viene de un formulario tipo ABM */
+      hNewValues := aItems
+      hOldValues := xCol
 
-   If Empty( aItems )
-   
-      If ValType(xCol)="N"
-         nCol := xCol
-      ElseIf ValType(xCol)="C"
-         nCol := ::oTreeView:GetPosCol( xCol )
-         If nCol < 0
-            MsgStop("Columna no reconocida", "atencion")
-            Return .F.
-         EndIf
-      Else
-         Return NIL      
-      Endif
-
-      if hb_ISNIL( aIter )
-         ::oTreeView:IsGetSelected( ::aIter )
-         SET LIST_STORE ::oLbx ITER ::aIter POS nCol VALUE uValue
-      else
-         SET LIST_STORE ::oLbx ITER aIter POS nCol VALUE uValue
+      if hb_IsNil( hNewValues ) .or. hb_IsNil( hOldValues )
+         return NIL
       endif
 
-  EndIf
+      //MsgInfo("Metodo Set en ModelQuery", "dbmodel.prg")
+
+      FOR EACH aColumn IN ::aTpyStruct
+         oColumn := ::Get( aColumn[COL_NAME] )
+         if oColumn:Editable .AND. HHasKey( hNewValues, oColumn:Name ) 
+            aValues[ aColumn:__EnumIndex() ] := hNewValues[ oColumn:Name ]
+         else
+            aValues[ aColumn:__EnumIndex() ] := hOldValues[ oColumn:Name ]
+         endif
+      NEXT
+      if ::oTreeView:IsGetSelected(aIter)
+         SET VALUES LIST_STORE ::oLbx ITER aIter VALUES aValues
+         return .t.
+      endif
+      return .f.
+      
+
+   ElseIf hb_IsArray( aItems )
+      If Empty( aItems )
+   
+         If ValType(xCol)="N"
+            nCol := xCol
+         ElseIf ValType(xCol)="C"
+            nCol := ::oTreeView:GetPosCol( xCol )
+            If nCol < 0
+               MsgStop("Columna no reconocida", "atencion")
+               Return .F.
+            EndIf
+         Else
+            Return NIL      
+         Endif
+
+         If hb_ISNIL( aIter )
+            ::oTreeView:IsGetSelected( ::aIter )
+            SET LIST_STORE ::oLbx ITER ::aIter POS nCol VALUE uValue
+         Else
+            SET LIST_STORE ::oLbx ITER aIter POS nCol VALUE uValue
+         EndIf
+
+     EndIf
+
+   EndIf
 
 Return .T.
 
@@ -909,7 +998,9 @@ Return {aTables,aData}
 METHOD Insert( aItems ) CLASS TPY_DATA_MODEL
 
    Local n, oExecute, cQuery,cQuery2:=""
-   Local aTables, lPrimero:=.t.
+   Local aTables, lPrimero:=.t., aItem, aColumn, oColumn
+   Local aValues := ARRAY( Len( ::aTpyStruct ) )
+   Local aIter := ARRAY( 4 )
    
    //-- Primero, si tenemos conexion a BD... intentamos insertar.
    If ::lQuery
@@ -957,10 +1048,24 @@ METHOD Insert( aItems ) CLASS TPY_DATA_MODEL
   
    EndIf
 
-   APPEND LIST_STORE ::oLbx ITER ::aIter
-   for n := 1 to Len( aItems[2] )
-       SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE aItems[2,n]
-   next
+   if hb_IsHash( aItems )
+
+      FOR EACH aColumn IN ::aTpyStruct
+         oColumn := ::Get( aColumn[COL_NAME] )
+         if oColumn:Editable
+            aValues[ aColumn:__EnumIndex() ] := aItems[ oColumn:Name ]
+         endif
+      NEXT
+      ::oLbx:Append( aValues )
+      SET VALUES LIST_STORE ::oLbx ITER aIter VALUES aValues
+
+   elseif hb_IsArray( aItems )
+      APPEND LIST_STORE ::oLbx ITER ::aIter
+      FOR EACH aItem IN aItems[2]
+          SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE aItem:__EnumIndex()
+      NEXT
+   endif
+
    ::nRows++
 
 Return .T.
@@ -1434,8 +1539,12 @@ METHOD New( oParent, oModel, cTitle, oIcon, nRow, nWidth, nHeight,;
 
       ::oWnd:SetSkipTaskBar( .t. )
 
-      If IsObject(oIcon)
-         gtk_window_set_icon(::oWnd:pWidget, oIcon)
+      If ISNIL( oIcon ) .and. FILE( oTpuy:cImages+"tpuy-icon-16.png" )
+         ::oWnd:SetIconFile( oTpuy:cImages+"tpuy-icon-16.png" )
+      Else
+         If hb_IsObject(oIcon)
+            ::oWnd:SetIconName( oIcon )
+         EndIf
       EndIf
       
       If !IsNIL(::uGlade)
@@ -2094,7 +2203,7 @@ METHOD Save() CLASS TPY_ABM
    Local lRet
    Local aItems := ARRAY( 5, Len(::aFields) )
    Local aField
-   Local lFin, nFind
+   Local lFin, nFind, aTemp
 
    lRet := Eval( ::bSave,Self )
 
@@ -2108,7 +2217,10 @@ METHOD Save() CLASS TPY_ABM
       EndIf
 
       //-- Mandamos a Actualizar el Modelo
-      For y=1 to Len( ::aFields )
+      //For y=1 to Len( ::aFields )
+      FOR EACH aTemp IN ::aFields
+
+         y := aTemp:__EnumIndex()
 
          If ABM_ISEDITABLE
 
@@ -2142,7 +2254,7 @@ METHOD Save() CLASS TPY_ABM
          
 //View({ aItems[1,y],aItems[2,y],aItems[3,y],aItems[4,y],aItems[5,y] })
 //view(::aFields[y])
-      Next y
+      NEXT
 
       
       If ::nRow=0

@@ -37,6 +37,9 @@ func dm_test1()
           TITLE   "Listado";
           SIZE    350,400 //OF oTpuy:oDesktop
    
+          ACTION OF oListBox BUTTON NEW __Editar( oListBox:oWnd, oListBox, .t. )
+          ACTION OF oListBox BUTTON EDIT __Editar( oListBox:oWnd, oListBox, .f., 1 )
+
 
    /* TODO:  Mejorar lo de modal y parent entre ventanas... 
              esta funcionando el modal, pero no del todo bien. 
@@ -49,3 +52,28 @@ func dm_test1()
    oModel:Destroy()
 
 return nil
+
+
+
+FUNCTION __Editar( oParent, oModel, lAdd, nRow )
+
+   local aTables := {}
+   local oABM
+
+   default lAdd := .f.
+   default nRow := 0
+
+   oABM := Tpy_ABM2():New( oParent, oModel, "Edición de Tabla.", , nRow ,,,,,,lAdd )
+
+   if !IsObject( oABM ) 
+      return .f.
+   endif
+
+   oABM:lButton := .t.
+   oABM:lBarBtn := .f.
+
+   oABM:bPosSave := {|| oABM:lEndSilence:=.t., oABM:oWnd:End()  }
+
+   oABM:Active()
+
+RETURN .t.

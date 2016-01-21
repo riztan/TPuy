@@ -18,6 +18,7 @@
 #include "tepuy.ch"
 #include "proandsys.ch"
 //#include "pc-soft.ch"
+#include "tpyentry.ch"
 
 #xuncommand SET RESOURCES <uGlade> FROM FILE <cFile> [ ROOT <root> ];
               => ;
@@ -157,8 +158,23 @@
                    [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
 
 
+// Modificacion para evitar conflicto con la definicion de comboboxentry
+// y mantener compatibilidad con los tipos de entry elaborados en tpuy.
+// RIGC - 2015-12-13
+#xtranslate DEFINE DOCUMENT ENTRY  => DEFINE ENTRY TYPE DOCUMENT
+#xtranslate DEFINE PORCENT ENTRY   => DEFINE ENTRY TYPE PORCENT
+#xtranslate DEFINE INTEGER ENTRY   => DEFINE ENTRY TYPE INTEGER
+#xtranslate DEFINE DECIMAL ENTRY   => DEFINE ENTRY TYPE DECIMAL
+#xtranslate DEFINE MONEY ENTRY     => DEFINE ENTRY TYPE MONEY
+#xtranslate DEFINE EMAIL ENTRY     => DEFINE ENTRY TYPE EMAIL
+#xtranslate DEFINE DATETIME ENTRY  => DEFINE ENTRY TYPE DATETIME
+#xtranslate DEFINE DATE ENTRY      => DEFINE ENTRY TYPE DATE
+#xtranslate DEFINE TIME ENTRY      => DEFINE ENTRY TYPE TIME
+#xtranslate DEFINE IP ENTRY        => DEFINE ENTRY TYPE IP
+#xtranslate DEFINE OTHER ENTRY     => DEFINE ENTRY TYPE OTHER
+
 // Entry/Get
-#xcommand DEFINE [<cType>] ENTRY [ <oBtn> ]  ;
+#xcommand DEFINE ENTRY [TYPE <cType>] [ <oBtn> ]  ;
                  [ VAR <uVar> ];
                  [ <lPassword: PASSWORD> ] ;
                  [ FILTER <cRegExFilter> ] ;

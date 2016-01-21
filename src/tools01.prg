@@ -1007,4 +1007,20 @@ FUNCTION AToSql( aDatos, nDbType )
 RETURN cSql
 
 
+/** \brief Apertura un archivo tipo PDF
+ *         
+ */
+FUNCTION tpy_PDFOpen( cFilePDF )
+  local uRes
+  if empty( cFilePDF ) .or. !FILE( cFilePDF )
+     MsgAlert("Archivo PDF No localizado.", "Atención")
+     return nil 
+  endif
+#ifdef __PLATFORM__WINDOWS
+      uRes := wapi_ShellExecute(0, 'open', cFilePDF, , 0, 0 )
+#else
+      uRes := winexec( "evince " + " " + cFilePDF )
+#endif  
+RETURN uRes
+
 //EOF
