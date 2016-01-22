@@ -28,6 +28,7 @@
 #include "hbclass.ch"
 #include "common.ch"
 #include "tpyentry.ch"
+#include "gclass.ch"
 
 memvar  oTpuy
 
@@ -75,8 +76,17 @@ CLASS TpyEntry FROM GEntry
    DATA cTitle       INIT  ""    // Titulo o Nombre que visualmente 
                                  // representaria este objeto.
    
+   DATA lCalendar    INIT .f.    // En entry tipo fecha 
+                                 // Activa/Desactiva posibilidad de 
+                                 // abrir calendario
 
-   METHOD New( bSetGet, cPicture, bValid, aCompletion, oFont, oParent, lExpand,;
+   DATA oForm                    // Formulario al que pertenece la entrada.
+                                 // Solo se usa en entrada tipo fecha 
+
+   DATA cDefault                 // Valor por defecto
+
+   METHOD New( bSetGet, cPicture, bValid, lCalendar, oForm, ;
+               aCompletion, oFont, oParent, lExpand,;
                lFill, nPadding , lContainer, x, y, cId, uGlade, uLabelTab, lPassWord,;
                lEnd , lSecond, lResize, lShrink, left_ta,right_ta,top_ta,bottom_ta,;
                xOptions_ta, yOptions_ta, bAction, ulButton, urButton )
@@ -107,19 +117,24 @@ ENDCLASS
 
 
 METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
-            nLen, lZero, ... ) CLASS TPYENTRY
+            lCalendar, oForm, nLen, lZero, ... ) CLASS TPYENTRY
 
    default nType        to TPYENTRY_OTHER
    default cPicture     to ""
    default cRegExFilter to ""
    default nLen         to 0
    default lZero        to .f.
+   default lCalendar    to .f.
 
    ::Super:New( bSet, cPicture, bValid, ... )
 
-   ::nType := nType
-   ::nLen  := nLen
-   ::lZero := lZero
+   ::cDefault  := ::GetText()
+
+   ::nType     := nType
+   ::nLen      := nLen
+   ::lZero     := lZero
+   ::lCalendar := lCalendar
+   ::oForm     := oForm
 
    ::SetMaxLength( ::nLen )
 
@@ -414,11 +429,64 @@ STATIC FUNCTION __VALDATE( oEntry )
       endif
 
    endif
+
+   if oEntry:Empty() .or. Empty( oEntry:Get() )
+      if hb_IsObject( oEntry:oForm:oWnd ) .and. ;
+                      oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW")
+         if oEntry:lCalendar 
+            Calendar( oEntry, oEntry:oForm )
+         endif
+      endif
+   endif
+
    if hb_IsBlock(oEntry:bPosValid)
       return EVAL( oEntry:bPosValid, oEntry )
    endif
 
 RETURN .T.
+
+
+static procedure Calendar( oEntry, oForm )
+   local oWnd, oBox, oCalendar, cRes, dFecha
+//   local dDefault := CTOD( oEntry:cDefault )
+
+   if Empty( oTpuy:dFecha )
+      dFecha := DATE()
+   else
+      dFecha := oTpuy:dFecha
+   endif
+
+   SET RESOURCES cRes FROM FILE oForm:cResFile
+
+   DEFINE WINDOW oWnd TITLE "Fecha";
+          SIZE 200,190             ;
+          OF oForm:oWnd
+
+      oWnd:SetDecorated( .f. )
+      oWnd:SetOpacity( 80 )
+      oWnd:SetSkipTaskBar( .t. )
+      gtk_window_set_position( oWnd:pWidget, GTK_WIN_POS_MOUSE )
+
+   DEFINE BOX oBox SPACING 3 BORDER 5 VERTICAL OF oWnd
+
+     DEFINE CALENDAR oCalendar                           ; 
+            DATE CTOD(oEntry:cDefault)                   ;
+            MARKDAY                                      ;
+            ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
+                       oWnd:End(), oWnd:=NIL)            ;
+            OF oBox
+
+
+     DEFINE BUTTON TEXT "Hoy"                        ;
+            ACTION ( oCalendar:SetDate( dFecha ), ;
+                     oCalendar:MarkDay( DAY(dFecha) )) ;
+            OF oBox
+
+
+   ACTIVATE WINDOW oWnd MODAL
+
+return
+
 
 
 STATIC FUNCTION __VALNUMERIC( oEntry )
@@ -460,6 +528,8 @@ STATIC FUNCTION __VALNUMERIC( oEntry )
    endif
 
 RETURN .t.
+
+
 
 
 /** \brief Validacion predeterminada para entry no definido.
