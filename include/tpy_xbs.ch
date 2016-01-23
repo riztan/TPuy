@@ -177,7 +177,10 @@
 #xcommand DEFINE ENTRY [TYPE <cType>] [ <oBtn> ]  ;
                  [ VAR <uVar> ];
                  [ <lCalendar: CALENDAR> [FORM <oForm> ] ];
-                 [ <lPassword: PASSWORD> ] ;
+                 [ <View( cQry )
+
+return
+lPassword: PASSWORD> ] ;
                  [ FILTER <cRegExFilter> ] ;
                  [ MSGWIDGET <oMsgWidget> ];
                  [ PICTURE <cPicture> ];
