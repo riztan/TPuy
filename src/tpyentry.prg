@@ -79,6 +79,7 @@ CLASS TpyEntry FROM GEntry
    DATA lCalendar    INIT .f.    // En entry tipo fecha 
                                  // Activa/Desactiva posibilidad de 
                                  // abrir calendario
+   DATA lCalActive   INIT .f.    // Controlar si el calendario esta activo.
 
    DATA oForm                    // Formulario al que pertenece la entrada.
                                  // Solo se usa en entrada tipo fecha 
@@ -132,7 +133,7 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
    default nLen         to 0
    default lZero        to .f.
    default lCalendar    to .f.
-/*
+
    if nType = TPYENTRY_DATE
       if lCalendar .and. hb_IsObject( oForm )
          if hb_ISNIL( ulButton ) .and. hb_ISNIL( urButton )
@@ -150,7 +151,7 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
          endif
       endif
    endif
-*/
+
    ::Super:New( bSet, cPicture, bValid, aCompletion, oFont, oParent,;
                 lExpand, lFill, nPadding , lContainer, x, y, cId, ;
                 uGlade, uLabelTab, lPassWord, lEnd , lSecond, lResize,;
@@ -470,14 +471,15 @@ STATIC FUNCTION __VALDATE( oEntry )
 
       endif
 
-
       if hb_IsObject( oEntry:oMsgWidGet() )
          oEntry:oMsgWidget:SetText('')
       endif
 
    endif
 
-   if oEntry:Empty() .or. Empty( oEntry:Get() )
+   if (oEntry:Empty() .or. Empty( oEntry:Get() )) ;
+      .and. !oEntry:lCalActive
+//View( oEntry:oGet:buffer )
       if hb_IsObject( oEntry:oForm:oWnd ) .and. ;
                       oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW")
          if oEntry:lCalendar 
@@ -521,7 +523,7 @@ static procedure Calendar( oEntry, oForm )
       //oWnd:SetDecorated( .f. )
       oWnd:SetDeletable( .f. )
       oWnd:SetResizable( .f. )
-      oWnd:SetTransparency( .1 )
+      oWnd:SetTransparency( .2 )
       gtk_window_set_position( oWnd:pWidget, GTK_WIN_POS_MOUSE )
 
    DEFINE BOX oBox SPACING 3 BORDER 5 VERTICAL OF oWnd
@@ -530,19 +532,22 @@ static procedure Calendar( oEntry, oForm )
             DATE CTOD(oEntry:cDefault)                   ;
             MARKDAY                                      ;
             ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
-                       oWnd:End(), oWnd:=NIL)            ;
+                       oWnd:End(), oWnd:=NIL,            ;
+                       oEntry:lCalActive:=.f., oEntry:SetFocus) ;
             OF oBox
 
+     oCalendar:MarkDay( DAY(dFecha) )
 
-     DEFINE BUTTON TEXT "Hoy"                          ;
-            ACTION ( oCalendar:SetDate( dFecha ),      ;
-                     oCalendar:MarkDay( DAY(dFecha) )) ;
+     DEFINE BUTTON TEXT "Hoy"                            ;
+            ACTION ( oCalendar:SetDate( dFecha ),        ;
+                     oCalendar:SetFocus() )              ;
             OF oBox
 
 
    ACTIVATE WINDOW oWnd MODAL
 
    oCalendar:SetFocus()
+   oEntry:lCalActive := .t.
 
 
 return 
