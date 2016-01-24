@@ -28,6 +28,7 @@
 #include "hbclass.ch"
 #include "common.ch"
 #include "tpyentry.ch"
+#include "gclass.ch"
 
 memvar  oTpuy
 
@@ -75,11 +76,22 @@ CLASS TpyEntry FROM GEntry
    DATA cTitle       INIT  ""    // Titulo o Nombre que visualmente 
                                  // representaria este objeto.
    
+   DATA lCalendar    INIT .f.    // En entry tipo fecha 
+                                 // Activa/Desactiva posibilidad de 
+                                 // abrir calendario
+   DATA lCalActive   INIT .f.    // Controlar si el calendario esta activo.
 
-   METHOD New( bSetGet, cPicture, bValid, aCompletion, oFont, oParent, lExpand,;
-               lFill, nPadding , lContainer, x, y, cId, uGlade, uLabelTab, lPassWord,;
-               lEnd , lSecond, lResize, lShrink, left_ta,right_ta,top_ta,bottom_ta,;
-               xOptions_ta, yOptions_ta, bAction, ulButton, urButton )
+   DATA oForm                    // Formulario al que pertenece la entrada.
+                                 // Solo se usa en entrada tipo fecha 
+
+   DATA cDefault                 // Valor por defecto
+
+   METHOD New( bSetGet, cPicture, bValid,;
+            lCalendar, oForm, nLen, lZero, aCompletion, oFont, oParent,;
+            lExpand, lFill, nPadding , lContainer, x, y, cId, uGlade,;
+            uLabelTab, lPassWord, lEnd , lSecond, lResize, lShrink, ;
+            left_ta,right_ta,top_ta,bottom_ta,;
+            xOptions_ta, yOptions_ta, bAction, ulButton, urButton )
       
    METHOD GetText()           INLINE  ALLTRIM( ::Super:GetText() )  
    METHOD GetValue()          INLINE  ALLTRIM( ::Super:GetText() )  
@@ -101,25 +113,58 @@ CLASS TpyEntry FROM GEntry
                                         // cumple la condicion el entry
                                         // debe ser no editable
    
-
 ENDCLASS
 
 
 
 METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
-            nLen, lZero, ... ) CLASS TPYENTRY
+            lCalendar, oForm, nLen, lZero, aCompletion, oFont, oParent,;
+            lExpand, lFill, nPadding , lContainer, x, y, cId, uGlade,;
+            uLabelTab, lPassWord, lEnd , lSecond, lResize, lShrink, ;
+            left_ta,right_ta,top_ta,bottom_ta,;
+            xOptions_ta, yOptions_ta, bAction, ;
+            ulButton, urButton ) CLASS TPYENTRY
+
+   local cImage := oTpuy:cImages+"calendar_blue_16.png", uImg
 
    default nType        to TPYENTRY_OTHER
    default cPicture     to ""
    default cRegExFilter to ""
    default nLen         to 0
    default lZero        to .f.
+   default lCalendar    to .f.
 
-   ::Super:New( bSet, cPicture, bValid, ... )
+   if nType = TPYENTRY_DATE
+      if lCalendar .and. hb_IsObject( oForm )
+         if hb_ISNIL( ulButton ) .and. hb_ISNIL( urButton )
+            if !File( cImage ) 
+               uImg := "gtk-find"
+            else
+               DEFINE IMAGE uImg FILE cImage
+            endif
+            //::SetButton( uImg, GTK_ENTRY_ICON_SECONDARY ) 
+            urButton := uImg
+            if !hb_IsBlock( bAction )
+//View( oForm:ClassName() )
+               bAction := {|this, nPos| Calendar( self, oForm )}
+            endif
+         endif
+      endif
+   endif
 
-   ::nType := nType
-   ::nLen  := nLen
-   ::lZero := lZero
+   ::Super:New( bSet, cPicture, bValid, aCompletion, oFont, oParent,;
+                lExpand, lFill, nPadding , lContainer, x, y, cId, ;
+                uGlade, uLabelTab, lPassWord, lEnd , lSecond, lResize,;
+                lShrink, left_ta,right_ta,top_ta,bottom_ta,;
+                xOptions_ta, yOptions_ta, bAction, ulButton, urButton )
+
+   ::cDefault  := ::GetText()
+
+   ::nType     := nType
+   ::nLen      := nLen
+   ::lZero     := lZero
+   ::lCalendar := lCalendar
+   ::oForm     := oForm
 
    ::SetMaxLength( ::nLen )
 
@@ -135,6 +180,24 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
    elseif ::nType = TPYENTRY_DATE
 
       ::cDataType := "D"
+/*
+      if lCalendar .and. hb_IsObject( oForm )
+         if hb_ISNIL( ulButton ) .and. hb_ISNIL( urButton )
+            if !File( cImage ) 
+               uImg := "gtk-find"
+            else
+               DEFINE IMAGE uImg FILE cImage
+            endif
+            ::SetButton( uImg, GTK_ENTRY_ICON_SECONDARY ) 
+            if !hb_IsBlock( bAction )
+//View( oForm:ClassName() )
+               bAction := {|| Calendar( self, oForm )}
+               ::OnIcon_Release := bAction
+            endif
+         endif
+      endif
+*/
+
 
    elseif ::nType = TPYENTRY_DECIMAL .or. ;
           ::nType = TPYENTRY_PORCENT .or. ;
@@ -408,17 +471,87 @@ STATIC FUNCTION __VALDATE( oEntry )
 
       endif
 
-
       if hb_IsObject( oEntry:oMsgWidGet() )
          oEntry:oMsgWidget:SetText('')
       endif
 
    endif
+
+   if (oEntry:Empty() .or. Empty( oEntry:Get() )) ;
+      .and. !oEntry:lCalActive
+//View( oEntry:oGet:buffer )
+      if hb_IsObject( oEntry:oForm:oWnd ) .and. ;
+                      oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW")
+         if oEntry:lCalendar 
+            Calendar( oEntry, oEntry:oForm )
+         endif
+      endif
+   endif
+
    if hb_IsBlock(oEntry:bPosValid)
       return EVAL( oEntry:bPosValid, oEntry )
    endif
 
 RETURN .T.
+
+
+static procedure Calendar( oEntry, oForm )
+   local oWnd, oBox, oCalendar, cRes, dFecha 
+   local cIconFile := oTpuy:cImages+oTpuy:cIconMain
+//   local dDefault := CTOD( oEntry:cDefault )
+
+   if Empty( oTpuy:dFecha )
+      dFecha := DATE()
+   else
+      dFecha := oTpuy:dFecha
+   endif
+
+   SET RESOURCES cRes FROM FILE oForm:cResFile
+
+   DEFINE WINDOW oWnd TITLE "Fecha";
+          SIZE 200,190             
+
+      if FILE( cIconFile )
+         oWnd:SetIconFile( cIconFile )
+      endif
+
+      if oForm:oWnd:IsDerivedFrom( "GWINDOW" )
+         gtk_window_set_transient_for( oWnd:pWidget, oForm:oWnd:pWidget )
+      endif
+         
+      oWnd:SetSkipTaskBar( .t. )
+      //oWnd:SetDecorated( .f. )
+      oWnd:SetDeletable( .f. )
+      oWnd:SetResizable( .f. )
+      oWnd:SetTransparency( .2 )
+      gtk_window_set_position( oWnd:pWidget, GTK_WIN_POS_MOUSE )
+
+   DEFINE BOX oBox SPACING 3 BORDER 5 VERTICAL OF oWnd
+
+     DEFINE CALENDAR oCalendar                           ; 
+            DATE CTOD(oEntry:cDefault)                   ;
+            MARKDAY                                      ;
+            ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
+                       oWnd:End(), oWnd:=NIL,            ;
+                       oEntry:lCalActive:=.f., oEntry:SetFocus) ;
+            OF oBox
+
+     oCalendar:MarkDay( DAY(dFecha) )
+
+     DEFINE BUTTON TEXT "Hoy"                            ;
+            ACTION ( oCalendar:SetDate( dFecha ),        ;
+                     oCalendar:SetFocus() )              ;
+            OF oBox
+
+
+   ACTIVATE WINDOW oWnd MODAL
+
+   oCalendar:SetFocus()
+   oEntry:lCalActive := .t.
+
+
+return 
+
 
 
 STATIC FUNCTION __VALNUMERIC( oEntry )
@@ -460,6 +593,8 @@ STATIC FUNCTION __VALNUMERIC( oEntry )
    endif
 
 RETURN .t.
+
+
 
 
 /** \brief Validacion predeterminada para entry no definido.

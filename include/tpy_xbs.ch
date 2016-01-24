@@ -176,7 +176,11 @@
 // Entry/Get
 #xcommand DEFINE ENTRY [TYPE <cType>] [ <oBtn> ]  ;
                  [ VAR <uVar> ];
-                 [ <lPassword: PASSWORD> ] ;
+                 [ <lCalendar: CALENDAR> [FORM <oForm> ] ];
+                 [ <View( cQry )
+
+return
+lPassword: PASSWORD> ] ;
                  [ FILTER <cRegExFilter> ] ;
                  [ MSGWIDGET <oMsgWidget> ];
                  [ PICTURE <cPicture> ];
@@ -204,7 +208,7 @@
       => ;
   [ <oBtn> := ] tpyEntry():New( [TPYENTRY_<cType>], ;
                    bSetGet( <uVar> ), <cRegExFilter>, <oMsgWidget>, <cPicture>,;
-                   [ \{|o| <bValid> \} ],;
+                   [ \{|o| <bValid> \} ],<.lCalendar.>,<oForm>,;
                    <nLen>,<.lZero.>,;
                    <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, ;
                    <nPadding>,<.lContainer.>,;
