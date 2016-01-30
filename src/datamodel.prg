@@ -457,7 +457,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
   Local aTypes, aStruct, aItems, oTemp
   Local cType //, nMin, nWidth
   Local nLenStru
-  Local cValTmp,nColumn, cColTitle
+  Local cValTmp,nColumn, nColumns, cColTitle, cColName
 
   If hb_IsNIL( oBox )
      Return NIL
@@ -489,7 +489,9 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
    For nColumn := 1 To ::nRows
        APPEND LIST_STORE ::oLbx ITER ::aIter
 
-       for n := 1 to Len( aItems[ nColumn ] )
+       nColumns := Len( aItems[ nColumn ] )
+
+       for n := 1 to nColumns
           If aStruct[n,2] == "D"
              //-- Transformamos a Formato definido en tepuy.ch
              If hb_ISDATE(aItems[nColumn,n])
@@ -539,6 +541,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
           If aStruct[n,2] == "L"
              SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE aItems[nColumn,n]
           else
+//             if len(cValTmp)>1 ; cValTmp:= ALLTRIM( cValTmp ) ; endif
              SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE UTF_8(cValTmp)
           endif
           //SET VALUES LIST_STORE ::oLbx ITER ::aIter VALUES aItems[nColumn]
@@ -647,6 +650,9 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
                /* Indicamos la accion a ejecutar al click de la fila.*/
 //               oTemp:oRenderer:bAction := {| o, cPath| fixed_toggled( o, cPath, ::oTreeview, ::oLbx ) }
 //               oTemp:oRenderer:bValid  := {| o, cPath| ::Run( o:nColumn+1 , "valid", cPath )}
+
+            CASE aStruct[ncolumn,2] == "N"
+               oTemp:oRenderer:SetAlign_H(.9)
                 
             CASE aStruct[nColumn,2] == "C"
 /* -- por ahora no.         
@@ -681,11 +687,12 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
       ENDIF       
      endif
 
-     __objAddData( self, cColTitle )
+     cColName := STRTRAN(STRTRAN("o"+cColTitle," ",""),".","")
+     __objAddData( self, cColName )
 #ifndef __XHARBOUR__
-     __objSendMsg( self, "_"+cColTitle, oTemp )
+     __objSendMsg( self, "_"+cColName, oTemp )
 #else
-     hb_execFromArray( @self, cColTitle, {oTemp} )
+     hb_execFromArray( @self, cColName, {oTemp} )
 #endif
 
    Next nColumn

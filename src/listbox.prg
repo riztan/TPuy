@@ -160,11 +160,17 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
       end
       ::oWnd:SetSkipTaskBar( .t. )
 
-      If ::lParent
-         gtk_window_set_transient_for( ::oWnd:pWidget, ::oParent:pWidget )
+//      If ::lParent
+      gtk_window_set_transient_for( ::oWnd:pWidget, ::oParent:pWidget )
+//      EndIf
+
+      If ISNIL( oIcon ) .and. FILE( oTpuy:cImages+"tpuy-icon-16.png" )
+         ::oWnd:SetIconFile( oTpuy:cImages+"tpuy-icon-16.png" )
+      Else
+         If hb_IsObject(oIcon)
+            ::oWnd:SetIconName( oIcon )
+         EndIf
       EndIf
-
-
 
       If !IsNIL(::uGlade)
          DEFINE BOX ::oBox ID "data" RESOURCE ::cGlade
@@ -175,13 +181,6 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
      ::oBox := ::oParent
    end
 
-   If ISNIL( oIcon ) .and. FILE( oTpuy:cImages+"tpuy-icon-16.png" )
-      ::oWnd:SetIconFile( oTpuy:cImages+"tpuy-icon-16.png" )
-   Else
-      If hb_IsObject(oIcon)
-         ::oWnd:SetIconName( oIcon )
-      EndIf
-   EndIf
 
    IF ::lBar
 
