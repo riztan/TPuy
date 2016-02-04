@@ -371,16 +371,26 @@ RETURN 0
 
 
 
-METHOD GetCol( cCol ) CLASS TPY_DATA_MODEL
-   Local uRes, cRow, nPosCol
-   Local pPath, aIter := GtkTreeIter
+METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
+   Local cRow, nPosCol, nRow, cType
+   Local pPath//, aIter := GtkTreeIter
 
-   cRow     := ALLTRIM( CSTR(::GetPosRow()-1) )
+   cType := VALTYPE( uCol )
+   if cType = "C"
+      nPosCol := ::oTreeView:GetPosCol( uCol )
+   elseif cType = "N"
+      nPosCol := uCol
+   else
+      return 0
+   endif
+
+   nRow := ::GetPosRow() - 1
+   cRow     := ALLTRIM( CSTR(nRow) )
+
    pPath := gtk_tree_path_new_from_string( cRow )
 
-   nPosCol := ::oTreeView:GetPosCol( cCol )
-   uRes := AllTrim( CSTR(::oTreeView:GetValue( nPosCol, "", pPath, @aIter )) )
-Return uRes
+Return AllTrim( CSTR(::oTreeView:GetValue( nPosCol, "", pPath, @::aIter )) )
+
 
 
 METHOD SetColTitle( cField, cValue )
