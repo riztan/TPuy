@@ -29,3 +29,98 @@
 #define TPYENTRY_OTHER      10
 
 
+
+
+// Entry/Get
+#xuncommand DEFINE ENTRY [ <oBtn> ]  ;
+                 [ VAR <uVar> ];
+                 [ <lPassword: PASSWORD> ] ;
+                 [ PICTURE <cPicture> ];
+                 [ VALID <bValid> ];
+                 [ COMPLETION <aCompletion> ];
+                 [ FONT <oFont> ];
+                 [ <lExpand: EXPAND> ] ;
+                 [ <lFill: FILL> ] ;
+                 [ PADDING <nPadding> ];
+                 [ <lContainer: CONTAINER> ] ;
+                 [ OF <oParent> ] ;
+                 [ ID <cId> ;
+                 [ RESOURCE <uGlade> ] ];
+                 [ POS <x>,<y>  ];
+                 [ LABELNOTEBOOK <uLabelBook> ];
+                 [ <lEnd: INSERT_END> ] ;
+                 [ <lSecond: SECOND_PANED > ] ;
+                 [ <lResize: RESIZE > ] ;
+                 [ <lShrink: SHRINK > ] ;
+                 [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ] ;
+                 [ ACTION <bAction> ];
+                 [ LEFT BUTTON <ulButton> ];
+                 [ RIGHT BUTTON <urButton> ];
+      => ;
+  [ <oBtn> := ] GEntry():New( bSetGet( <uVar> ), <cPicture>, [ \{|o| <bValid> \} ],;
+                   <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, <nPadding>,<.lContainer.>,;
+                   <x>,<y>, <cId>, <uGlade>, <uLabelBook>,<.lPassword.>,;
+                   <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
+                   <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, <yOptions_ta>,;
+                   [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
+
+
+// Modificacion para evitar conflicto con la definicion de comboboxentry
+// y mantener compatibilidad con los tipos de entry elaborados en tpuy.
+// RIGC - 2015-12-13
+#xtranslate DEFINE DOCUMENT ENTRY  => DEFINE ENTRY TYPE DOCUMENT
+#xtranslate DEFINE PORCENT ENTRY   => DEFINE ENTRY TYPE PORCENT
+#xtranslate DEFINE INTEGER ENTRY   => DEFINE ENTRY TYPE INTEGER
+#xtranslate DEFINE DECIMAL ENTRY   => DEFINE ENTRY TYPE DECIMAL
+#xtranslate DEFINE MONEY ENTRY     => DEFINE ENTRY TYPE MONEY
+#xtranslate DEFINE EMAIL ENTRY     => DEFINE ENTRY TYPE EMAIL
+#xtranslate DEFINE DATETIME ENTRY  => DEFINE ENTRY TYPE DATETIME
+#xtranslate DEFINE DATE ENTRY      => DEFINE ENTRY TYPE DATE
+#xtranslate DEFINE TIME ENTRY      => DEFINE ENTRY TYPE TIME
+#xtranslate DEFINE IP ENTRY        => DEFINE ENTRY TYPE IP
+#xtranslate DEFINE OTHER ENTRY     => DEFINE ENTRY TYPE OTHER
+
+// Entry/Get
+#xcommand DEFINE ENTRY [TYPE <cType>] [ <oBtn> ]  ;
+                 [ VAR <uVar> ];
+                 [ <lCalendar: CALENDAR> [FORM <oForm> ] ];
+                 [ <lPassword: PASSWORD> ] ;
+                 [ FILTER <cRegExFilter> ] ;
+                 [ MSGWIDGET <oMsgWidget> ];
+                 [ PICTURE <cPicture> ];
+                 [ VALID <bValid> ];
+                 [ LENGHT <nLen> [ <lZero: ZERO> ] ];
+                 [ COMPLETION <aCompletion> ];
+                 [ FONT <oFont> ];
+                 [ <lExpand: EXPAND> ] ;
+                 [ <lFill: FILL> ] ;
+                 [ PADDING <nPadding> ];
+                 [ <lContainer: CONTAINER> ] ;
+                 [ OF <oParent> ] ;
+                 [ ID <cId> ;
+                 [ RESOURCE <uGlade> ] ];
+                 [ POS <x>,<y>  ];
+                 [ LABELNOTEBOOK <uLabelBook> ];
+                 [ <lEnd: INSERT_END> ] ;
+                 [ <lSecond: SECOND_PANED > ] ;
+                 [ <lResize: RESIZE > ] ;
+                 [ <lShrink: SHRINK > ] ;
+                 [ TABLEATTACH <left_ta>,<right_ta>,<top_ta>,<bottom_ta>[,<xOptions_ta>, <yOptions_ta> ] ] ;
+                 [ ACTION <bAction> ];
+                 [ LEFT BUTTON <ulButton> ];
+                 [ RIGHT BUTTON <urButton> ];
+      => ;
+  [ <oBtn> := ] tpyEntry():New( [TPYENTRY_<cType>], ;
+                   bSetGet( <uVar> ), <cRegExFilter>, <oMsgWidget>, <cPicture>,;
+                   [ \{|o| <bValid> \} ],<.lCalendar.>,<oForm>,;
+                   <nLen>,<.lZero.>,;
+                   <aCompletion>, <oFont>, <oParent>, <.lExpand.>, <.lFill.>, ;
+                   <nPadding>,<.lContainer.>,;
+                   <x>,<y>, <cId>, <uGlade>, <uLabelBook>,<.lPassword.>,;
+                   <.lEnd.>, <.lSecond.>, <.lResize.>, <.lShrink.>,;
+                   <left_ta>,<right_ta>,<top_ta>,<bottom_ta>, <xOptions_ta>, ;
+                   <yOptions_ta>,;
+                   [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
+
+
+

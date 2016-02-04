@@ -580,6 +580,10 @@ View( "aqui...  revisar. (model_abm.prg)" )
 
                     
 
+            Case oColumn:Type = "D"
+#include "tpyentry.ch" // --  en pruebas  ( RIGC - Feb 03/2016 )
+                 DEFINE DATE ENTRY oWidGetTmp VAR cTemp CALENDAR ;
+                        OF ::oBoxes:tmp 
             OTHER
                  DEFINE ENTRY oWidGetTmp VAR cTemp OF ::oBoxes:tmp EXPAND FILL
          ENDCASE
@@ -999,7 +1003,7 @@ endif
              if oColumn:Editable
 
                 Do Case
-                Case cClassName = "GENTRY" .or. cClassName = "GGET" 
+                Case ::hWidget[oColumn:Name]:IsDerivedFrom("GENTRY") .or. cClassName = "GGET" 
                    
                    cValue := ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
 //View( cValue )
@@ -1028,7 +1032,7 @@ endif
                       AADD( aUpdate, { aColumn:__EnumIndex, uValue } )
                    endif
                 Other
-? ::hWidget[oColumn:Name]:ClassName()  
+MsgInfo( ::hWidget[oColumn:Name]:ClassName(), procname() )
                 EndCase
 
              else

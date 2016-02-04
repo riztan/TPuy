@@ -9,14 +9,14 @@ func dm_test1()
    local aStruct
    local aItems
    local oModel
-   local oListBox
+   local oListBox, dFecha := date()
 
 
    aItems  := {;
-              {"Rafael"  , "Carmona"     ,.t.,date()-15},;
-              {"Federico", "De Maussion" ,.f.,date()-30},;
-              {"Daniel"  , "Garcia"      ,.f.,date()+12},;
-              {"Riztan"  , "Gutierrez"   ,.f.,date()   } ;
+              {"Rafael"  , "Carmona"     ,.t.,dFecha-15},;
+              {"Federico", "De Maussion" ,.f.,dFecha-30},;
+              {"Daniel"  , "Garcia"      ,.f.,dFecha+12},;
+              {"Riztan"  , "Gutierrez"   ,.f.,dFecha   } ;
               }
 
    aStruct := {{"Nombre"  , "C" , 20 , 0},;
@@ -49,6 +49,7 @@ func dm_test1()
    //oListBox:oParent := oTpuy:oWnd
    oListBox:Active()
 
+oModel:SetColEditable( 1, {|| msginfo("hola") } )
    oModel:Destroy()
 
 return nil
