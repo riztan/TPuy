@@ -123,7 +123,7 @@
 
 
 
-
+/* -- pasado a tpyentry.ch
 // Entry/Get
 #xuncommand DEFINE ENTRY [ <oBtn> ]  ;
                  [ VAR <uVar> ];
@@ -215,6 +215,6 @@
                    <yOptions_ta>,;
                    [ \{| this,nPos | <bAction> \} ], <ulButton>, <urButton> )
 
-
+*/
 
 //eof

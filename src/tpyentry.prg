@@ -135,7 +135,7 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
    default lCalendar    to .f.
 
    if nType = TPYENTRY_DATE
-      if lCalendar .and. hb_IsObject( oForm )
+      if lCalendar //.and. hb_IsObject( oForm )
          if hb_ISNIL( ulButton ) .and. hb_ISNIL( urButton )
             if !File( cImage ) 
                uImg := "gtk-find"
@@ -146,7 +146,7 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
             urButton := uImg
             if !hb_IsBlock( bAction )
 //View( oForm:ClassName() )
-               bAction := {|this, nPos| Calendar( self, oForm )}
+               bAction := {|this, nPos| __Calendar( self, oForm )}
             endif
          endif
       endif
@@ -405,6 +405,9 @@ RETURN .T.
 STATIC FUNCTION __VALDATE( oEntry )
    local lResult
    local cValue, dValue
+   local dFecha := Date()
+
+   if oTpuy:IsDef("dFecha") ; dFecha := oTPuy:dFecha ; endif
 
    if !oEntry:Empty()
 
@@ -416,7 +419,7 @@ STATIC FUNCTION __VALDATE( oEntry )
 
 
       if cValue == "."
-         oEntry:Set( oTPuy:dFecha )
+         oEntry:Set( dFecha )
          if hb_IsBlock(oEntry:bPosValid)
             return EVAL( oEntry:bPosValid, oEntry )
          endif
@@ -456,7 +459,7 @@ STATIC FUNCTION __VALDATE( oEntry )
 
       else
 
-         if ABS( YEAR( oTPuy:dFecha ) - YEAR( dValue ) ) > oEntry:lYearsLimit
+         if ABS( YEAR( dFecha ) - YEAR( dValue ) ) > oEntry:lYearsLimit
             oEntry:SetText('')
             if hb_IsObject( oEntry:oMsgWidget )
                oEntry:oMsgWidget:SetText( oEntry:cMessage )
@@ -483,7 +486,7 @@ STATIC FUNCTION __VALDATE( oEntry )
       if hb_IsObject( oEntry:oForm:oWnd ) .and. ;
                       oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW")
          if oEntry:lCalendar 
-            Calendar( oEntry, oEntry:oForm )
+            __Calendar( oEntry, oEntry:oForm )
          endif
       endif
    endif
@@ -495,18 +498,14 @@ STATIC FUNCTION __VALDATE( oEntry )
 RETURN .T.
 
 
-static procedure Calendar( oEntry, oForm )
-   local oWnd, oBox, oCalendar, cRes, dFecha 
+static procedure __Calendar( oEntry, oForm )
+   local oWnd, oBox, oCalendar, cRes, dFecha := Date()
    local cIconFile := oTpuy:cImages+oTpuy:cIconMain
 //   local dDefault := CTOD( oEntry:cDefault )
 
-   if Empty( oTpuy:dFecha )
-      dFecha := DATE()
-   else
-      dFecha := oTpuy:dFecha
-   endif
+   if oTpuy:IsDef("dFecha"); dFecha := oTpuy:dFecha; endif
 
-   SET RESOURCES cRes FROM FILE oForm:cResFile
+//   SET RESOURCES cRes FROM FILE oForm:cResFile
 
    DEFINE WINDOW oWnd TITLE "Fecha";
           SIZE 200,190             
@@ -515,8 +514,10 @@ static procedure Calendar( oEntry, oForm )
          oWnd:SetIconFile( cIconFile )
       endif
 
-      if oForm:oWnd:IsDerivedFrom( "GWINDOW" )
-         gtk_window_set_transient_for( oWnd:pWidget, oForm:oWnd:pWidget )
+      if !hb_IsNIL( oForm )
+         if oForm:oWnd:IsDerivedFrom( "GWINDOW" )
+            gtk_window_set_transient_for( oWnd:pWidget, oForm:oWnd:pWidget )
+         endif
       endif
          
       oWnd:SetSkipTaskBar( .t. )
