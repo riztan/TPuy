@@ -73,6 +73,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA aTypes
       DATA hModel
       DATA aCol
+      DATA lDolphin          INIT .f.
 
       DATA nRows             INIT 0
       
@@ -143,14 +144,25 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
       ::oQuery := xQuery
       ::lQuery := .T.
       //::aDMStru:= AClone(::aStruct)   (no es necesaria esta linea por ahora)
-      ::aItems := xQuery:aData
-      ::aStruct:= xQuery:aStruct
+      //::aItems := xQuery:aData
+      //::aStruct:= xQuery:aStruct
 
    ElseIf  hb_IsObject( oConn ) .AND. ValType(xQuery)=="C"
       ::oConn  := oConn
-      ::oQuery := oConn:Query(xQuery)
+      TRY
+         ::oQuery := oConn:Query(xQuery)
+      CATCH
+         MsgStop("Error al generar la consulta "+hb_eol()+xQuery, "Atención")
+         return nil
+      END
       ::lQuery := .T.
+
+   EndIf
+
+
+   If ::lQuery
       If ::oQuery:ClassName()="TDOLPHINQRY"
+         ::lDolphin := .t.
          ::aStruct := {} 
          FOR EACH aItem IN ::oQuery:aStructure
             AADD( ::aStruct , { aItem[1], aItem[9], aItem[6], aItem[8] } ) 
@@ -161,7 +173,6 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
          ::aStruct:= ::oQuery:aStruct
          if !empty(aDMStru) ; ::aDMStru := aDMStru ; endif
       EndIf
-
    EndIf
     
 
@@ -169,7 +180,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
 
    If ::lQuery .AND. hb_IsObject(::oQuery)
 
-      IF ::oQuery:ClassName() == "TDOLPHINQRY"
+      IF ::lDolphin //::oQuery:ClassName() == "TDOLPHINQRY"
          /* ToDo: Rutinas para tomar datos de columnas */
          nLenStru  := Len(::aStruct)
          //nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
@@ -464,10 +475,11 @@ RETURN
 METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 
   Local oScroll, n
-  Local aTypes, aStruct, aItems, oTemp
+  Local aTypes, aStruct, aItem, aItems, oTemp
   Local cType //, nMin, nWidth
   Local nLenStru
-  Local cValTmp,nColumn, nColumns, cColTitle, cColName
+  Local cValTmp,nColumn, nColumns, oColumn, cColTitle, cColName
+  Local lMsgRun := .f., oMsgRun, cMsgRun
 
   If hb_IsNIL( oBox )
      Return NIL
@@ -495,35 +507,48 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
    //DEFINE LIST_STORE ::oLbx TYPES aTypes
 
    ::nRows := LEN( aItems )
+   if ::nRows > 100
+      lMsgRun := .t.
+      cMsgRun := "Leyendo datos... "
+      if ::nRows > 1000
+         cMsgRun := "Por favor espere, puede tardar un poco."
+      endif
+      oMsgRun := MsgRunStart( cMsgRun )
+   endif
+   
+   FOR EACH aItem IN aItems
 
-   For nColumn := 1 To ::nRows
+       nColumn := aItem:__enumIndex()
+
        APPEND LIST_STORE ::oLbx ITER ::aIter
 
-       nColumns := Len( aItems[ nColumn ] )
 
-       for n := 1 to nColumns
+       FOR EACH oColumn IN aItem
+
+          n := oColumn:__enumIndex()
+
           If aStruct[n,2] == "D"
              //-- Transformamos a Formato definido en tepuy.ch
-             If hb_ISDATE(aItems[nColumn,n])
-                cValTmp := DTOC(aItems[nColumn,n])
+             If hb_ISDATE( oColumn ) 
+                cValTmp := DTOC( oColumn ) 
              Else
                 cValTmp := TPY_DATEFORMAT   
-                cValTmp := strtran( cValTmp, 'dd', substr(CStr(aItems[nColumn,n]), 9, 2) )
-                cValTmp := strtran( cValTmp, 'mm', substr(CStr(aItems[nColumn,n]), 6, 2) )
-                cValTmp := strtran( cValTmp, 'yyyy', left(CStr(aItems[nColumn,n]), 4) )
+                cValTmp := strtran( cValTmp, 'dd', substr(CStr(oColumn), 9, 2) )
+                cValTmp := strtran( cValTmp, 'mm', substr(CStr(oColumn), 6, 2) )
+                cValTmp := strtran( cValTmp, 'yyyy', left(CStr(oColumn), 4) )
              EndIf
           Else
-             cValTmp := aItems[nColumn,n]
+             cValTmp := oColumn
 
              If LEN( ::aDMStru[n] ) < 6
                 //cValTmp := TRANSFORM(  )
                 If aStruct[n,2]== "C" 
-                   cValTmp := aItems[nColumn,n]
+                   cValTmp := oColumn
                 ElseIf aStruct[n,2] == "N"
-                   cValTmp := CStr(aItems[nColumn,n])
+                   cValTmp := CStr(oColumn)
                 ElseIf aStruct[n,2] == "L"
-                   //cValTmp := IIF(aItems[nColumn,n],"true","false")
-                   cValTmp := aItems[nColumn,n]
+                   //cValTmp := IIF(oColumn,"true","false")
+                   cValTmp := oColumn
                 EndIf
 //? aStruct[n,2],"  ",cValTmp 
              Else
@@ -532,13 +557,13 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
                    If LEN(::aDMStru[n,6])==1
                       If aStruct[n,2]== "C" .OR. aStruct[n,2]=="N"
 
-                        cValTmp := TRANSFORM( aItems[nColumn,n],;
+                        cValTmp := TRANSFORM( oColumn,;
                                    Repl(::aDMStru[n,6], aStruct[n,3]) )
                       EndIf
  
                    Else
-                      If ValType( aItems[nColumn,n] ) != "L"
-                         cValTmp := TRANSFORM( Val(aItems[nColumn,n]), ::aDMStru[n,6] )
+                      If ValType( oColumn ) != "L"
+                         cValTmp := TRANSFORM( Val(oColumn), ::aDMStru[n,6] )
                       EndIf
                    EndIf
                 
@@ -549,7 +574,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
           EndIf
           
           If aStruct[n,2] == "L"
-             SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE aItems[nColumn,n]
+             SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE oColumn
           else
 //             if len(cValTmp)>1 ; cValTmp:= ALLTRIM( cValTmp ) ; endif
              SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE UTF_8(cValTmp)
@@ -557,6 +582,8 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
           //SET VALUES LIST_STORE ::oLbx ITER ::aIter VALUES aItems[nColumn]
        next
    Next
+
+   if lMsgRun ; oMsgRun:end() ; endif
    
    DEFINE SCROLLEDWINDOW oScroll  OF oBox EXPAND FILL ;
           SHADOW GTK_SHADOW_ETCHED_IN
