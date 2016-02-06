@@ -420,20 +420,39 @@ Return AllTrim( CSTR(::oTreeView:GetValue( nPosCol, "", pPath, @::aIter )) )
 
 
 
-METHOD SetColTitle( cField, cValue )
-   local aField, aStruct
+METHOD SetColTitle( uField, cValue )
+   local aField, aStruct, cFieldType, lRes := .f.
+
+   if uField = NIL ; return lRes ; endif
+
+   cFieldType := ValType( uField )
+
+   if ( cFieldType != "N" .and. cFielType != "C" ) .or. ValType(cValue)!="C"
+      return lRes
+   endif
+      
+   if hb_IsObject( ::oLbx )
+      nColumn := iif( cFieldType = "C", ::GetColPos( uField ), uField ) 
+      aCol[ nColumn ]:SetTitle( cValue )
+      lRes := .t.
+   endif
+
    aStruct := iif( Empty(::aDMStru), ::aStruct, ::aDMStru )
    FOR EACH aField IN aStruct
-      if aField[1] == cField //.OR.aField[2] == cField
-         aField[1] := cValue
-         return .t.
+      if cFieldType = "C"
+         if aField[1] == uField //.OR.aField[2] == uField
+            aField[1] := cValue
+            return .t.
+         endif
+      else
+         if aField:__enumIndex() == uField
+            aField[1] := cValue
+            return .t.
+         endif
       endif
    NEXT
-   if hb_IsObject( ::oLbx )
-      nColumn := ::GetColPos( cField ) 
-      aCol[ nColumn ]:SetTitle( cValue )
-   endif
-RETURN .f.
+
+RETURN lRes
 
 
 METHOD ColSet(cField,nPos,uValue)  CLASS TPY_DATA_MODEL
