@@ -76,6 +76,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA lDolphin          INIT .f.
 
       DATA nRows             INIT 0
+      DATA nTime             
       
       DATA aValiders
       
@@ -185,6 +186,21 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
          nLenStru  := Len(::aStruct)
          //nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
          ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) )
+         FOR EACH aField IN ::aStruct
+             ::aDMStru[ aField:__enumIndex() ] := { aField[1], ;  // DESCRIP
+                                                    aField[1], ;  // NAME
+                                                    .t.,       ;  // EDITABLE
+                                                    .t.,       ;  // VIEWABLE
+                                                    .t.,       ;  // NAVIGABLE
+                                                    'X',       ;  // PICTURE
+                                                    '',        ;  // DEFAULT
+                                                    .f.,       ;  // REFERENCE
+                                                    '',        ;  // REFTABLE
+                                                    '',        ;  // REFSCRIPT
+                                                    '' }          // BOXNAME
+                                                    
+         NEXT
+
       ELSE
 
          /* Consulta Tipo PostgreSQL */
@@ -413,6 +429,10 @@ METHOD SetColTitle( cField, cValue )
          return .t.
       endif
    NEXT
+   if hb_IsObject( ::oLbx )
+      nColumn := ::GetColPos( cField ) 
+      aCol[ nColumn ]:SetTitle( cValue )
+   endif
 RETURN .f.
 
 
@@ -506,6 +526,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
    DEFINE TREE_STORE ::oLbx ARRAY aTypes
    //DEFINE LIST_STORE ::oLbx TYPES aTypes
 
+   ::nTime := DateTime()
    ::nRows := LEN( aItems )
    if ::nRows > 100
       lMsgRun := .t.
@@ -582,8 +603,8 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
           //SET VALUES LIST_STORE ::oLbx ITER ::aIter VALUES aItems[nColumn]
        next
    Next
-
    if lMsgRun ; oMsgRun:end() ; endif
+   ::nTime := (DateTime()-::nTime) * 1000
    
    DEFINE SCROLLEDWINDOW oScroll  OF oBox EXPAND FILL ;
           SHADOW GTK_SHADOW_ETCHED_IN
