@@ -28,7 +28,7 @@
 
 
 /* Mensajes */
-//#define MSG_ALERT                     "Alerta!"
+#define MSG_ALERTA                    "Alerta!"
 #define MSG_CONNECTED                 "Conectado"
 
 #define MESSAGE_PROCESSING            "Procesando..."

@@ -267,6 +267,7 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
 
    EndIf
 
+   ::oModel:Listore( ::oBox, Self )
 
 RETURN Self
 
@@ -315,7 +316,7 @@ METHOD Active( bAction, bInit ) CLASS TPY_LISTBOX
    ::bAction := bAction
    ::bInit   := bInit
 
-   ::oModel:Listore( ::oBox, Self )
+   //::oModel:Listore( ::oBox, Self )
    //::oModel:Listore( ::oBox )
 
    IF ::lBar

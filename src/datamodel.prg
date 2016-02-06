@@ -92,7 +92,9 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
 //      METHOD NewAuto( aTypes )
 //      METHOD Append( aValues )
 //      METHOD Insert( nRow, aValues )
+      METHOD SetValue( uColumn, uValue, aIter )  /*RIGC 2016-02-06  Metodo para asignar un valor en una columna. */
       METHOD Set( aItems, xCol, uValue, aError )
+
       METHOD GetTables( aItems, cSchema )
       METHOD Insert( aItems )
 //      METHOD Clear() INLINE gtk_list_store_clear( ::pWidget )
@@ -100,11 +102,11 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD SetFromDBF( uValue )
       METHOD GetPosRow()
       METHOD GetCol( cCol )
-      METHOD GetPosCol( cCol ) INLINE ::oTreeView:GetPosCol( cCol )
+      METHOD GetPosCol( cCol )    INLINE iif( hb_IsNIL(::oTreeView), -1, ::oTreeView:GetPosCol( cCol ) )
       METHOD SetColTitle( cField, cValue )
       METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
-      METHOD SetColEditable( nCol, bAction )
+      METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )
 ENDCLASS
 
 
@@ -391,6 +393,7 @@ Return Self
 
 
 METHOD GetPosRow() CLASS TPY_DATA_MODEL
+   if hb_IsNIL( ::oTreeView ) ; return 0 ; endif
    IF !Empty(::aItems)
       Return ::oTreeView:GetPosRow( ::aIter )
    ENDIF
@@ -401,6 +404,8 @@ RETURN 0
 METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
    Local cRow, nPosCol, nRow, cType
    Local pPath//, aIter := GtkTreeIter
+
+   if hb_IsNIL( ::oTreeView ); return nil ; endif
 
    cType := VALTYPE( uCol )
    if cType = "C"
@@ -420,21 +425,24 @@ Return AllTrim( CSTR(::oTreeView:GetValue( nPosCol, "", pPath, @::aIter )) )
 
 
 
-METHOD SetColTitle( uField, cValue )
+METHOD SetColTitle( uField, cValue )  CLASS TPY_DATA_MODEL
    local aField, aStruct, cFieldType, lRes := .f.
+   local nColumn
 
    if uField = NIL ; return lRes ; endif
 
    cFieldType := ValType( uField )
 
-   if ( cFieldType != "N" .and. cFielType != "C" ) .or. ValType(cValue)!="C"
+   if ( cFieldType != "N" .and. cFieldType != "C" ) .or. ValType(cValue)!="C"
       return lRes
    endif
       
    if hb_IsObject( ::oLbx )
-      nColumn := iif( cFieldType = "C", ::GetColPos( uField ), uField ) 
-      aCol[ nColumn ]:SetTitle( cValue )
-      lRes := .t.
+      nColumn := iif( cFieldType = "C", ::GetPosCol( uField ), uField ) 
+      if nColumn > 0
+         ::aCol[ nColumn ]:SetTitle( cValue )
+         lRes := .t.
+      endif
    endif
 
    aStruct := iif( Empty(::aDMStru), ::aStruct, ::aDMStru )
@@ -499,16 +507,39 @@ Return .F.
 
 
 
-METHOD SetColEditable( nCol, bAction )  CLASS TPY_DATA_MODEL
-   if empty(nCol) ; return ; endif
+METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )  CLASS TPY_DATA_MODEL
+   local nCol, cType := ValType( uCol )
+   if empty(uCol) .or. ValType( lYesNo )!="L" ; return .f. ; endif
 
-   if hb_IsBlock( bAction )
-      ::aCol[nCol]:oRenderer:SetEditable(.T.)
-      ::aCol[nCol]:oRenderer:bEdited := bAction 
+   if cType = "N"
+      nCol := uCol
+   elseif cType = "C"
+      nCol := ::GetPosCol( uCol )
+      if nCol <= 0 ; return .f. ; endif
+   else
+      return .f.
+   endif
+
+   if !lYesNo 
+      ::aCol[nCol]:oRenderer:SetEditable( lYesNo ) 
+      return .t. 
+   endif
+
+   if hb_IsBlock( bPosEdit )
+      ::aCol[nCol]:oRenderer:SetEditable( lYesNo )
+      ::aCol[nCol]:oRenderer:bEdited := {| oSender, path, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
+                                           ::aIter := aIter, ;
+                                           EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ), ;
+                                           ::oTreeView:SetFocus() }
       ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
    endif
 
-RETURN 
+   if hb_IsBlock( bPreEdit )
+      ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
+      ::aCol[nCol]:oRenderer:bOnEditing_Started := bPreEdit
+   endif
+
+RETURN .f.
 
 
 METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
@@ -842,6 +873,33 @@ METHOD Run( col, cArray , ... )
    EndIf
 
 RETURN lRet
+
+
+
+/** Metodo SetValue(  )
+ *  Asigna un Valor a una columna segun el posicionamiento del iterador
+ *
+ */
+METHOD SetValue( uColumn, uValue, aIter )  CLASS  TPY_DATA_MODEL
+
+   local nColumn, cType := ValType( uColumn )
+
+   if cType != "C" .and. cType != "N" ; return .f. ; endif
+
+   if hb_IsNIL( uValue ); return .f. ; endif
+
+   default aIter to ::aIter
+
+   if cType="C"
+      nColumn := ::GetPosCol( uColumn )
+   else
+      nColumn := uColumn
+   endif
+
+   ::oLbx:Set( aIter, nColumn, uValue )
+
+RETURN .t.
+
 
 
 /*

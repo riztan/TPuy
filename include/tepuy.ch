@@ -151,6 +151,14 @@
 #xcommand ACTION OF <oListBox> BUTTON PRINT <action>  =>  <oListBox>:bPrint := \{|| <action> \}
 
 
+#xcommand  SET EDITABLE <uColumn> LISTBOX <oListBox> ;
+        [ BEFORE <bPreEdit> ]                        ;
+        [ AFTER  <bPosEdit> ]                        ;
+  =>                                                 ;
+  <oListBox>:oModel:SetColEditable( <uColumn>, .t., [\{|oModel, nColumn, uPreValue, uValue | <bPosEdit> \}], [\{|o| <bPreEdit> \}] )
+
+
+
 #xcommand DEFINE FORMEDIT <oForm> ;
                  [ MODEL <oModel>           ] ;
                  [ TITLE <cTitle>           ] ;
