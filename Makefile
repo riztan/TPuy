@@ -17,7 +17,7 @@ RESOURCE_FILE =./src/resource.rc
 
 export HPDF=yes
 
-TARGET = ./bin/tpuy-dp
+TARGET = ./bin/tpuy
 
 SRCPATH = ./src/
 SOURCES  = $(SRCPATH)main.prg          \
@@ -48,7 +48,6 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)glade.prg         \
            $(SRCPATH)tpy_image.prg     \
            $(SRCPATH)model_abm.prg     \
-           $(SRCPATH)tpy_dp.prg        \
            $(SRCPATH)tpyentry.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq
