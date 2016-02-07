@@ -58,6 +58,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA oLbx
       DATA oOnChange
       DATA aIter
+      DATA cPath
       DATA oConn
       DATA oQuery
       DATA lQuery            INIT .F.
@@ -104,9 +105,18 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD GetCol( cCol )
       METHOD GetPosCol( cCol )    INLINE iif( hb_IsNIL(::oTreeView), -1, ::oTreeView:GetPosCol( cCol ) )
       METHOD SetColTitle( cField, cValue )
+      METHOD GetColTitle( nCol )  INLINE ::aCol[ nCol ]:GetTitle()
       METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
       METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )
+
+      METHOD GoNext()             INLINE ::oTreeView:GoNext()
+      METHOD GoPrev()             INLINE ::oTreeView:GoPrev()
+      METHOD GoUp()               INLINE ::oTreeView:GoUp()
+      METHOD GoDown()             INLINE ::oTreeView:GoDown()
+      METHOD GoTop()              INLINE ::oTreeView:GoTop()
+      METHOD GoNextCol()          
+
 ENDCLASS
 
 
@@ -527,8 +537,9 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )  CLASS TPY_DATA_MODEL
 
    if hb_IsBlock( bPosEdit )
       ::aCol[nCol]:oRenderer:SetEditable( lYesNo )
-      ::aCol[nCol]:oRenderer:bEdited := {| oSender, path, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
+      ::aCol[nCol]:oRenderer:bEdited := {| oSender, cPath, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
                                            ::aIter := aIter, ;
+                                           ::cPath := cPath, ;
                                            EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ), ;
                                            ::oTreeView:SetFocus() }
       ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
@@ -540,6 +551,45 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )  CLASS TPY_DATA_MODEL
    endif
 
 RETURN .f.
+
+
+
+
+/** GoNextCol( nColumn, lEdit, lDown )
+ *  Posiciona el cursor en la columna siguiente a la indicada.
+ *  Si está al final del treeview, baja el cursor a menos que por la variable lDown
+ *  se indique lo contrario.
+ *  A traves de lEdit, se indica si la columna siguiente entra en modo edición.
+ */
+METHOD GoNextCol( nColumn, lEdit, lDown )  CLASS TPY_DATA_MODEL
+   local pPath, pNextCol, lNext := .f.
+   local aIter := ARRAY( 4 )
+
+   default nColumn to 0
+   default lEdit to .f.
+   default lDown to .t.
+
+   if ::oTreeView:GetColumns() <= nColumn
+      if lDown
+         lNext := .t.
+         nColumn := 0
+      else
+         return .f.
+      endif
+   endif
+
+   pNextCol := gtk_tree_view_get_column( ::oTreeview:pWidget, nColumn ) 
+   pPath := gtk_tree_path_new_from_string( ::cPath )
+   gtk_tree_view_set_cursor( ::oTreeview:pWidget, pPath, pNextCol, lEdit )
+   ::oTreeView:SetFocus() 
+   gtk_tree_path_free( pPath )
+
+   if lNext; ::GoNext() ; endif
+
+RETURN .t.
+
+
+
 
 
 METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
@@ -699,7 +749,6 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 
          oTemp:SetResizable( .T. )
 
-         ::oTreeView:bRow_Activated := oListBox:bEdit
          ::aCol[nColumn] := oTemp
 
      else
@@ -788,12 +837,13 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
 
 //         ::oTreeView:bRow_Activated := { |path,col| Comprueba( ::oTreeview, path, col ) }
 
-         //-- Hacemos que doble clic active el bloque de codigo para el boton "editar".
-         ::oTreeView:bRow_Activated := oListBox:bEdit
    
          ::aCol[nColumn] := oTemp
       ENDIF       
      endif
+
+     //-- Hacemos que doble clic active el bloque de codigo para el boton "editar".
+     ::oTreeView:bRow_Activated := {| path, col | EVAL( oListBox:bEdit, self, path, col ) }
 
      cColName := STRTRAN(STRTRAN("o"+cColTitle," ",""),".","")
      __objAddData( self, cColName )
