@@ -517,9 +517,14 @@ Return .F.
 
 
 
-METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )  CLASS TPY_DATA_MODEL
+METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )  CLASS TPY_DATA_MODEL
    local nCol, cType := ValType( uCol )
+   local lPreEdit := .f., lPosEdit := .f.
+
    if empty(uCol) .or. ValType( lYesNo )!="L" ; return .f. ; endif
+
+   default aCompletion := {}
+
 
    if cType = "N"
       nCol := uCol
@@ -535,24 +540,53 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )  CLASS TPY_DATA_MODEL
       return .t. 
    endif
 
-   if hb_IsBlock( bPosEdit )
-      ::aCol[nCol]:oRenderer:SetEditable( lYesNo )
-      ::aCol[nCol]:oRenderer:bEdited := {| oSender, cPath, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
-                                           ::aIter := aIter, ;
-                                           ::cPath := cPath, ;
-                                           EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ), ;
-                                           ::oTreeView:SetFocus() }
-      ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
-   endif
+   lPreEdit := hb_IsBlock( bPreEdit )
+   lPosEdit := hb_IsBlock( bPosEdit )
 
-   if hb_IsBlock( bPreEdit )
-      ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
-      ::aCol[nCol]:oRenderer:bOnEditing_Started := bPreEdit
+   if lPreEdit .or. lPosEdit
+      ::aCol[nCol]:oRenderer:SetEditable( lYesNo )
+
+      if lPosEdit 
+         ::aCol[nCol]:oRenderer:bEdited := {| oSender, cPath, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
+                                              ::aIter := aIter, ;
+                                              ::cPath := cPath, ;
+                                              EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ), ;
+                                              ::oTreeView:SetFocus() }
+      endif
+
+      if lPreEdit
+         ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
+         ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oSender, pCell, pEditable, cPath | ;
+                                                         ::pCell := pCell,                  ;
+                                                         ::pEditable := pEditable,          ;
+                                                         ::cPath     := cPath,              ;
+                                                         iif( !Empty(aCompletion), __CreateCompletion( pEditable, aCompletion ), nil),;
+                                                         EVAL( bPreEdit, oSender, pCell, pEditable, cPath ) }
+      endif
+
+      ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
    endif
 
 RETURN .f.
 
+STATIC PROCEDURE __CreateCompletion( pEntry, aItems )
+   local oEntry, oList, oCompletion, cValue
 
+   if !GTK_IS_ENTRY( pEntry ) ; return ; endif
+
+   oEntry := gEntry():Object_Empty()
+   oEntry:pWidget := pEntry
+
+   DEFINE LIST_STORE oList TYPES G_TYPE_STRING
+   FOR EACH cValue IN aItems
+      INSERT LIST_STORE oList ROW cValue:__EnumIndex() VALUES cValue
+   NEXT
+   //AEVAL( aItems, {|a,n| INSERT LIST_STORE oList ROW n VALUES a } )
+   
+   oCompletion := gEntryCompletion():New( oEntry, oList, 1 )
+   gtk_entry_set_completion( oEntry:pWidget, oCompletion:pWidget )
+
+RETURN
 
 
 /** GoNextCol( nColumn, lEdit, lDown )
