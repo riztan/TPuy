@@ -59,6 +59,8 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA oOnChange
       DATA aIter
       DATA cPath
+      DATA pCell
+      DATA pEditable
       DATA oConn
       DATA oQuery
       DATA lQuery            INIT .F.
@@ -108,7 +110,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD GetColTitle( nCol )  INLINE ::aCol[ nCol ]:GetTitle()
       METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
-      METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit )
+      METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )
 
       METHOD GoNext()             INLINE ::oTreeView:GoNext()
       METHOD GoPrev()             INLINE ::oTreeView:GoPrev()
@@ -569,6 +571,8 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )  CLASS TP
 
 RETURN .f.
 
+/** Crea Autocompletado para una columna en el treeview.
+ */
 STATIC PROCEDURE __CreateCompletion( pEntry, aItems )
    local oEntry, oList, oCompletion, cValue
 
@@ -581,7 +585,6 @@ STATIC PROCEDURE __CreateCompletion( pEntry, aItems )
    FOR EACH cValue IN aItems
       INSERT LIST_STORE oList ROW cValue:__EnumIndex() VALUES cValue
    NEXT
-   //AEVAL( aItems, {|a,n| INSERT LIST_STORE oList ROW n VALUES a } )
    
    oCompletion := gEntryCompletion():New( oEntry, oList, 1 )
    gtk_entry_set_completion( oEntry:pWidget, oCompletion:pWidget )
