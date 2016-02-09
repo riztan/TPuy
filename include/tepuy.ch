@@ -152,11 +152,11 @@
 
 
 #xcommand  SET EDITABLE <uColumn> LISTBOX <oListBox>      ;
-        [ BEFORE <bPreEdit> [COMPLETION  <aCompletion>] ] ;
+        [ BEFORE <bPreEdit> [<lCombo: COMBOBOX, COMBO>] [ITEMS  <aCompletion>] ] ;
         [ AFTER  <bPosEdit> ]                             ;
   =>                                                      ;
   <oListBox>:oModel:SetColEditable( <uColumn>, .t., [\{|oModel, nColumn, uPreValue, uValue | <bPosEdit> \}],;
-        [\{|uParam, pCell, pEditable, cPath | <bPreEdit> \}], [<aCompletion>] )
+        [\{|uParam, pCell, pEditable, cPath | <bPreEdit> \}], [<aCompletion>],[<.lCombo.>] )
 
 
 

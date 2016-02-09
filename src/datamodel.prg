@@ -110,7 +110,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD GetColTitle( nCol )  INLINE ::aCol[ nCol ]:GetTitle()
       METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
-      METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )
+      METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aItems )
 
       METHOD GoNext()             INLINE ::oTreeView:GoNext()
       METHOD GoPrev()             INLINE ::oTreeView:GoPrev()
@@ -519,14 +519,16 @@ Return .F.
 
 
 
-METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )  CLASS TPY_DATA_MODEL
+METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aItems, lComboBox )  CLASS TPY_DATA_MODEL
    local nCol, cType := ValType( uCol )
    local lPreEdit := .f., lPosEdit := .f.
+   local oModel, cValue, oColTemp/*, pWidget, oRenderer*/
+   local cAux
 
    if empty(uCol) .or. ValType( lYesNo )!="L" ; return .f. ; endif
 
-   default aCompletion := {}
-
+   default aItems := {}
+   default lComboBox := .f.
 
    if cType = "N"
       nCol := uCol
@@ -537,8 +539,9 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )  CLASS TP
       return .f.
    endif
 
+   ::aCol[nCol]:oRenderer:SetEditable( lYesNo )
+
    if !lYesNo 
-      ::aCol[nCol]:oRenderer:SetEditable( lYesNo ) 
       return .t. 
    endif
 
@@ -546,30 +549,59 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aCompletion )  CLASS TP
    lPosEdit := hb_IsBlock( bPosEdit )
 
    if lPreEdit .or. lPosEdit
-      ::aCol[nCol]:oRenderer:SetEditable( lYesNo )
+
+      if lPreEdit
+         if lComboBox .and. !Empty(aItems)
+   
+            DEFINE LIST_STORE oModel TYPES G_TYPE_STRING
+            FOR EACH cValue IN aItems
+               INSERT LIST_STORE oModel ROW cValue:__EnumIndex() VALUES cValue
+            NEXT
+   
+            cAux := ::aCol[nCol]:GetTitle()
+            ::oTreeView:RemoveColumn( nCol )
+   
+
+            DEFINE TREEVIEWCOLUMN oColTemp TITLE cAux POS nCol ;
+                   TYPE "COMBO" MODEL oModel OF ::oTreeView
+   
+            ::aCol[nCol] := oColTemp
+
+            ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
+            ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oSender, pCell, pEditable, cPath |                  ;
+                                                            ::pCell := pCell,                                   ;
+                                                            ::pEditable := pEditable,                           ;
+                                                            ::cPath     := cPath,                               ;
+                                                            EVAL( bPreEdit, oSender, nCol, pCell, pEditable, cPath ) }
+
+         else
+            ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
+            ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oSender, pCell, pEditable, cPath |                  ;
+                                                            ::pCell := pCell,                                   ;
+                                                            ::pEditable := pEditable,                           ;
+                                                            ::cPath     := cPath,                               ;
+                                                            iif( !Empty(aItems), __CreateCompletion( pEditable, aItems ), nil),;
+                                                            EVAL( bPreEdit, oSender, nCol, pCell, pEditable, cPath ) }
+                                                            //::oTreeView:SetFocus() }
+         endif
+      endif
+
 
       if lPosEdit 
          ::aCol[nCol]:oRenderer:bEdited := {| oSender, cPath, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
                                               ::aIter := aIter, ;
                                               ::cPath := cPath, ;
-                                              EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ), ;
-                                              ::oTreeView:SetFocus() }
+                                              EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ) }
+                                              //::oTreeView:SetFocus() }
       endif
 
-      if lPreEdit
-         ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
-         ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oSender, pCell, pEditable, cPath | ;
-                                                         ::pCell := pCell,                  ;
-                                                         ::pEditable := pEditable,          ;
-                                                         ::cPath     := cPath,              ;
-                                                         iif( !Empty(aCompletion), __CreateCompletion( pEditable, aCompletion ), nil),;
-                                                         EVAL( bPreEdit, oSender, pCell, pEditable, cPath ) }
-      endif
 
       ::aCol[nCol]:oRenderer:SetColumn( ::aCol[nCol] )
    endif
 
 RETURN .f.
+
+
 
 /** Crea Autocompletado para una columna en el treeview.
  */
@@ -589,7 +621,7 @@ STATIC PROCEDURE __CreateCompletion( pEntry, aItems )
    oCompletion := gEntryCompletion():New( oEntry, oList, 1 )
    gtk_entry_set_completion( oEntry:pWidget, oCompletion:pWidget )
 
-RETURN
+RETURN 
 
 
 /** GoNextCol( nColumn, lEdit, lDown )
@@ -617,8 +649,9 @@ METHOD GoNextCol( nColumn, lEdit, lDown )  CLASS TPY_DATA_MODEL
 
    pNextCol := gtk_tree_view_get_column( ::oTreeview:pWidget, nColumn ) 
    pPath := gtk_tree_path_new_from_string( ::cPath )
-   gtk_tree_view_set_cursor( ::oTreeview:pWidget, pPath, pNextCol, lEdit )
    ::oTreeView:SetFocus() 
+   gtk_tree_view_set_cursor( ::oTreeview:pWidget, pPath, pNextCol, lEdit )
+   //::oTreeView:SetFocus() 
    gtk_tree_path_free( pPath )
 
    if lNext; ::GoNext() ; endif
@@ -885,7 +918,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
      cColName := STRTRAN(STRTRAN("o"+cColTitle," ",""),".","")
      __objAddData( self, cColName )
 #ifndef __XHARBOUR__
-     __objSendMsg( self, "_"+cColName, oTemp )
+     __objSendMsg( self, "_"+cColName, @oTemp )
 #else
      hb_execFromArray( @self, cColName, {oTemp} )
 #endif
