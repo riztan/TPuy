@@ -89,7 +89,8 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
 
       METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders )
       METHOD Listore( oBox, oListBox )
-      METHOD ListoreWnd( )
+      METHOD ListoreWnd( )     /* replantear o eliminar. */
+
       METHOD Run( col, cArray, ... )
 //      METHOD Edit()
 //      METHOD NewAuto( aTypes )
@@ -103,21 +104,25 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
 //      METHOD Clear() INLINE gtk_list_store_clear( ::pWidget )
 //      METHOD Remove( aIter ) INLINE gtk_list_store_remove( ::pWidget, aIter )
       METHOD SetFromDBF( uValue )
+
+
+// -- Bloque de metodos deben pasar a la clase tpy_listbox
       METHOD GetPosRow()
       METHOD GetCol( cCol )
       METHOD GetPosCol( cCol )    INLINE iif( hb_IsNIL(::oTreeView), -1, ::oTreeView:GetPosCol( cCol ) )
       METHOD SetColTitle( cField, cValue )
       METHOD GetColTitle( nCol )  INLINE ::aCol[ nCol ]:GetTitle()
-      METHOD ColSet( cField, nPos, uValue )
       METHOD ColDisable(cField)
       METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aItems )
-
       METHOD GoNext()             INLINE ::oTreeView:GoNext()
       METHOD GoPrev()             INLINE ::oTreeView:GoPrev()
       METHOD GoUp()               INLINE ::oTreeView:GoUp()
       METHOD GoDown()             INLINE ::oTreeView:GoDown()
       METHOD GoTop()              INLINE ::oTreeView:GoTop()
       METHOD GoNextCol()          
+// -- fin
+
+      METHOD ColSet( cField, nPos, uValue )  /*revisar para replantear o eliminar. No tiene sentido*/
 
 ENDCLASS
 
@@ -200,13 +205,28 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
          nLenStru  := Len(::aStruct)
          //nFields := ::oConn:Query("select * from "+cBaseFields+" limit 1" ):nFields
          ::aDMStru := ARRAY( nLenStru, Len(::aStruct[1]) )
+//View( ::aStruct )
          FOR EACH aField IN ::aStruct
+             Do Case // PICTURE
+             Case aField[ 2 ] = "L" 
+                cPicture := "BOOLEAN"
+             Case aField[ 2 ] = "D" 
+                cPicture := "99/99/9999"
+             Case aField[ 2 ] = "C" 
+                cPicture := "X"
+             Case aField[ 2 ] = "N" 
+//View( aField )
+                cPicture := iif( aField[ 4 ] > 0, P_92, P_60 )
+             Other
+                cPicture := "X"
+             EndCase
+
              ::aDMStru[ aField:__enumIndex() ] := { aField[1], ;  // DESCRIP
                                                     aField[1], ;  // NAME
                                                     .t.,       ;  // EDITABLE
                                                     .t.,       ;  // VIEWABLE
                                                     .t.,       ;  // NAVIGABLE
-                                                    'X',       ;  // PICTURE
+                                                    cPicture,  ;  // PICTURE
                                                     '',        ;  // DEFAULT
                                                     .f.,       ;  // REFERENCE
                                                     '',        ;  // REFTABLE
@@ -754,7 +774,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
  
                    Else
                       If ValType( oColumn ) != "L"
-                         cValTmp := TRANSFORM( Val(oColumn), ::aDMStru[n,6] )
+                         cValTmp := TRANSFORM( iif( hb_IsNumeric( oColumn ), oColumn, VAL(oColumn) ), ::aDMStru[n,6] )
                       EndIf
                    EndIf
                 
