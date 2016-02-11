@@ -109,7 +109,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
 // -- Bloque de metodos deben pasar a la clase tpy_listbox
       METHOD GetPosRow()
       METHOD GetCol( cCol )
-      METHOD GetPosCol( cCol )    INLINE iif( hb_IsNIL(::oTreeView), -1, ::oTreeView:GetPosCol( cCol ) )
+      METHOD GetPosCol( cColTitle )    //INLINE iif( hb_IsNIL(::oTreeView), -1, ::oTreeView:GetPosCol( cCol ) )
       METHOD SetColTitle( cField, cValue )
       METHOD GetColTitle( nCol )  INLINE ::aCol[ nCol ]:GetTitle()
       METHOD ColDisable(cField)
@@ -125,7 +125,6 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD ColSet( cField, nPos, uValue )  /*revisar para replantear o eliminar. No tiene sentido*/
 
 ENDCLASS
-
 
 
 METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS TPY_DATA_MODEL
@@ -434,7 +433,7 @@ RETURN 0
 
 
 METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
-   Local cRow, nPosCol, nRow, cType
+   Local cRow, nPosCol, nRow, cType, uValue
    Local pPath//, aIter := GtkTreeIter
 
    if hb_IsNIL( ::oTreeView ); return nil ; endif
@@ -453,7 +452,30 @@ METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
 
    pPath := gtk_tree_path_new_from_string( cRow )
 
-Return AllTrim( CSTR(::oTreeView:GetValue( nPosCol, "", pPath, @::aIter )) )
+   //uValue := ::oTreeView:GetValue( nPosCol, "", pPath, @::aIter ) 
+// Revisar ::oTreeView:GetValue()  Explota cuando el modelo está en blanco.
+   uValue := ::oTreeView:GetAutoValue( nPosCol, @::aIter ) 
+   if ValType( uValue ) != "C" ; uValue := CSTR( uValue ) ; endif
+   if !Empty( uValue ) ; uValue := ALLTRIM( uValue ) ; endif
+
+Return uValue
+
+
+
+
+METHOD GetPosCol( cColTitle ) CLASS TPY_DATA_MODEL
+   local nPos := -1, oColumn
+
+   if hb_IsNIL( ::oTreeView ) ; return nPos ; endif
+
+   FOR EACH oColumn IN ::aCol
+      if ALLTRIM( oColumn:GetTitle() ) == ALLTRIM(cColTitle)
+         RETURN oColumn:__EnumIndex()
+      endif
+   NEXT
+
+RETURN nPos
+
 
 
 
@@ -596,12 +618,12 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aItems, lComboBox )  CL
 
          else
             ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
-            ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oSender, pCell, pEditable, cPath |                  ;
+            ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oRenderer, pCell, pEditable, cPath |                  ;
                                                             ::pCell := pCell,                                   ;
                                                             ::pEditable := pEditable,                           ;
                                                             ::cPath     := cPath,                               ;
                                                             iif( !Empty(aItems), __CreateCompletion( pEditable, aItems ), nil),;
-                                                            EVAL( bPreEdit, oSender, nCol, pCell, pEditable, cPath ) }
+                                                            EVAL( bPreEdit, oRenderer, nCol, pCell, pEditable, cPath ) }
                                                             //::oTreeView:SetFocus() }
          endif
       endif
@@ -611,7 +633,7 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aItems, lComboBox )  CL
          ::aCol[nCol]:oRenderer:bEdited := {| oSender, cPath, uVal, aIter/*, oLbx, oTreeView, oCol*/ |;
                                               ::aIter := aIter, ;
                                               ::cPath := cPath, ;
-                                              EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal ) }
+                                              EVAL( bPosEdit, self, nCol, ::GetCol(nCol), uVal, aIter ) } 
                                               //::oTreeView:SetFocus() }
       endif
 
@@ -669,7 +691,7 @@ METHOD GoNextCol( nColumn, lEdit, lDown )  CLASS TPY_DATA_MODEL
 
    pNextCol := gtk_tree_view_get_column( ::oTreeview:pWidget, nColumn ) 
    pPath := gtk_tree_path_new_from_string( ::cPath )
-   ::oTreeView:SetFocus() 
+   //::oTreeView:SetFocus() 
    gtk_tree_view_set_cursor( ::oTreeview:pWidget, pPath, pNextCol, lEdit )
    //::oTreeView:SetFocus() 
    gtk_tree_path_free( pPath )

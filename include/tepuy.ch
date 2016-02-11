@@ -155,9 +155,11 @@
         [ BEFORE <bPreEdit> [<lCombo: COMBOBOX, COMBO>] [ITEMS  <aCompletion>] ] ;
         [ AFTER  <bPosEdit> ]                             ;
   =>                                                      ;
-  <oListBox>:oModel:SetColEditable( <uColumn>, .t., [\{|oModel, nColumn, uPreValue, uValue | <bPosEdit> \}],;
-        [\{|uParam, pCell, pEditable, cPath | <bPreEdit> \}], [<aCompletion>],[<.lCombo.>] )
+  <oListBox>:oModel:SetColEditable( <uColumn>, .t.,;
+        [\{| ... | <bPosEdit> \}],;
+        [\{| ... | <bPreEdit> \}], [<aCompletion>],[<.lCombo.>] )
 
+        //[\{|oModel, nColumn, uPreValue, uValue, aIter | <bPosEdit> \}],;
 
 
 #xcommand DEFINE FORMEDIT <oForm> ;
