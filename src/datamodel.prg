@@ -103,6 +103,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD Insert( aItems )
 //      METHOD Clear() INLINE gtk_list_store_clear( ::pWidget )
 //      METHOD Remove( aIter ) INLINE gtk_list_store_remove( ::pWidget, aIter )
+      METHOD Remove( aIter )
       METHOD SetFromDBF( uValue )
 
 
@@ -1373,6 +1374,26 @@ METHOD Insert( aItems ) CLASS TPY_DATA_MODEL
    ::nRows++
 
 Return .T.
+
+
+
+METHOD Remove( aIter )  CLASS TPY_DATA_MODEL
+   local pPath
+
+   if hb_IsNIL( ::oTreeView ); return .F. ; endif
+
+   if empty(aIter) .or. hb_IsNIL(aIter)
+      aIter := ARRAY(4)//GtkTreeIter
+   endif
+
+   if ::oTreeView:IsGetSelected( @aIter )
+      pPath := ::oTreeView:GetPath( aIter )
+      ::oLbx:Remove( aIter )
+      gtk_tree_view_set_cursor( ::oTreeView:pWidget, pPath )
+      ::oTreeView:SetFocus()
+   endif
+
+RETURN .T.
 
 
 
