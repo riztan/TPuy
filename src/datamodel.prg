@@ -148,7 +148,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
    ::aItems   := aItems
    ::aActions := aActions
    ::aValiders:= aValiders
-//    ::aIter    := GtkTreeIter
+   ::aIter    := GtkTreeIter
    ::lCursorTop:= .T.
 
    ::hVars := Hash()
@@ -196,7 +196,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
    EndIf
     
 
-   ::aIter := ARRAY( LEN(::aItems) )
+   //::aIter := ARRAY( LEN(::aItems) )
 
    If ::lQuery .AND. hb_IsObject(::oQuery)
 
@@ -327,7 +327,7 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
              Case aLin[ 2 ] = "C" 
                 cPicture := "X"
              Case aLin[ 2 ] = "N" 
-                cPicture := "N"
+                cPicture := __FORMAT( aLin[3], aLin[4] )
              Other
                 cPicture := "X"
              EndCase
@@ -360,6 +360,32 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
    EndIf
 
 RETURN Self
+
+
+STATIC FUNCTION __FORMAT( nLen, nDecimals, cFormat )
+   local cPict, nGrupos, nCont := 1
+   default cFormat   to "@E "
+   default nDecimals to oTpuy:nDecimals
+   default nLen      to 9 
+
+   nGrupos := INT( nLen / 3 ) + MOD(nLen, 3)
+
+   cPict := cFormat 
+
+   Do While nCont <= nGrupos
+      cPict += "999"
+      if !(nCont = nGrupos)
+         cPict += ","
+      endif
+      nCont++
+   EndDo
+
+   if nDecimals > 0
+      cPict += "."+REPLI("9",nDecimals)
+   endif
+   
+RETURN cPict
+
 
 
 METHOD SetFromDBF( uValue ) CLASS TPY_DATA_MODEL
@@ -455,9 +481,15 @@ METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
 
    //uValue := ::oTreeView:GetValue( nPosCol, "", pPath, @::aIter ) 
 // Revisar ::oTreeView:GetValue()  Explota cuando el modelo está en blanco.
-   uValue := ::oTreeView:GetAutoValue( nPosCol, @::aIter ) 
-   if ValType( uValue ) != "C" ; uValue := CSTR( uValue ) ; endif
-   if !Empty( uValue ) ; uValue := ALLTRIM( uValue ) ; endif
+   uValue := ::oTreeView:GetAutoValue( nPosCol ) //, @::aIter ) 
+   cType := ValType( uValue )
+   if cType != "C" .and. cType != "L"
+      uValue := CSTR( uValue ) 
+   endif
+
+   if !Empty( uValue ) .and. cType != "L"
+      uValue := ALLTRIM( uValue )
+   endif
 
 Return uValue
 
@@ -675,7 +707,7 @@ RETURN
  */
 METHOD GoNextCol( nColumn, lEdit, lDown )  CLASS TPY_DATA_MODEL
    local pPath, pNextCol, lNext := .f.
-   local aIter := ARRAY( 4 )
+   local aIter := GtkTreeIter//ARRAY( 4 )
 
    default nColumn to 0
    default lEdit to .f.
@@ -1059,9 +1091,12 @@ METHOD SetValue( uColumn, uValue, aIter )  CLASS  TPY_DATA_MODEL
       nColumn := uColumn
    endif
 
-   ::oLbx:Set( aIter, nColumn, uValue )
+   if ::oTreeView:IsGetSelected( aIter )
+      ::oLbx:Set( aIter, nColumn, uValue )
+      return .t.
+   endif
 
-RETURN .t.
+RETURN .f.
 
 
 
@@ -1088,7 +1123,7 @@ METHOD SET( aItems, xCol, uValue, aIter, aError ) CLASS TPY_DATA_MODEL
    DEFAULT xCol   := 1
 //   DEFAULT uValue := "No Value"
    DEFAULT aError := ARRAY(1)
-   DEFAULT aIter := ARRAY( 4 )
+   DEFAULT aIter := GtkTreeIter //ARRAY( 4 )
 
    //-- Primero, si tenemos conexion a BD... intentamos actualizar.
    If ::lQuery .AND. !Empty(aItems)
@@ -1383,7 +1418,7 @@ METHOD Remove( aIter )  CLASS TPY_DATA_MODEL
    if hb_IsNIL( ::oTreeView ); return .F. ; endif
 
    if empty(aIter) .or. hb_IsNIL(aIter)
-      aIter := ARRAY(4)//GtkTreeIter
+      aIter := GtkTreeIter //ARRAY(4)
    endif
 
    if ::oTreeView:IsGetSelected( @aIter )
