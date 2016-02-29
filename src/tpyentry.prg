@@ -146,7 +146,7 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
             urButton := uImg
             if !hb_IsBlock( bAction )
 //View( oForm:ClassName() )
-               bAction := {|this, nPos| __Calendar( self, oForm )}
+               bAction := {|this, nPos| Calendar( self, oForm )}
             endif
          endif
       endif
@@ -486,7 +486,7 @@ STATIC FUNCTION __VALDATE( oEntry )
       if hb_IsObject( oEntry:oForm:oWnd ) .and. ;
                       oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW")
          if oEntry:lCalendar 
-            __Calendar( oEntry, oEntry:oForm )
+            Calendar( oEntry, oEntry:oForm )
          endif
       endif
    endif
@@ -496,62 +496,6 @@ STATIC FUNCTION __VALDATE( oEntry )
    endif
 
 RETURN .T.
-
-
-static procedure __Calendar( oEntry, oForm )
-   local oWnd, oBox, oCalendar, cRes, dFecha := Date()
-   local cIconFile := oTpuy:cImages+oTpuy:cIconMain
-//   local dDefault := CTOD( oEntry:cDefault )
-
-   if oTpuy:IsDef("dFecha"); dFecha := oTpuy:dFecha; endif
-
-//   SET RESOURCES cRes FROM FILE oForm:cResFile
-
-   DEFINE WINDOW oWnd TITLE "Fecha";
-          SIZE 200,190             
-
-      if FILE( cIconFile )
-         oWnd:SetIconFile( cIconFile )
-      endif
-
-      if !hb_IsNIL( oForm )
-         if oForm:oWnd:IsDerivedFrom( "GWINDOW" )
-            gtk_window_set_transient_for( oWnd:pWidget, oForm:oWnd:pWidget )
-         endif
-      endif
-         
-      oWnd:SetSkipTaskBar( .t. )
-      //oWnd:SetDecorated( .f. )
-      oWnd:SetDeletable( .f. )
-      oWnd:SetResizable( .f. )
-      oWnd:SetTransparency( .2 )
-      gtk_window_set_position( oWnd:pWidget, GTK_WIN_POS_MOUSE )
-
-   DEFINE BOX oBox SPACING 3 BORDER 5 VERTICAL OF oWnd
-
-     DEFINE CALENDAR oCalendar                           ; 
-            DATE CTOD(oEntry:cDefault)                   ;
-            MARKDAY                                      ;
-            ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
-                       oWnd:End(), oWnd:=NIL,            ;
-                       oEntry:lCalActive:=.f., oEntry:SetFocus) ;
-            OF oBox
-
-     oCalendar:MarkDay( DAY(dFecha) )
-
-     DEFINE BUTTON TEXT "Hoy"                            ;
-            ACTION ( oCalendar:SetDate( dFecha ),        ;
-                     oCalendar:SetFocus() )              ;
-            OF oBox
-
-
-   ACTIVATE WINDOW oWnd MODAL
-
-   oCalendar:SetFocus()
-   oEntry:lCalActive := .t.
-
-
-return 
 
 
 
@@ -629,5 +573,64 @@ STATIC FUNCTION __VALOTHER( oEntry )
    endif
 
 return .t.
+
+
+
+PROCEDURE Calendar( oEntry, oForm ) 
+   local oWnd, oBox, oCalendar, cRes, dFecha := Date()
+   local cIconFile := oTpuy:cImages+oTpuy:cIconMain
+//   local dDefault := CTOD( oEntry:cDefault )
+
+   if oTpuy:IsDef("dFecha"); dFecha := oTpuy:dFecha; endif
+
+//   SET RESOURCES cRes FROM FILE oForm:cResFile
+
+   DEFINE WINDOW oWnd TITLE "Fecha";
+          SIZE 200,190             
+
+      if FILE( cIconFile )
+         oWnd:SetIconFile( cIconFile )
+      endif
+
+      if !hb_IsNIL( oForm )
+         if oForm:oWnd:IsDerivedFrom( "GWINDOW" )
+            gtk_window_set_transient_for( oWnd:pWidget, oForm:oWnd:pWidget )
+         endif
+      endif
+         
+      oWnd:SetSkipTaskBar( .t. )
+      //oWnd:SetDecorated( .f. )
+      oWnd:SetDeletable( .f. )
+      oWnd:SetResizable( .f. )
+      oWnd:SetTransparency( .2 )
+      gtk_window_set_position( oWnd:pWidget, GTK_WIN_POS_MOUSE )
+
+   DEFINE BOX oBox SPACING 3 BORDER 5 VERTICAL OF oWnd
+
+     DEFINE CALENDAR oCalendar                           ; 
+            DATE CTOD(oEntry:cDefault)                   ;
+            MARKDAY                                      ;
+            ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
+                       oWnd:End(), oWnd:=NIL,            ;
+                       oEntry:lCalActive:=.f., oEntry:SetFocus) ;
+            OF oBox
+
+     oCalendar:MarkDay( DAY(dFecha) )
+
+     DEFINE BUTTON TEXT "Hoy"                            ;
+            ACTION ( oCalendar:SetDate( dFecha ),        ;
+                     oCalendar:SetFocus() )              ;
+            OF oBox
+
+     oCalendar:SetFocus()
+     oCalendar:SetDate( dFecha )
+
+   ACTIVATE WINDOW oWnd MODAL
+
+   oEntry:lCalActive := .t.
+
+
+return 
+
 
 //eof
