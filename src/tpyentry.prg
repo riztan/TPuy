@@ -76,6 +76,7 @@ CLASS TpyEntry FROM GEntry
    DATA cTitle       INIT  ""    // Titulo o Nombre que visualmente 
                                  // representaria este objeto.
    
+   DATA oCalendar                // si hay calendario, es este objeto.
    DATA lCalendar    INIT .f.    // En entry tipo fecha 
                                  // Activa/Desactiva posibilidad de 
                                  // abrir calendario
@@ -483,10 +484,14 @@ STATIC FUNCTION __VALDATE( oEntry )
    if (oEntry:Empty() .or. Empty( oEntry:Get() )) ;
       .and. !oEntry:lCalActive
 //View( oEntry:oGet:buffer )
-      if hb_IsObject( oEntry:oForm:oWnd ) .and. ;
-                      oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW")
-         if oEntry:lCalendar 
-            Calendar( oEntry, oEntry:oForm )
+      if hb_IsObject( oEntry:oForm:oWnd ) 
+         if oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW") .and. ;
+            oEntry:lCalendar 
+            oEntry:oCalendar :=  Calendar( oEntry, oEntry:oForm )
+         endif
+         if oEntry:oForm:IsDerivedFrom("GWINDOW") .and. ;
+            oEntry:lCalendar 
+            oEntry:oCalendar :=  Calendar( oEntry, oEntry:oForm )
          endif
       endif
    endif
@@ -576,44 +581,67 @@ return .t.
 
 
 
-PROCEDURE Calendar( oEntry, oForm ) 
+FUNCTION Calendar( oEntry, oForm ) 
    local oWnd, oBox, oCalendar, cRes, dFecha := Date()
    local cIconFile := oTpuy:cImages+oTpuy:cIconMain
+   local oWndParent, lPModal := .f.
+   local bAction
 //   local dDefault := CTOD( oEntry:cDefault )
 
    if oTpuy:IsDef("dFecha"); dFecha := oTpuy:dFecha; endif
 
+   if hb_IsObject( oForm )
+      if oForm:IsDerivedFrom("GWINDOW")
+         oWndParent := oForm
+      else
+         if oForm:oWnd:IsDerivedFrom("GWINDOW")
+            oWndParent := oForm:oWnd
+         endif
+      endif
+   endif
+
 //   SET RESOURCES cRes FROM FILE oForm:cResFile
 
-   DEFINE WINDOW oWnd TITLE "Fecha";
-          SIZE 200,190             
+   DEFINE WINDOW oWnd TITLE "Fecha" ;
+          TYPE GTK_WINDOW_TOPLEVEL ; 
+          OF oWndParent //;
+          //SIZE 200,190             
 
       if FILE( cIconFile )
          oWnd:SetIconFile( cIconFile )
       endif
 
-      if !hb_IsNIL( oForm )
-         if oForm:oWnd:IsDerivedFrom( "GWINDOW" )
-            gtk_window_set_transient_for( oWnd:pWidget, oForm:oWnd:pWidget )
+      if !hb_IsNIL( oWndParent )
+         //gtk_window_set_transient_for( oWnd:pWidget, oWndParent:pWidget )
+         if oWndParent:IsModal()
+            lPModal := .t.
+            oWndParent:Modal( .f. )
          endif
       endif
          
       oWnd:SetSkipTaskBar( .t. )
       //oWnd:SetDecorated( .f. )
-      oWnd:SetDeletable( .f. )
+      //oWnd:SetDeletable( .f. )
       oWnd:SetResizable( .f. )
       oWnd:SetTransparency( .2 )
       gtk_window_set_position( oWnd:pWidget, GTK_WIN_POS_MOUSE )
 
    DEFINE BOX oBox SPACING 3 BORDER 5 VERTICAL OF oWnd
 
+     bAction := {|| oEntry:Set( oCalendar:GetDate() ),;
+                    iif( lPModal, oWndParent:Modal(lPModal),nil),;
+                    oWnd:End(),;
+                    oEntry:lCalActive:=.f.,;
+                    oEntry:SetFocus() }
+
      DEFINE CALENDAR oCalendar                           ; 
             DATE CTOD(oEntry:cDefault)                   ;
             MARKDAY                                      ;
-            ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
-                       oWnd:End(), oWnd:=NIL,            ;
-                       oEntry:lCalActive:=.f., oEntry:SetFocus) ;
+            ON_DCLICK EVAL(bAction) ;
             OF oBox
+            //ON_DCLICK (oEntry:Set( oCalendar:GetDate() ),;
+            //           oWnd:End(),             ;
+            //           oEntry:lCalActive:=.f., oEntry:SetFocus );
 
      oCalendar:MarkDay( DAY(dFecha) )
 
@@ -625,12 +653,10 @@ PROCEDURE Calendar( oEntry, oForm )
      oCalendar:SetFocus()
      oCalendar:SetDate( dFecha )
 
+   oEntry:lCalActive := .t.
    ACTIVATE WINDOW oWnd MODAL
 
-   oEntry:lCalActive := .t.
-
-
-return 
+return oWnd
 
 
 //eof
