@@ -651,7 +651,7 @@ METHOD SetColEditable( uCol, lYesNo, bPosEdit, bPreEdit, aItems, lComboBox )  CL
 
          else
             ::aCol[nCol]:oRenderer:Connect( "editing-started" )  
-            ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oRenderer, pCell, pEditable, cPath |                  ;
+            ::aCol[nCol]:oRenderer:bOnEditing_Started := {| oRenderer, pCell, pEditable, cPath |                ;
                                                             ::pCell := pCell,                                   ;
                                                             ::pEditable := pEditable,                           ;
                                                             ::cPath     := cPath,                               ;

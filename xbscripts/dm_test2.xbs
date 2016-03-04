@@ -1,0 +1,78 @@
+/*
+ * dm_test2: Ejemplo Simple de uso de DataModel y Listbox, incluye edicion de los datos.
+ */
+
+#include "tpy_xbs.ch"
+
+func dm_test2()
+
+   local aStruct
+   local aItems
+   local oModel
+   local oListBox, dFecha := date()
+
+
+   aItems  := {;
+              {"Rafael"  , "Carmona"     ,.t.,dFecha-15},;
+              {"Federico", "De Maussion" ,.f.,dFecha-30},;
+              {"Daniel"  , "Garcia"      ,.f.,dFecha+12},;
+              {"Riztan"  , "Gutierrez"   ,.f.,dFecha   } ;
+              }
+
+   aStruct := {{"Nombre"  , "C" , 20 , 0},;
+               {"Apellido", "C" , 20 , 0},;
+               {"Estatus" , "L" , 01 , 0},;
+               {"Fecha"   , "D" , 10 , 0}}
+
+
+   //oModel :=  tpy_data_model():New(,,aStruct,aItems) 
+   DEFINE MODEL  oModel  ;
+          STRUCT aStruct ;
+          DATA   aItems
+
+
+   //oListBox := tpy_listbox():New(,oModel,"listbox",,350,500)
+   DEFINE LISTBOX oListBox ;
+          MODEL   oModel   ;
+          TITLE   "Listado";
+          SIZE    350,400 //OF oTpuy:oDesktop
+   
+
+          ACTION OF oListBox BUTTON NEW  __Editar( oListBox:oWnd, oListBox, .t. )
+          ACTION OF oListBox BUTTON EDIT __Editar( oListBox:oWnd, oListBox, .f. )
+
+   oListBox:Active()
+
+   oModel:Destroy()
+
+return nil
+
+
+
+FUNCTION __Editar( oParent, oListBox, lAdd, nRow )
+
+   local aTables := {}
+   local oABM
+
+   default lAdd := .f.
+   default nRow := 0
+
+   oABM := Tpy_ABM2():New( oParent, oListBox, "Edición de Tabla.", , nRow ,,,,,,lAdd )
+
+   if !IsObject( oABM ) 
+      return .f.
+   endif
+
+   oABM:lButton := .t. //-- Agregar Botones (Guardar / Cancelar) 
+
+   oABM:lBarBtn := .f.
+
+   //-- Luego de Guardar, cerrar la ventana.
+   oABM:bPosSave := {|| oABM:lEndSilence:=.t., oABM:oWnd:End()  }
+
+   //oABM:lModal := .f.
+
+   oABM:Active()
+
+RETURN .t.
+

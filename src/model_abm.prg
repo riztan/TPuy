@@ -582,8 +582,13 @@ View( "aqui...  revisar. (model_abm.prg)" )
 
             Case oColumn:Type = "D"
 #include "tpyentry.ch" // --  en pruebas  ( RIGC - Feb 03/2016 )
-                 DEFINE DATE ENTRY oWidGetTmp VAR cTemp CALENDAR ;
+                 DEFINE DATE ENTRY oWidGetTmp VAR cTemp CALENDAR FORM ::oWnd ;
                         OF ::oBoxes:tmp 
+//                 if hb_IsObject(::oWnd) .and. ::oWnd:IsDerivedFrom("GWINDOW")
+//                    ::oWnd:Modal(.f.)
+//view( oWidgetTmp:oCalendar:Classname() )
+//                    gtk_window_set_transient_for( oWidgetTmp:oCalendar, ::oWnd )  
+//                 endif
             OTHER
                  DEFINE ENTRY oWidGetTmp VAR cTemp OF ::oBoxes:tmp EXPAND FILL
          ENDCASE
@@ -892,10 +897,10 @@ METHOD ACTIVE( bAction, bInit ) CLASS TPY_ABM2
 
          DEFINE BUTTON ::hButtons["oSave"] TEXT "Guardar" ;
                 FROM STOCK GTK_STOCK_SAVE ;
-                ACTION ::Save() ;
+                ACTION ::Save()           ;
                 OF ::oBoxes:oBoxBtns  
 
-         DEFINE BUTTON ::hBUttons["oCancel"] TEXT "Cancelar" ;
+         DEFINE BUTTON ::hButtons["oCancel"] TEXT "Cancelar" ;
                 FROM STOCK GTK_STOCK_CANCEL ;
                 ACTION (::lEndSilece:=.t., ::End()) ;
                 OF ::oBoxes:oBoxBtns
@@ -905,7 +910,7 @@ METHOD ACTIVE( bAction, bInit ) CLASS TPY_ABM2
 
          DEFINE TOOLBUTTON ::hButtons["oSave"] TEXT "Guardar" ;
                 FROM STOCK GTK_STOCK_SAVE ;
-                ACTION ::Save() ;
+                ACTION ::Save()           ;
                 OF ::oBoxes:oBoxBtns  
 /*
       DEFINE BOX ::hButtons["otro"] OF ::hButtons["oSave"]
@@ -921,8 +926,8 @@ METHOD ACTIVE( bAction, bInit ) CLASS TPY_ABM2
                 OF ::oBoxes:oBoxBtns
 
       EndIf
-         DEFINE TOOLTIP WIDGET ::hButtons["oSave"  ] TEXT "Guarda los Valores en Base de Datos."
-         DEFINE TOOLTIP WIDGET ::hButtons["oCancel"] TEXT "Cancela cualquier acción y cierra el formulario."
+      DEFINE TOOLTIP WIDGET ::hButtons["oSave"  ] TEXT "Guarda los Valores"
+      DEFINE TOOLTIP WIDGET ::hButtons["oCancel"] TEXT "Cancela cualquier acción y cierra el formulario."
    EndIf   
 
 
@@ -983,7 +988,8 @@ METHOD SAVE() CLASS TPY_ABM2
           /* Alta/Adicion */
           if Empty( ::hOldValues )  
              Do Case
-             Case cClassName = "GENTRY" .or. cClassName = "GGET"
+             //Case cClassName = "GENTRY" .or. cClassName = "GGET"
+             Case ::hWidget[oColumn:Name]:IsDerivedFrom("GENTRY") .or. cClassName = "GGET" 
                 cValue :=  ALLTRIM( ::hWidget[oColumn:Name]:GetText() )
              Case cClassName = "GCHECKBOX"
                 cValue :=  ::hWidget[oColumn:Name]:GetValue() 
