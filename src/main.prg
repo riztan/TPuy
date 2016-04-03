@@ -59,6 +59,7 @@ REQUEST ERRORSYS
   REQUEST GDIMAGE
 #else
   EXTERNAL WAPI_SHELLEXECUTE
+  #include "hbwin_ext.ch"
 #endif
 
 

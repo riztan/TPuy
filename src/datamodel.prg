@@ -120,6 +120,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD GoUp()               INLINE ::oTreeView:GoUp()
       METHOD GoDown()             INLINE ::oTreeView:GoDown()
       METHOD GoTop()              INLINE ::oTreeView:GoTop()
+      METHOD GoBottom()           INLINE ::oTreeView:GoBottom() 
       METHOD GoNextCol()          
 // -- fin
 
