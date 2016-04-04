@@ -1426,7 +1426,7 @@ METHOD Remove( aIter )  CLASS TPY_DATA_MODEL
       pPath := ::oTreeView:GetPath( aIter )
       ::oLbx:Remove( aIter )
       gtk_tree_view_set_cursor( ::oTreeView:pWidget, pPath )
-      ::oTreeView:SetFocus()
+      //::oTreeView:SetFocus()
    endif
 
 RETURN .T.

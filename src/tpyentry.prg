@@ -62,6 +62,8 @@ CLASS TpyEntry FROM GEntry
    DATA cMessage     INIT "El dato es inválido."
    DATA bError       INIT {|| .t. }
 
+   DATA cPreValue     INIT ""
+
    DATA bPosValid    INIT {|| .t. } 
 
    DATA nDecimals    INIT  oTPuy:nDecimals   // decimales en caso de ser 
@@ -102,7 +104,7 @@ CLASS TpyEntry FROM GEntry
    METHOD ToSql( nDBType )    INLINE ToSql( ::Get(), nDbType ) // 0=MySql 
                                                                // 1=PostgreSQL
 
-   METHOD SetText( cText )    INLINE  ::Super:SetText( ALLTRIM(cText), .F. )
+   METHOD SetText( cText )    //INLINE  ::Super:SetText( ALLTRIM(cText), .F. )
    METHOD SetValue( cText )   INLINE  ::SetText( cText )
    METHOD Set( cText )        
 
@@ -116,6 +118,11 @@ CLASS TpyEntry FROM GEntry
    
 ENDCLASS
 
+
+METHOD SetText(cText)
+   ::cPreValue := ::Super:GetText()
+   ::Super:SetText( ALLTRIM(cText), .F. )
+RETURN
 
 
 METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
@@ -660,3 +667,4 @@ return oWnd
 
 
 //eof
+
