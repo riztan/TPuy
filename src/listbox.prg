@@ -81,6 +81,8 @@ CLASS TPY_LISTBOX // FROM TPUBLIC // FROM TPY_DATA_MODEL
 
    METHOD Set(...)   INLINE  ::oModel:Set(...)
 
+   METHOD HeadersVisible( lSet )  INLINE gtk_tree_view_set_headers_visible( ::oModel:oTreeView:pWidget , lSet )
+
    METHOD ForEach( bCode )  INLINE ::oModel:oTreeView:ForEach( bCode )
 
    METHOD Release()  INLINE  IF(  !IsNIL( ::oWnd ), ::oWnd:End(), NIL )

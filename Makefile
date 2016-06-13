@@ -40,6 +40,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)gpctoolbutton.prg \
            $(SRCPATH)utf.prg           \
            $(SRCPATH)xml.prg           \
+           $(SRCPATH)mxml.prg          \
            $(SRCPATH)filechooser.prg   \
            $(SRCPATH)about.prg         \
            $(SRCPATH)pctapiz.prg       \
@@ -48,14 +49,15 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)glade.prg         \
            $(SRCPATH)tpy_image.prg     \
            $(SRCPATH)model_abm.prg     \
-           $(SRCPATH)tpyentry.prg
+           $(SRCPATH)tpyentry.prg      \
+           $(SRCPATH)tdocument.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq
 
 ifeq ($(HB_MAKE_PLAT),win)
    LIBS  +=-lhbcplr -lhbpp -lhbcommon -lhbnetio -lhbrtl -lhbtip
 else
-   LIBS +=-lmysqlclient -lpq
+   LIBS +=-lmysqlclient -lpq -lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
 endif
 
 
@@ -68,6 +70,7 @@ endif
 PRGFLAGS=-I./include 
 PRGFLAGS+=-I/harbour-project/contrib/xhb
 PRGFLAGS+=-I/harbour-project/contrib/hbtip
+PRGFLAGS+=-I$(HB_INC_3RD_PATH)/hbmxml
 
 include $(ROOT)Rules.make
 
