@@ -65,7 +65,7 @@
 
 /*Conexion a Base de Datos (AGOSTO-2016) */
 #xtranslate <object>:Conn:<connection>  =>  <object>:oConn:<connection>\["oConn"\]
-#xcommand   SET DBCONN <connection>     =>  oTPuy:oConn := ::oConn:<connection>\["oConn"\]
+#xcommand   SET DBCONN <connection> [FORM <oForm>]    =>  oTPuy:oConn := [<oForm>]:oConn:<connection>\["oConn"\]
 #xtranslate oDBConn                     =>  oTPuy:oConn
 //fin
 
