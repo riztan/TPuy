@@ -62,6 +62,8 @@ REQUEST ERRORSYS
   #include "hbwin_ext.ch"
 #endif
 
+EXTERNAL TFHKA
+
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
 
@@ -161,7 +163,12 @@ Function Main( ... )
    oTpuy:cResource  := ""
    oTpuy:cRsrcMain  := oTpuy:cResources+"proandsys.glade"
 
-   oTpuy:cOS        := ""
+#ifdef __PLATFORM__UNIX
+   oTpuy:cOS        := "NIX"
+#endif
+#ifdef __PLATFORM__WINDOWS
+   oTpuy:cOS        := "WIN"
+#endif
    oTpuy:cIconMain  := ""
    oTpuy:cAppName   := ""
 
@@ -223,7 +230,8 @@ Function Main( ... )
 
    ENDIF
    
-   oTpuy:aConnection:= {}
+   //oTpuy:aConnection:= {}
+   oTPuy:oXMLConnections := NIL
    DEFINE PUBLIC oTpuy:oConnections
 
    // No se porque, pero si se define el recurso antes de 
@@ -231,6 +239,11 @@ Function Main( ... )
    // SET RESOURCES oTpuy:cResource FROM FILE oTpuy:cRsrcMain 
 
 //   MemoToXML() // Guardamos los valores de conexion.
+
+   if !FILE( oTpuy:cXBScripts+"begin.xbs" ) 
+      QOUT( "No ha sido posible localizar 'begin.xbs'" )
+      return uReturn
+   endif
 
    TRY
      uReturn := oTpuy:RunXBS('begin')
@@ -241,6 +254,7 @@ Function Main( ... )
      Eval( ErrorBlock(), oError ) 
      RETURN NIL
    END
+
 Return uReturn
 
 

@@ -59,14 +59,16 @@
 
 #xtranslate tracelog( <uValue> )  => tpyLog( <uValue>, ProcName() )
 
-/*
-#xcommand TRY        => BEGIN SEQUENCE WITH { |e| break( e ) }
-#xcommand CATCH [<!oErr!>] => RECOVER [USING <oErr>] <-oErr->
-#xcommand FINALLY          => ALWAYS
-*/
 
 #define TPY_CONN    oTpuy:aConnection[1]
 #define OSDRIVE()   IIF( "Linux"$OS(), "", CURDRIVE() )    // Parche por mal funcionamiento en GNU
+
+/*Conexion a Base de Datos (AGOSTO-2016) */
+#xtranslate <object>:Conn:<connection>  =>  <object>:oConn:<connection>\["oConn"\]
+#xcommand   SET DBCONN <connection> [FORM <oForm>]    =>  oTPuy:oConn := [<oForm>]:oConn:<connection>\["oConn"\]
+#xtranslate oDBConn                     =>  oTPuy:oConn
+//fin
+
 
 #xcommand <uVar> := PUBLIC [OBJECT]  => <uVar> := TPublic():New()
 #xcommand <uVar> IS PUBLIC [OBJECT]  => <uVar> := TPublic():New()
