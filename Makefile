@@ -56,7 +56,7 @@ LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq -lhbzebra
 
 ifeq ($(HB_MAKE_PLAT),win)
    LIBS  +=-lhbcplr -lhbpp -lhbcommon -lhbnetio -lhbrtl -lhbtip \
-	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbct
+	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbct -lhbcurl
 else
    LIBS +=-lmysqlclient -lpq -lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
 endif

@@ -141,6 +141,7 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
    default nLen         to 0
    default lZero        to .f.
    default lCalendar    to .f.
+   default lContainer    to .f.
 
    if nType = TPYENTRY_DATE
       if lCalendar //.and. hb_IsObject( oForm )

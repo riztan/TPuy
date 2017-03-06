@@ -63,6 +63,8 @@ REQUEST ERRORSYS
 #endif
 
 EXTERNAL TFHKA
+EXTERNAL HB_HSETCASEMATCH
+EXTERNAL HB_HKEYAT
 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
