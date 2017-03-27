@@ -822,10 +822,14 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
                 If !hb_IsNIL(::aDMStru[n,6])
 
                    If LEN(::aDMStru[n,6])==1
-                      If aStruct[n,2]== "C" .OR. aStruct[n,2]=="N"
+                      If aStruct[n,2]== "C" .OR. aStruct[n,2]=="N" 
 
-                        cValTmp := TRANSFORM( oColumn,;
-                                   Repl(::aDMStru[n,6], aStruct[n,3]) )
+                        if VALTYPE(oColumn) = "C"
+                           cValTmp := TRANSFORM( oColumn,;
+                                      Repl(::aDMStru[n,6], aStruct[n,3]) )
+                        else
+                           cValTmp := ""
+                        endif
                       EndIf
  
                    Else
