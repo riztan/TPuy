@@ -96,8 +96,9 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
    
    pixbuf := gdk_pixbuf_new_from_file( oTpuy:cImages+"tepuyes.png" )
 
-   if FILE( oTpuy:cImages+"msgrun.ui" )
-      oMsgRun := GDialog():New(,nWidth,nHeight,,,,, )
+   if !FILE( oTpuy:cResources+"msgrun.ui" )
+      //oMsgRun := GDialog():New(,nWidth,nHeight,,,,, )
+      DEFINE DIALOG oMsgRun SIZE nWidth, nHeight 
    else
       lRes := .t.
       SET RESOURCES cRes FROM FILE oTpuy:cResources+"msgrun.ui"
@@ -112,11 +113,11 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
       DEFINE LABEL oMsgRun_oLabel ;
              TEXT cMensaje ;
              ID "label1" RESOURCE cRes
-   else
-
-      DEFINE DRAWINGAREA oDraw ;
-             EXPOSE EVENT  MsgRunDraw( oSender, pixbuf, cMensaje );
-             OF oMsgRun CONTAINER
+//   else
+//
+//      DEFINE DRAWINGAREA oDraw ;
+//             EXPOSE EVENT  MsgRunDraw( oSender, pixbuf, cMensaje );
+//             OF oMsgRun CONTAINER
 
    endif
 /*
@@ -130,8 +131,11 @@ Function MsgRunStart(cMensaje,bAction,cImagen,nWidth,nHeight/*,MSGRUN_TYPE*/)
    oMsgRun:SetDecorated(.F.)
 //   oMsgRun:Separator(.F.)
 
-//   oMsgRun:Activate(,,,,,, ,, .T., .F. , .F., .F., .F. )
-   ACTIVATE DIALOG oMsgRun CENTER RUN
+   if lRes 
+      ACTIVATE DIALOG oMsgRun CENTER RUN
+   else
+      oMsgRun:Activate(,,,,,, ,, .T., .F. , .F., .F., .F. )
+   endif
 
 //   oMsgRun:Refresh()
 //   SecondsSleep(.2)
