@@ -9,11 +9,6 @@
   !include "WordFunc.nsh"
   !include "EnvVarUpdate.nsh"
 
-;  !insertmacro MUI_DEFAULT MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
-;  !insertmacro MUI_DEFAULT MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
-  !insertmacro MUI_DEFAULT MUI_ICON "installer.ico"
-  !insertmacro MUI_DEFAULT MUI_UNICON "installer.ico"
-
 ;--------------------------------
 ;Include Macros
 
@@ -23,19 +18,22 @@
 ;General
 
   !define NOMBRE "TPuy"
-  !define TPUY_EXE "tpuy_win_x86_hb31.exe"
-  !define VERSION "0.1(a)"
+  !define TPUY_EXE "tpuy_win_x86_hb32.exe"
+  !define VERSION "0.3(a)"
   !define FOLDER "TPuy"
 
   !define DRIVE  "C:"
-  !define ROOT   "z:\utilitis\GIT"
-  !define SOURCE "${ROOT}\tpuy-win"
+  !define ROOT   ".\misc"
+  !define SOURCE "${ROOT}"
 
 
   ;Name and file
   Name "${NOMBRE}-${VERSION}" 
-  Icon "${SOURCE}\install\installer.ico"
+  Icon "${SOURCE}\images\installer.ico"
   OutFile "${NOMBRE}_${VERSION}_setup.exe"
+
+  !insertmacro MUI_DEFAULT MUI_ICON   "${SOURCE}\images\installer.ico"
+  !insertmacro MUI_DEFAULT MUI_UNICON "${SOURCE}\images\installer.ico"
 
   XPStyle on
 
@@ -58,14 +56,16 @@ Function .onInit
 
 ;        StrCpy $THEME "MS-Windows"
 
-        StrCpy $1 "Enero 2015"
+        StrCpy $1 "Abril 2017"
 
         # the plugins dir is automatically deleted when the installer exits
         InitPluginsDir
 	GetTempFileName $INI $PLUGINSDIR
 	;File /oname=$INI "WordFunc.ini"
 
-        File /oname=$PLUGINSDIR\splash.bmp "${SOURCE}\install\tpuy-logo.bmp"
+        File /oname=$PLUGINSDIR\splash.bmp "${SOURCE}\images\tpuy-logo-splash.bmp"
+;        File /oname=$PLUGINSDIR\splash.bmp "${NSISDIR}\Contrib\Graphics\Wizard\llama.bmp"
+
         #optional
 ;        File /oname=$PLUGINSDIR\splash.wav "${ROOT}\images\tpuy.wav"
 
@@ -85,10 +85,10 @@ FunctionEnd
 ;Interface Configuration
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "${SOURCE}\install\tpy_head.bmp" ; optional
+  !define MUI_HEADERIMAGE_BITMAP "${SOURCE}\images\tpy_head.bmp" ; optional
   !define MUI_ABORTWARNING
   ;Definiendo Imagenes de Bienvenida y Finalizacion
-  !define MUI_WELCOMEFINISHPAGE_BITMAP "${SOURCE}\install\tpy_bar.bmp"
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${SOURCE}\images\tpy_bar.bmp"
 
 
 
@@ -251,10 +251,10 @@ SectionEnd
 Section /o "Ejemplos, Turoriales, etc." SecIII
 
   SetOutPath $INSTDIR\images
-  File /r ${SOURCE}\ejemplos\images\*
+  File /r ${SOURCE}\samples\images\*
 
   SetOutPath $INSTDIR\xbscripts
-  File /r ${SOURCE}\ejemplos\xbscripts\*
+  File /r ${SOURCE}\samples\xbscripts\*
 
 SectionEnd
 
