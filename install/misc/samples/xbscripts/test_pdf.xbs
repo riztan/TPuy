@@ -1,0 +1,107 @@
+/* 
+ * Proyecto TPuy
+ * test_pdf: Ejemplo de uso de TImprimePDF de Rafa.
+ *
+ */
+
+#include "tpy_xbs.ch"
+#include "harupdf.ch"
+#include "tutilpdf.ch"
+
+PROCEDURE test_pdf(  )
+   Local oHaru, nLinea, samp_text, i, oFact
+   local cFilePDF := "test.pdf", cWinOS
+   local cImgLogo := oTpuy:cImages+"tpuy-icon-64.png"
+   LOCAL font_list  := { ;
+                        "Courier",                  ;
+                        "Courier-Bold",             ;
+                        "Courier-Oblique",          ;
+                        "Courier-BoldOblique",      ;
+                        "Helvetica",                ;
+                        "Helvetica-Bold",           ;
+                        "Helvetica-Oblique",        ;
+                        "Helvetica-BoldOblique",    ;
+                        "Times-Roman",              ;
+                        "Times-Bold",               ;
+                        "Times-Italic",             ;
+                        "Times-BoldItalic"         ;
+                      }
+
+   if FILE( cFilePDF ); FERASE( cFilePDF ) ; endif
+   oHaru := TIMPRIMEPDF():New( cFilePDF )    // Creamos documento
+
+   oHaru:PageSetSize( HPDF_PAGE_SIZE_A4, HPDF_PAGE_LANDSCAPE ) // Page format
+
+   if FILE( cImgLogo )
+      UTILPDF oHaru:oUtil 1,1.5 ;
+              IMAGE cImgLogo //SIZE 8,5 
+   endif
+
+   UTILPDF oHaru:oUtil 2.5,4 ;
+          SAY  "Proyecto TPuy" ;
+          FONT "Times-Bold" ;
+          SIZE 18 ;
+          COLOR RGB 0.0, 0.0, 0.6
+
+
+   oHaru:SetFont( font_list[2], 10)
+   nLinea := 4
+   oHaru:CmSay( nLinea, 1, "http://gtxbase.org" )
+
+   nLinea += 0.5
+   oHaru:SetFont( font_list[1], 12 )
+   oHaru:CMSAY( nLinea, 1, "Harbour Power" )
+
+   nLinea += 1
+   oHaru:SetFont( font_list[5], 24 )
+
+   oHaru:CMSAY( nLinea, 1, "(c)2011 by Rafa Carmona" )
+
+   UTILPDF oHaru:oUtil BOX nLinea,13.25 TO nLinea + 1,14.8  FILLRGB 0.4,1,1
+   UTILPDF oHaru:oUtil BOX nLinea,14.8  TO nLinea + 1,17    FILLRGB 0.4,1,1
+   UTILPDF oHaru:oUtil BOX nLinea,17    TO nLinea + 1,19.5  FILLRGB 0.4,1,1
+
+   //Second Page
+   oHaru:Addpage()                              // Add page to document
+   oHaru:PageSetSize( HPDF_PAGE_SIZE_LETTER,;
+                      HPDF_PAGE_PORTRAIT )      // Page format
+
+   nLinea := 1
+   FOR i := 1 TO Len( font_list )
+      samp_text := "abcdefgABCDEFG12345!#$%&+-@?"
+      oHaru:SetFont( font_list[i], 9 )
+      oHaru:CMSAY( nLinea, 1, font_list[i] )
+      oHaru:CMSAY( nLinea, 1 )
+      nLinea += 0.6
+
+      oHaru:SetFont( font_list[i], 20 )
+      oHaru:CMSAY( nLinea, 1, samp_text  )
+      nLinea += 0.6
+
+   NEXT
+
+   oHaru:End( .f. )
+
+
+   if !FILE( cFilePDF )
+      MsgStop( "No se generó el PDF.", "Atención" )
+      return
+   endif
+
+   if oTPuy:cOS="WINDOWS"
+      cWinOS := win_regRead("HKLM\Software\Microsoft\"+;
+                            "Windows NT\CurrentVersion\ProductName")
+      if ("Windows 7" IN cWinOS)
+         MsgAlert( "En Windows 7, es posible que sea necesario tener la ruta "+;
+                   "del lector PDF en la variable de entorno: 'path' ", ;
+                   "Importante." )
+         wapi_ShellExecute(0, 'open', cFilePDF )
+      else
+         tpy_PDFOpen(cFilePDF)
+      endif
+   else
+      if FILE( cFilePDF ); tpy_PDFOpen(cFilePDF) ; endif
+   endif
+
+Return nil
+

@@ -1,0 +1,222 @@
+/*
+ *  Proyecto Tpuy.
+ *
+ *  Programa Inicial. Genera Menu, Fondo de Pantalla y un 
+ *  Expander para colocar algunos logs.
+ */
+#include "tpy_xbs.ch"
+
+#define TPY_CONN    oTpuy:aConnection[1]
+
+Function begin()
+
+   LOCAL oWnd , oConn
+   LOCAL cResFile := oTpuy:cResources+"proandsys.glade"
+   LOCAL cResource, pixbuf, oDraw, oSender, lValor
+   LOCAL tTime := hb_DateTime()
+
+   if !__CheckDir()
+      return nil
+   endif
+
+   oTpuy:lNetIO      := .f.  
+   oTpuy:tLastNetIO  := tTime    // Ultima conexion a servidor NetIO
+   oTpuy:lNetIOXBSUp := .f.      // Control de Actualizacion de Scripts
+   oTpuy:tNetIOXBSUp := tTime    // Control de Actualizacion de Scripts
+   oTpuy:nIntervalUp := 0.005000 // Intervalo de tiempo para Verificar y Actualizar Scripts
+
+   __NetIOUpdate()
+
+   pixbuf := gdk_pixbuf_new_from_file( oTpuy:cImages+"tepuy_800x600.png" )
+
+   DEFINE WINDOW oTpuy:oWnd;
+          TITLE oTpuy:cSystem_Name ;
+          ICON_FILE oTpuy:cImages+"tpuy-icon-32.png" ;
+          SIZE 750,630
+
+      oWnd:= oTpuy:oWnd
+
+      DEFINE BOX oTpuy:oBox VERTICAL OF oWnd
+
+      DEFINE BOX oTpuy:oBoxMenu VERTICAL OF oTpuy:oBox
+
+      DEFINE BARMENU oTpuy:oMenuBar OF oTpuy:oBoxMenu
+
+      DEFINE BOX oTpuy:oDesktop  VERTICAL CONTAINER OF oTpuy:oBox
+      DEFINE BOX oTpuy:oFondo   CONTAINER OF oTpuy:oDesktop
+
+   oTpuy:oTapiz := PCTapiz():New( oTpuy:oFondo )
+   oTpuy:oTapiz:Imagen( oTpuy:cImages+"tepuy_1024x768.png", ;
+                        pcEstirado, pcEstirado, "Saludos Terricola" )
+   
+   oTpuy:oTapiz:Active( '<span size="12000"><b>'+oTpuy:cSystem_Name+"</b></span>" )
+
+      //Create_Menus( oBoxMenu ) 
+      oTpuy:RunXBS('menu',oTpuy:oMenuBar)
+
+
+      DEFINE EXPANDER oTpuy:oExpander  PROMPT "Estado" MARKUP OF oTpuy:oBox  
+             DEFINE TOOLTIP WIDGET oTpuy:oExpander ;
+                    TEXT "Pulse para desplegar detalles del Estado del Sistema" 
+
+             DEFINE BOX oTpuy:oBoxV_E OF oTpuy:oExpander VERTICAL CONTAINER
+
+             DEFINE BUTTON TEXT "Limpiar Registro";
+                    ACTION oTpuy:oLog:SetText("") ;
+                    OF oTpuy:oBoxV_E
+
+             DEFINE SCROLLEDWINDOW oTpuy:oScroll OF oTpuy:oBoxV_E EXPAND FILL CONTAINER
+                    oTpuy:oScroll:SetPolicy( GTK_POLICY_AUTOMATIC,;
+                                             GTK_POLICY_AUTOMATIC)
+
+             oTpuy:cLog := ""
+             DEFINE TEXTVIEW oTpuy:oLog VAR oTpuy:cLog OF oTpuy:oScroll CONTAINER
+                    oTpuy:oLog:SetEditable(.f.)
+
+
+      DEFINE STATUSBAR oTpuy:oStatusBar OF oTpuy:oBox ;
+             TEXT oTpuy:cSystem_Name + " | Hora: "+oTpuy:cTime ;
+             INSERT_END
+
+   ACTIVATE WINDOW oWnd INITIATE; // MAXIMIZED ;   //CENTER;
+           VALID Salida() 
+            
+Return .T.
+
+
+/** __CheckDir()
+ *  Verifica si la estructura del directorio en uso es apto para
+ *  hacer funcionar una aplicación tpuy.
+ */
+FUNCTION __CheckDir()
+   local cName
+   local aDir := Directory( "*", "D" )
+
+   FOR EACH cName IN {oTPuy:cImages, oTPuy:cResources, ;
+                      oTPuy:cXBScript }
+
+      cName := __NameDir( cName )
+      if hb_IsNIL( cName )
+         return .f.
+      endif
+
+      
+      if ASCAN( aDir, {|x| ALLTRIM(x[1])=cName .and. x[5]="D"  } ) = 0
+         if MakeDir( cName ) > 0
+            return .f.
+         endif
+      endif
+
+   NEXT
+
+RETURN .t.
+
+
+
+/** __NameDir()
+ *  Obtener nombre del directorio
+ */
+Function __NameDir( cName )
+   local cDirName 
+   if hb_IsNIL(cName) .or. !ValType(cName)="C"
+      return nil
+   endif
+   
+   cDirName := STRTRAN( cName,    ".", "" )
+   cDirName := STRTRAN( cDirName, "/", "" )
+   cDirName := STRTRAN( cDirName, "\", "" )
+return cDirName
+
+
+/** __NetIOUpdate()
+ *  Evalua si ya a transcurrido el tiempo necesario para
+ *  ejecutar el script de actualizacion automatica de scripts.
+ */
+FUNCTION __NETIOUPDATE()
+
+   //local nInterval := 0.005000
+   local cScript := "xbs_update"
+   local tTime := hb_DateTime() //SECONDS()
+   local uReturn
+
+   if !oTpuy:IsDef("lNetInit") ; oTpuy:lNetInit := .f. ; endif
+
+   if oTpuy:lNetInit
+      If !( ( tTime - oTpuy:tNetIOXBSUp ) > oTpuy:nIntervalUp )
+         return .t.
+      EndIf
+   endif
+
+   // Si no existe el timer, lo creamos.
+   If !oTpuy:IsDef( "oNetIOUpdate" )
+      DEFINE TIMER oTpuy:oNetIOUpdate;
+             INTERVAL 3000;
+             ACTION lValor := __NetIOUpdate();
+
+      ACTIVATE TIMER oTpuy:oNetIOUpdate
+   Else
+      if hb_ISOBJECT(oTpuy:oWnd) .and. oTpuy:oNetIOUpdate:nInterval < 50000
+         oTpuy:oNetIOUpdate:End()
+         DEFINE TIMER oTpuy:oNetIOUpdate;
+                INTERVAL 60000;
+                ACTION lValor := __NetIOUpdate();
+
+         ACTIVATE TIMER oTpuy:oNetIOUpdate
+      endif
+   EndIf
+
+   if !hb_IsObject( oTpuy:oWnd ) ; return nil ; endif
+
+   if !File( oTpuy:cXBScript+"netio_check.xbs" ) ; return .f. ; endif 
+
+   uReturn := oTpuy:RunXBS("netio_check")
+
+   if ValType(uReturn)="L" .and. !uReturn ; return .f. ; endif
+
+   /* Actualizamos los Script */
+   if FILE( oTpuy:cXBScripts+cScript+".xbs" )
+      oTpuy:RunXBS( cScript )
+   else
+      ~~RunXBS( cScript )
+   endif
+
+   oTpuy:tNetIOXBSUp := hb_DateTime() //nSeconds
+
+RETURN .T.
+
+
+
+/** Creación del Fondo de Pantalla.
+ *
+ */
+FUNCTION __Dibuja( oSender, cMsg )
+ Local gc
+ Local pango
+ Local widget
+
+ Local pixbuf := gdk_pixbuf_new_from_file( oTpuy:cImages+"tepuy_800x600.png" )
+
+  widget := oSender:pWidget
+
+  gc = gdk_gc_new( widget  )   // cambio propiedades del contexto grafico gc
+
+  gdk_draw_pixbuf( widget, gc, pixbuf, 0, 0, 0, 0 )
+
+  If !Empty( cMsg )
+  
+     cMsg := '<span  size="11000"><b><i>'+cMsg
+     cMsg += '</i></b> </span>'
+     
+     pango :=  gtk_widget_create_pango_layout( widget )
+     pango_layout_set_markup( pango, cMsg )
+     gdk_draw_layout( widget, gc, 10, 15, pango )
+     
+  EndIf
+ 
+  g_object_unref( gc )
+
+
+Return .T.
+
+
+//eof

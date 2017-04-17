@@ -1,0 +1,32 @@
+/*
+ * enum GtkPrintOperationResult
+ */
+#define GTK_PRINT_OPERATION_RESULT_ERROR       0
+#define GTK_PRINT_OPERATION_RESULT_APPLY       1
+#define GTK_PRINT_OPERATION_RESULT_CANCEL      2
+#define GTK_PRINT_OPERATION_RESULT_IN_PROGRESS 3
+
+/*
+ * enum GtkPrintOperationAction
+ */
+#define GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG 0
+#define GTK_PRINT_OPERATION_ACTION_PRINT        1
+#define GTK_PRINT_OPERATION_ACTION_PREVIEW      2
+#define GTK_PRINT_OPERATION_ACTION_EXPORT       3
+
+/*
+ * enum GtkUnit
+ */
+#define GTK_UNIT_PIXEL  0
+#define GTK_UNIT_POINTS 1
+#define GTK_UNIT_INCH   2
+#define GTK_UNIT_MM     3
+
+
+/*
+ * enum GtkPageOrientation
+ */
+#define GTK_PAGE_ORIENTATION_PORTRAIT          0
+#define GTK_PAGE_ORIENTATION_LANDSCAPE         1
+#define GTK_PAGE_ORIENTATION_REVERSE_PORTRAIT  2
+#define GTK_PAGE_ORIENTATION_REVERSE_LANDSCAPE 3

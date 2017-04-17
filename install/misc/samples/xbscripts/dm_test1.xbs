@@ -1,0 +1,52 @@
+/*
+ * dm_test1: Ejemplo Simple de uso de DataModel y Listbox
+ */
+
+#include "gclass.ch"
+#include "proandsys.ch"
+#include "tepuy.ch"
+
+func dm_test1()
+
+   local aStruct
+   local aItems
+   local oModel
+   local oListBox
+
+
+   aItems  := {;
+              {"Rafael"  , "Carmona"     ,.t.,date()-15},;
+              {"Federico", "De Maussion" ,.f.,date()-30},;
+              {"Daniel"  , "Garcia"      ,.f.,date()+12},;
+              {"Riztan"  , "Gutierrez"   ,.f.,date()   } ;
+              }
+
+   aStruct := {{"Nombre"  , "C" , 20 , 0},;
+               {"Apellido", "C" , 20 , 0},;
+               {"Estatus" , "L" , 01 , 0},;
+               {"Fecha"   , "D" , 10 , 0}}
+
+
+   //oModel :=  tpy_data_model():New(,,aStruct,aItems) 
+   DEFINE MODEL  oModel  ;
+          STRUCT aStruct ;
+          DATA   aItems
+
+
+   //oListBox := tpy_listbox():New(,oModel,"listbox",,350,500)
+   DEFINE LISTBOX oListBox ;
+          MODEL   oModel   ;
+          TITLE   "Listado";
+          SIZE    350,400 //OF oTpuy:oDesktop
+   
+   /* TODO:  Mejorar lo de modal y parent entre ventanas... 
+             esta funcionando el modal, pero no del todo bien. 
+             RIGC 
+    */
+   //oListBox:oWnd:Modal(.t.)
+   //oListBox:oParent := oTpuy:oWnd
+   oListBox:Active()
+
+   oModel:Destroy()
+
+return nil

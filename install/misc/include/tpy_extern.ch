@@ -1,0 +1,4 @@
+
+#ifdef _WIN_
+EXTERNAL WIN_OLECREATEOBJECT
+#endif

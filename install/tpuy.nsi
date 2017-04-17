@@ -206,7 +206,7 @@ Section "Base Tpuy " SecDummy
   ;Crea .bat con nombre corto
   FileOpen   $0 $INSTDIR\bin\${NOMBRE}.bat w
   FileWrite  $0 '@echo off$\r$\n'
-  FileWrite  $0 '"$INSTDIR\bin\${TPUY_EXE}"$\r$\n'
+  FileWrite  $0 '"$INSTDIR\bin\${TPUY_EXE}" %1 %2 %3 %4 %5 %6 %7 %8 %9 $\r$\n'
   FileClose  $0
 
 

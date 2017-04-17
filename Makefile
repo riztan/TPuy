@@ -28,6 +28,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)hbrun.prg         \
            $(SRCPATH)connto.prg        \
            $(SRCPATH)connsave.prg      \
+	   $(SRCPATH)hbpdf_tools.prg   \
            $(SRCPATH)tools01.prg       \
            $(SRCPATH)testqry1.prg      \
            $(SRCPATH)tpostgres.prg     \
@@ -56,10 +57,13 @@ LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq -lhbzebra
 
 ifeq ($(HB_MAKE_PLAT),win)
    LIBS  +=-lhbcplr -lhbpp -lhbcommon -lhbnetio -lhbrtl -lhbtip \
-	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbct -lhbcurl
+	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbcurl -lhbwin
 else
-   LIBS +=-lmysqlclient -lpq -lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
+   # temporalmente se suspende el uso de libhbtfhka por un problema de incompatibilidad
+   LIBS +=-lmysqlclient -lpq #-lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
 endif
+
+LIBS +=-lhbct -lhbmxml -lmxml
 
 
 ifeq ($(XBASE_COMPILER),HARBOUR)

@@ -62,14 +62,24 @@ REQUEST ERRORSYS
   #include "hbwin_ext.ch"
 #endif
 
-EXTERNAL TFHKA
+//EXTERNAL TFHKA
 EXTERNAL HB_HSETCASEMATCH
 EXTERNAL HB_HKEYAT
+
+EXTERNAL HB_OSIS64BIT 
+EXTERNAL HB_OSISWIN9X 
+EXTERNAL HB_OSISWINNT 
+EXTERNAL HB_OSISWIN2K 
+EXTERNAL HB_OSISWINVISTA 
+EXTERNAL HB_OSISWINCE 
+
 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
 
 memvar oTpuy
+
+#define _INITCONF_   "init.conf"
 
 // memvar oMsgRun_oLabel, oMsgRun_oImage
 
@@ -187,10 +197,22 @@ Function Main( ... )
    oTpuy:cSepDec    := ","   // Separador decimal
 
    TRY
-     RUNXBS( "init.conf" )
+     RUNXBS( _INITCONF_ )
    CATCH
-     MsgStop("Hay problemas para leer el archivo <b>'init.conf'</b>","Finalizado.") 
-     RETURN NIL
+     MsgStop("Hay problemas para leer el archivo <b>"+_INITCONF_+"</b>","Finalizado.") 
+     if MsgNoYes( "¿Desea que se genere el fichero y la estructura de un proyecto tpuy?" )
+        if __GenTpyStru()
+           if File( _INITCONF_ ) 
+              RUNXBS( _INITCONF_ )
+           else
+              RETURN NIL
+           endif
+        else
+           RETURN NIL
+        endif
+     else
+        RETURN NIL
+     endif
    END
 
    SET DECIMALS TO oTpuy:nDecimals
@@ -201,7 +223,7 @@ Function Main( ... )
       oTpuy:cDefDecMask := "@R 999,999,999."+REPLICATE( '9', oTpuy:nDecimals )
    endif
 
-   // Debemos resetear nombre de la aplicacion luego de ejecutar el init.conf 
+   // Debemos resetear nombre de la aplicacion luego de ejecutar el _INITCONF_ 
    oTpuy:SetAppName( TPUY_NAME )
 
    If !File(oTpuy:cTempDir)
@@ -297,6 +319,61 @@ Function Salir( lForce, uReturn )
    EndIf
 
 Return uReturn
+
+
+
+/** \brief Crea la estructura minima de directorios para un proyecto de tpuy y
+ *         crea el fichero _INITCONF_
+ */
+STATIC FUNCTION __GenTpyStru()
+   local aCarpetas := {"include", "images", "resources", "xbscripts"}
+   local aDir := Directory( "*", "D" )
+   local cDir
+   local cFileInit, cFileBegin
+
+   cFileInit := "/* "+CRLF
+   cFileInit += " * Este fichero es parte de: Proyecto TPuy. "+CRLF
+   cFileInit += " * © Copyright 2008, "+ALLTRIM(STR(YEAR(DATE())))+" Riztan Gutierrez"+CRLF 
+   cFileInit += " */ "+CRLF+CRLF
+   cFileInit += "#define pf  oTpuy:cPrefix "+CRLF+CRLF
+   cFileInit += 'oTpuy:cPreFix    := "./" '+CRLF
+   cFileInit += 'oTpuy:cImages    := pf+"images/" '+CRLF
+   cFileInit += 'oTpuy:cResources := pf+"resources/" '+CRLF
+   cFileInit += 'oTpuy:cTablas    := pf+"tables/" '+CRLF
+   cFileInit += 'oTpuy:cIncludes  := pf+"include/"'+CRLF
+   cFileInit += 'oTpuy:cSQLScr    := pf+"sql/"'+CRLF
+   cFileInit += 'oTpuy:cDocs      := pf+"doc/"'+CRLF
+   cFileInit += 'oTpuy:cTempDir   := oTpuy:cHomePath+"/.tpuy_tmp/"'+CRLF
+   cFileInit += 'oTpuy:cXBScript  := pf+"xbscripts/"'+CRLF+CRLF
+   cFileInit += 'oTpuy:nDecimals  := 2'+CRLF+CRLF
+
+   FOR EACH cDir in aCarpetas
+      if ASCAN( aDir, {|x| ALLTRIM(x[1])=cDir .and. x[5] } ) = 0
+         MakeDir( cDir )
+      endif
+   NEXT
+
+   if !FILE( "xbscripts/begin.xbs" )
+
+      cFileBegin := "/*"+CRLF
+      cFileBegin += " *  Proyecto Tpuy."+CRLF
+      cFileBegin += " *"+CRLF
+      cFileBegin += " *  Programa Inicial.   "+CRLF
+      cFileBegin += " */"+CRLF+CRLF+CRLF
+      cFileBegin += '#include "tpy_xbs.ch"'+CRLF+CRLF+CRLF
+      cFileBegin += "Procedure begin()"+CRLF
+      cFileBegin += '   View("Hola, este es el script: "+procname()) '+CRLF
+      cFileBegin += '   View("Edita el script y comienza a incluir codigo xBase de Harbour, t-gtk y TPuy! ") '+CRLF+CRLF+CRLF
+      cFileBegin += "//eof"
+
+      hb_MemoWrit( "xbscripts/begin.xbs", cFileBegin )
+
+   endif
+
+   hb_MemoWrit( _INITCONF_, cFileInit )
+
+Return .T.
+
 
 
 

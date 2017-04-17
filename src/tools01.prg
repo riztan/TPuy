@@ -1013,7 +1013,7 @@ RETURN cSql
 
 /** \brief Apertura un archivo tipo PDF
  *         
- */
+ *
 FUNCTION tpy_PDFOpen( cFilePDF )
   local uRes
   if empty( cFilePDF ) .or. !FILE( cFilePDF )
@@ -1026,5 +1026,5 @@ FUNCTION tpy_PDFOpen( cFilePDF )
       uRes := winexec( "evince " + " " + cFilePDF )
 #endif  
 RETURN uRes
-
+*/
 //EOF

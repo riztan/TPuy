@@ -1,0 +1,88 @@
+/*
+ * t-gtk.org
+ * Ejemplo de visualizacion de iconos.
+ */
+
+#include "tpy_xbs.ch"
+
+#define GtkTreeIter  Array( 4 )
+
+Function IconView()
+  Local oWnd, oScroll, oIconView, oModel
+
+ /* Ventana */
+  DEFINE WINDOW oWnd ;
+         TITLE "GtkIconView. T-Gtk for [x]Harbour (c)03-2006 Rafa Carmona"; 
+         SIZE 500,500
+    
+     DEFINE SCROLLEDWINDOW oScroll OF oWnd CONTAINER
+
+     oModel := Create_Model()
+     DEFINE ICONVIEW oIconView MODEL oModel OF oScroll CONTAINER
+
+     oIconView:SetTexColumn( 1 )
+     oIconView:SetPixBufColumn( 2 )
+     oIconView:SetColumns( 5 )
+     oIconView:bItem_Activated := {|oSender,pPath| Comprueba( oSender, pPath )  }
+
+  ACTIVATE WINDOW oWnd CENTER
+
+
+return NIL
+
+FUNCTION Create_Model()
+  local aIter := GtkTreeIter
+  local oLbx, x, oImage,pixbuf
+  Local aFiles := {}
+  local aPngs := Directory( oTPuy:cImages+"*.png" )
+  local aJpgs := Directory( oTPuy:cImages+"*.jpg" )
+  
+  Aeval( aPngs ,{ | a| AADD( aFiles, a[1] ) } )
+  Aeval( aJpgs ,{ | a| AADD( aFiles, a[1] ) } )
+
+   DEFINE LIST_STORE oLbx TYPES G_TYPE_STRING, GDK_TYPE_PIXBUF 
+    For x := 1 To Len( aFiles )
+        APPEND LIST_STORE oLbx ITER aIter
+        SET LIST_STORE oLbx ITER aIter POS 1 VALUE aFiles[x]
+        
+        DEFINE IMAGE oImage FILE oTPuy:cImages+aFiles[ x ] LOAD
+        pixbuf := gdk_pixbuf_scale_simple( oImage:GetPixBuf(), 100,100 )
+        SET LIST_STORE oLbx ITER aIter POS 2 VALUE pixbuf
+        gdk_pixbuf_unref( pixbuf )
+    Next
+
+ RETURN oLbx
+
+// Una manera facil de obtener el valor de las columnas
+// Podemos ver como coger la imagen de la columna 1
+// Easy get values from columns
+// Example get image from column 1
+
+Static Function Comprueba( oIconView, pPath  )
+    Local oWnd , oImage, cText
+    Local nWidth,nHeight
+    Local cWidth,cHeight
+    Local nWMax:=600, nHMax:=600
+    
+    // u := o:GetValue( nColumn, cType_data, pPath )
+    cText  := oIconView:GetValue( 1,, pPath )
+    
+    DEFINE WINDOW oWnd TITLE cText TYPE_HINT GDK_WINDOW_TYPE_HINT_MENU
+         DEFINE IMAGE oImage FILE oTpuy:cImages+cText OF oWnd CONTAINER
+         
+         nWidth  := oImage:GetWidth()
+         nHeight := oImage:GetHeight()
+         
+         cWidth  := AllTrim( Str(nWidth) )
+         cHeight := AllTrim( Str(nHeight) )
+         
+         if nWidth > nWMax ; nWidth := nWMax ; endif
+         if nHeight > nHMax ; nHeight := nHMax ; endif
+         
+         oImage:Adjust( nWidth ) //, nHeight )
+         
+         oWnd:SetTitle( cText+". "+cHeight+"x"+cWidth )
+    
+    ACTIVATE WINDOW oWnd MODAL CENTER
+
+Return nil
