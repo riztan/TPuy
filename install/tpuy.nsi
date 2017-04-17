@@ -19,7 +19,7 @@
 
   !define NOMBRE "TPuy"
   !define TPUY_EXE "tpuy_win_x86_hb32.exe"
-  !define VERSION "0.3(a)"
+  !define VERSION "0.4(a)"
   !define FOLDER "TPuy"
 
   !define DRIVE  "C:"

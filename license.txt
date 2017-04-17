@@ -1,4 +1,4 @@
-TPuy Versión 0.3 (Alfa)
+TPuy Versión 0.4 (Alfa)
 Copyright (c) 2008 - 2017 tpuy.org
 
 Desarrolladores:
