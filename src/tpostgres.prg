@@ -910,7 +910,7 @@ RETURN result
 
 
 METHOD TraceOn( cFile ) CLASS TPQserver
-    ::pTrace := PQcreatetrace( cFile )
+    ::pTrace := PQtraceCreate( cFile )
     
     if ::pTrace != NIL
         PQtrace( ::pDb, ::pTrace )

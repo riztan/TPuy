@@ -53,7 +53,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)tpyentry.prg      \
            $(SRCPATH)tdocument.prg
 
-LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lpq -lhbzebra
+LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lhbzebra
 
 ifeq ($(HB_MAKE_PLAT),win)
    LIBS  +=-lhbcplr -lhbpp -lhbcommon -lhbnetio -lhbrtl -lhbtip \
@@ -63,7 +63,7 @@ else
    LIBS +=-lmysqlclient -lpq #-lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
 endif
 
-LIBS +=-lhbct -lhbmxml -lmxml
+LIBS +=-lhbct -lhbmxml -lmxml 
 
 
 ifeq ($(XBASE_COMPILER),HARBOUR)

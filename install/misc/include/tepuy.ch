@@ -63,6 +63,11 @@
 #define TPY_CONN    oTpuy:aConnection[1]
 #define OSDRIVE()   IIF( "Linux"$OS(), "", CURDRIVE() )    // Parche por mal funcionamiento en GNU
 
+/* Convertir Datos PostgreSQL y MySQL */
+#xtranslate ToPgSQL( <uValue> )  =  ToSQL( <uValue>, 1 )
+#xtranslate ToMySQL( <uValue> )  =  ToSQL( <uValue>, 0 )
+
+
 /*Conexion a Base de Datos (AGOSTO-2016) */
 #xtranslate <object>:Conn:<connection>  =>  <object>:oConn:<connection>\["oConn"\]
 #xcommand   SET DBCONN <connection> [FORM <oForm>]    =>  oTPuy:oConn := [<oForm>]:oConn:<connection>\["oConn"\]

@@ -40,6 +40,7 @@
 #include "tepuy.ch"
 #include "tgtkext.ch"
 #include "tgtkext2.ch"
+#include "postgresql_ext.ch"
 #include "tpy_extern.ch"
 #include "imprimepdf_ext.ch"
 //#include "libgdaext.ch"
