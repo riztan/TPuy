@@ -250,11 +250,14 @@ SectionEnd
 ;Examples
 Section /o "Ejemplos, Turoriales, etc." SecIII
 
-  SetOutPath $INSTDIR\images
-  File /r ${SOURCE}\samples\images\*
+  SetOutPath $INSTDIR
+  File /r ${SOURCE}\samples\*
 
-  SetOutPath $INSTDIR\xbscripts
-  File /r ${SOURCE}\samples\xbscripts\*
+  ;SetOutPath $INSTDIR\images
+  ;File /r ${SOURCE}\samples\images\*
+
+  ;SetOutPath $INSTDIR\xbscripts
+  ;File /r ${SOURCE}\samples\xbscripts\*
 
 SectionEnd
 

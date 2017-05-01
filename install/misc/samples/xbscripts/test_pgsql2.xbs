@@ -13,7 +13,6 @@
 #include "postgres.ch"
 #include "gclass.ch"
 
-#xtranslate ToPgSQL( <arg> )  => ToSQL( <arg>, 1 )
 
 Function Login(cHost,cDB,cUser,cPass,nPort)
     Local conn, res, aTemp, i, x,y, pFile,nTime,cTime,cSql
