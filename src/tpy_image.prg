@@ -78,7 +78,7 @@ METHOD SetFile( cImage ) CLASS TPY_IMAGE
 
          if oTPuy:lNetIO .and. !Empty(rApp)
             if !GetImage( cImgName )
-               MsgStop( "No es posible obtener la imagen "+ cImgName +" desde el servidor." )
+               MsgStop( 'No es posible obtener la imagen "'+ cImgName +'" desde el servidor.', ~~rApp:cAppName )
                return nil
             endif
  
@@ -109,7 +109,7 @@ METHOD SetFile( cImage ) CLASS TPY_IMAGE
 
                      elseif MsgNOYES( "¿Actualizar la copia local de la imagen "+cImgName+"?" )
                         if !GetImage( cImgName )
-                           MsgStop( "No ha sido posible obtener la imagen desde el servidor." )
+                           MsgStop( "No ha sido posible obtener la imagen desde el servidor.", ~~rApp:cAppName )
                            return nil
                         endif
                      endif
@@ -117,7 +117,7 @@ METHOD SetFile( cImage ) CLASS TPY_IMAGE
                endif
             else
                if !GetImage( cImgName )
-                  MsgStop("No es posible obtener la imagen "+ cImgName +"desde el servidor.")
+                  MsgStop('No es posible obtener la imagen "'+ cImgName +'" desde el servidor.', ~~rApp:cAppName )
                   return nil
                endif
 
@@ -136,7 +136,7 @@ Return nil
 
 
 
-/** Function para obtener una imagen desde un servidor TPuy.
+/** Funcion para obtener una imagen desde un servidor TPuy.
  *  cImgName:  Nombre de la imagen a solicitar. 
  *             Se debe incluir la extensión. (sin ruta).
  */
@@ -153,7 +153,15 @@ Function GetImage( cImgName )
          else
             if !( cImg == MemoRead( oTpuy:cImages + cImgName ) )
                return hb_MemoWrit( oTPuy:cImages + cImgName, cImg )
+            else
+               // imagenes identicas
+               return .t.
             endif
+         endif
+      else
+         // Si la imagen existe localmente, la usamos...
+         if FILE( oTPuy:cImages+cImgName )
+            return .t.
          endif
       endif
    endif
