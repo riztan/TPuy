@@ -51,7 +51,8 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)tpy_image.prg     \
            $(SRCPATH)model_abm.prg     \
            $(SRCPATH)tpyentry.prg      \
-           $(SRCPATH)tdocument.prg
+           $(SRCPATH)tdocument.prg     \
+           $(SRCPATH)tcursor.prg
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lhbzebra
 
