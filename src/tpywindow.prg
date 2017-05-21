@@ -35,6 +35,8 @@ CLASS TpyWindow FROM GWindow
 
    METHOD NEW( cTitle, nType, nWidth, nHeight, ;
                cId, uGlade, nTypeHint, cIconName, cIconFile, oParent )
+
+   METHOD SetParent( oParent )    INLINE gtk_window_set_transient_for( ::pWidget, oParent:pWidget  )
    
 ENDCLASS
 
