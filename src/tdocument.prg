@@ -42,6 +42,10 @@ CLASS TDOCUMENT FROM TPUBLIC
 
    DATA nOption     INIT 0      // Opcion tipo datapro 1=incluir, 3=modificar
 
+   DATA nStatus     INIT 0      // Modo del documento
+                                // 0 = Lectura
+                                // 1 = Escritura
+
    DATA oFecha
    DATA oEntFecha
 
@@ -86,6 +90,7 @@ CLASS TDOCUMENT FROM TPUBLIC
    Method Close()                     INLINE  ::Exit()
 
    Method Show()
+   Method Activate()                  INLINE  ::Show()
 
    //Method Configure() // Crea Ventana de Configuración.
    Method Refresh()
