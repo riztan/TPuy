@@ -492,15 +492,21 @@ STATIC FUNCTION __VALDATE( oEntry )
    if (oEntry:Empty() .or. Empty( oEntry:Get() )) ;
       .and. !oEntry:lCalActive
 //View( oEntry:oGet:buffer )
-      if hb_IsObject( oEntry:oForm:oWnd ) 
-         if oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW") .and. ;
-            oEntry:lCalendar 
-            oEntry:oCalendar :=  Calendar( oEntry, oEntry:oForm )
+      if hb_isObject( oEntry:oForm ) .and. oEntry:oForm:IsDerivedFrom("TPUBLIC")
+
+         if hb_IsObject( oEntry:oForm:oWnd ) 
+            if oEntry:oForm:oWnd:IsDerivedFrom("GWINDOW") .and. ;
+               oEntry:lCalendar 
+               oEntry:oCalendar :=  Calendar( oEntry, oEntry:oForm )
+            endif
+
+         else
+            if oEntry:oForm:IsDerivedFrom("GWINDOW") .and. ;
+               oEntry:lCalendar 
+               oEntry:oCalendar :=  Calendar( oEntry, oEntry:oForm )
+            endif
          endif
-         if oEntry:oForm:IsDerivedFrom("GWINDOW") .and. ;
-            oEntry:lCalendar 
-            oEntry:oCalendar :=  Calendar( oEntry, oEntry:oForm )
-         endif
+
       endif
    endif
 
@@ -589,7 +595,7 @@ return .t.
 
 
 
-FUNCTION Calendar( oEntry, oForm ) 
+FUNCTION Calendar( oEntry, oParent ) 
    local oWnd, oBox, oCalendar, cRes, dFecha := Date()
    local cIconFile := oTpuy:cImages+oTpuy:cIconMain
    local oWndParent, lPModal := .f.
@@ -598,17 +604,17 @@ FUNCTION Calendar( oEntry, oForm )
 
    if oTpuy:IsDef("dFecha"); dFecha := oTpuy:dFecha; endif
 
-   if hb_IsObject( oForm )
-      if oForm:IsDerivedFrom("GWINDOW")
-         oWndParent := oForm
+   if hb_IsObject( oParent )
+      if oParent:IsDerivedFrom("GWINDOW")
+         oWndParent := oParent
       else
-         if oForm:oWnd:IsDerivedFrom("GWINDOW")
-            oWndParent := oForm:oWnd
+         if oParent:oWnd:IsDerivedFrom("GWINDOW")
+            oWndParent := oParent:oWnd
          endif
       endif
    endif
 
-//   SET RESOURCES cRes FROM FILE oForm:cResFile
+//   SET RESOURCES cRes FROM FILE oParent:cResFile
 
    DEFINE WINDOW oWnd TITLE "Fecha" ;
           TYPE GTK_WINDOW_TOPLEVEL ; 
