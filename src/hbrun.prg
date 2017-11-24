@@ -169,7 +169,6 @@ endif
 //MsgInfo( cFile ) 
             FReOpen_Stderr( cLogFile, "w" )
             if !oTpuy:lMainRun
-
                cFile := HB_COMPILEBUF( HB_ARGV( 0 ), "-n2", "-w0", "-es2", "-q0", ;
                                        s_aIncDir, "-I" + FNameDirGet( cFile ), ;
                                        "-D" + "__HBSCRIPT__HBRUN", cFile )
@@ -204,7 +203,9 @@ endif
             ENDIF
          OTHERWISE
             s_cDirBase := hb_DirBase()
-            hb_argShift( .T. )
+            // Esta función hb_argShift() hace que no funcionen otras
+            // como:  hb_DirBase()
+            //hb_argShift( .T. )
 
             //if oTpuy:lMainRun
             //  hb_hrbLoad( cFile )
