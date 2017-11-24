@@ -50,7 +50,10 @@
 // #include "hbstruct.ch"
 // #include "hblang.ch"
 
+EXTERNAL HB_IDLESLEEP
 EXTERNAL HB_PROCESSRUN
+EXTERNAL HB_PROCESSOPEN
+EXTERNAL HB_PROCESSCLOSE
 EXTERNAL WINEXEC
 
 EXTERNAL HB_LANGSELECT
@@ -74,7 +77,10 @@ EXTERNAL HB_OSISWIN2K
 EXTERNAL HB_OSISWINVISTA 
 EXTERNAL HB_OSISWINCE 
 
+EXTERNAL HB_DIRBASE
+EXTERNAL HB_DIRSEPADD
 
+EXTERNAL G_UTF8_GET_CHAR 
 
 // GLOBAL oTpuy  /** \var GLOBAL oTpuy. Objeto Principal oTpuy. */
 
@@ -87,7 +93,6 @@ memvar oTpuy
 /** \brief Inicio. Donde comienza todo.
  */
 Function Main( ... )
-//Function Main(  )
 
    Local oError, uReturn
    Local cVersion:="0.4 (Alfa)"
@@ -199,6 +204,7 @@ Function Main( ... )
 
    TRY
      RUNXBS( _INITCONF_ )
+
    CATCH
      MsgStop("Hay problemas para leer el archivo <b>"+_INITCONF_+"</b>","Finalizado.") 
      if MsgNoYes( "¿Desea que se genere el fichero y la estructura de un proyecto tpuy?" )
@@ -528,6 +534,14 @@ PROCEDURE TPYLOG(uMensaje,cFuncName)
    endif
 RETURN
 
+
+/*
+ * Evitamos errores en los scripts por no existir la funcion.
+ */
+#ifdef __PLATFORM__UNIX
+  function WAPI_SHELLEXECUTE()
+  return nil
+#endif
 
 
 //EOF
