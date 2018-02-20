@@ -64,8 +64,8 @@
 #define OSDRIVE()   IIF( "Linux"$OS(), "", CURDRIVE() )    // Parche por mal funcionamiento en GNU
 
 /* Convertir Datos PostgreSQL y MySQL */
-#xtranslate ToPgSQL( <uValue> )  =  ToSQL( <uValue>, 1 )
-#xtranslate ToMySQL( <uValue> )  =  ToSQL( <uValue>, 0 )
+#xtranslate ToPgSQL( <uValue> )  =>  ToSQL( <uValue>, 1 )
+#xtranslate ToMySQL( <uValue> )  =>  ToSQL( <uValue>, 0 )
 
 
 /*Conexion a Base de Datos (AGOSTO-2016) */

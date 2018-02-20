@@ -142,6 +142,12 @@ METHOD New( oParent, oModel, cTitle, oIcon, nWidth, nHeight, cId, uGlade ) CLASS
            ::lParent := .F.
            ::lInBox  := .T.
       Other
+           if !hb_IsObject( oTPuy:oWnd )
+              MsgStop( "No es posible mostrar la información."+CRLF+;
+                       "No se ha indicado una ventana o contenedor "+;
+                       "adecuado. ", procname() )
+              return nil
+           endif
            If oTpuy:oWnd:IsDerivedFrom("GWINDOW")
               ::oParent := oTpuy:oWnd
               ::lParent := .t.
