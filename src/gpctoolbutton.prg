@@ -21,7 +21,7 @@
     (c)2003 Rafael Carmona <thefull@wanadoo.es>
 */
 
-memvar oTepuy
+memvar oTpuy
 
 #include "gtkapi.ch"
 #include "hbclass.ch"
@@ -60,14 +60,14 @@ METHOD New( cText, bAction, cStock, lMnemonic, cFromStock, oParent, lExpand, xIm
              if xImage != NIL
                if Valtype( xImage ) == "C"
                   If !File( xImage ) 
-                     If !File( oTepuy:cImages+xImage )
-                        If !File( oTepuy:cResources+xImage )
+                     If !File( oTpuy:cImages+xImage )
+                        If !File( oTpuy:cResources+xImage )
                            lImage := .F.
                         Else
-                           xImage := oTepuy:cResources+xImage
+                           xImage := oTpuy:cResources+xImage
                         EndIf
                      Else
-                        xImage := oTepuy:cImages+xImage
+                        xImage := oTpuy:cImages+xImage
                      EndIf
                   EndIf
                   oImage := GImage():New( xImage,,.F.,.F.,,.F.,,,,,,,,.F.,.F.,.F.,.F.,,,,,,,,,,,.F. )
