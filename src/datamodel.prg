@@ -217,7 +217,8 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
                 cPicture := "X"
              Case aField[ 2 ] = "N" 
 //View( aField )
-                cPicture := iif( aField[ 4 ] > 0, P_92, P_60 )
+                //cPicture := iif( aField[ 4 ] > 0, P_92, P_60 )
+                cPicture := __FORMAT( aLin[3], aLin[4] )
              Other
                 cPicture := "X"
              EndCase
@@ -365,9 +366,17 @@ RETURN Self
 
 STATIC FUNCTION __FORMAT( nLen, nDecimals, cFormat )
    local cPict, nGrupos, nCont := 1
-   default cFormat   to "@E "
+   //default cFormat   to "@E "
    default nDecimals to oTpuy:nDecimals
    default nLen      to 9 
+
+   if hb_ISNIL( cFormat )
+      if oTPuy:cSepDec=","
+         cFormat := "@E"
+      else
+         cFormat := "@R"
+      endif
+   endif
 
    nGrupos := INT( nLen / 3 ) + MOD(nLen, 3)
 
