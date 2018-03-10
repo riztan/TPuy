@@ -80,6 +80,9 @@ CLASS TPY_LISTBOX // FROM TPUBLIC // FROM TPY_DATA_MODEL
    METHOD GoPrev()   INLINE  ::oModel:oTreeView:GoPrev()
 
    METHOD Set(...)   INLINE  ::oModel:Set(...)
+   METHOD SetRow( pPath )
+
+   METHOD SavePath() INLINE  ::oModel:SavePath()
 
    METHOD SetTitleAlign( nAlign )  INLINE gtk_tree_view_column_set_alignment( ::oModel:oTreeView:pWidget, nAlign )
    //METHOD SetAlign( nCol, nXAlign, nYAlign )  INLINE gtk_cell_renderer_set_alignment( ::oModel:aCol[nCol]:oRenderer:pWidget, nXAlign, nYAlign ) 
@@ -377,6 +380,16 @@ METHOD Active( bAction, bInit ) CLASS TPY_LISTBOX
 
 
 RETURN Self
+
+
+
+METHOD SetRow( pPath )  CLASS TPY_LISTBOX
+   if hb_IsNIL( pPath )
+      pPath := ::oModel:pPath
+   endif
+   if hb_IsNIL( pPath ) ; return .f. ; endif
+   gtk_tree_view_set_cursor( ::oModel:oTreeView:pWidget, pPath )
+RETURN .t.
 
 
 //EOF

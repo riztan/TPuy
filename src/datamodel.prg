@@ -59,6 +59,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       DATA oOnChange
       DATA aIter
       DATA cPath
+      DATA pPath
       DATA pCell
       DATA pEditable
       DATA oConn
@@ -96,6 +97,8 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
 //      METHOD NewAuto( aTypes )
 //      METHOD Append( aValues )
 //      METHOD Insert( nRow, aValues )
+      METHOD SavePath( aIter ) // Guarda la ruta de la linea en el momento
+      METHOD FreePath()    INLINE gtk_tree_path_free( ::pPath )
       METHOD SetValue( uColumn, uValue, aIter )  /*RIGC 2016-02-06  Metodo para asignar un valor en una columna. */
       METHOD Set( aItems, xCol, uValue, aError )
 
@@ -127,6 +130,7 @@ CLASS TPY_DATA_MODEL FROM TPUBLIC
       METHOD ColSet( cField, nPos, uValue )  /*revisar para replantear o eliminar. No tiene sentido*/
 
 ENDCLASS
+
 
 
 METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS TPY_DATA_MODEL
@@ -471,7 +475,7 @@ RETURN 0
 
 METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
    Local cRow, nPosCol, nRow, cType, uValue
-   Local pPath//, aIter := GtkTreeIter
+//   Local pPath//, aIter := GtkTreeIter
 
    if hb_IsNIL( ::oTreeView ); return nil ; endif
 
@@ -484,10 +488,9 @@ METHOD GetCol( uCol ) CLASS TPY_DATA_MODEL
       return 0
    endif
 
-   nRow := ::GetPosRow() - 1
-   cRow     := ALLTRIM( CSTR(nRow) )
-
-   pPath := gtk_tree_path_new_from_string( cRow )
+//   nRow := ::GetPosRow() - 1
+//   cRow     := ALLTRIM( CSTR(nRow) )
+//   pPath := gtk_tree_path_new_from_string( cRow )
 
    //uValue := ::oTreeView:GetValue( nPosCol, "", pPath, @::aIter ) 
 // Revisar ::oTreeView:GetValue()  Explota cuando el modelo está en blanco.
@@ -1084,6 +1087,19 @@ METHOD Run( col, cArray , ... )
 RETURN lRet
 
 
+/** Metodo que Almacena la ruta a la linea (registro)
+ *
+ */
+METHOD SavePath( aIter ) CLASS TPY_DATA_MODEL
+   if hb_IsNIL( aIter )
+      aIter := ::aIter
+   endif
+   ::oTreeView:IsGetSelected( @aIter )
+   ::pPath := ::oTreeView:GetPath( aIter )
+
+RETURN ::pPath
+
+
 
 /** Metodo SetValue(  )
  *  Asigna un Valor a una columna segun el posicionamiento del iterador
@@ -1439,6 +1455,7 @@ METHOD Remove( aIter )  CLASS TPY_DATA_MODEL
       pPath := ::oTreeView:GetPath( aIter )
       ::oLbx:Remove( aIter )
       gtk_tree_view_set_cursor( ::oTreeView:pWidget, pPath )
+      gtk_tree_path_free( pPath )
       //::oTreeView:SetFocus()
    endif
 
