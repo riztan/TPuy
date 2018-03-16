@@ -1011,6 +1011,35 @@ FUNCTION AToSql( aDatos, nDbType )
 RETURN cSql
 
 
+
+/** \brief Función para validar una entrada que será utilizada luego en
+ *                la construcción de una consulta SQL. 
+ *                El objetivo es evitar la inyección sql.
+ *  cString = Cadena de texto a evaluar.
+ *
+ * \return .t. / .f.  Si la cadena es válida o no según sea el caso.
+ */
+FUNCTION sql_Sanitize( cString )
+
+   LOCAL cRegex1 := "(;|\s)" 
+   LOCAL cRegex2 := "(exec|execute|select|insert|update|delete|create|alter|drop|rename|truncate|backup|restore)\s"
+
+   hb_DefaultValue( cString, "")
+   hb_DefaultValue( cError, "")
+
+   if hb_RegExHas( cRegEx1, cString ) .or. ( hb_RegExHas( cRegex1, cString ) .and. ;
+                                             hb_RegExHas( cRegex2, cString ) )
+      return .f.
+   else
+      if hb_RegExHas( cRegex2, cString )
+         return .f.
+      endif
+   endif
+
+   return .t.
+
+
+
 /** \brief Apertura un archivo tipo PDF
  *         
  *
