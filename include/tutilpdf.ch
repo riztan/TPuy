@@ -15,11 +15,13 @@
 
 #xcommand UTILPDF <oUtil> ;
           [ <nRow>,<nCol> SAY <cText> ];
+	  [ TO <nBottom>,<nRight> ];
           [ FONT <cFont> ] [SIZE <nSize> ];
           [ COLOR RGB <nRed>,<nGreen>,<nBlue> ];
           [ ROTATE <nAngle>];
+          [ ALIGN <nAlign>];
          =>;
-           <oUtil>:Text( <cText>,<nRow>,<nCol>,<cFont>,<nSize>, <nRed>,<nGreen>,<nBlue>, <nAngle>)
+           <oUtil>:Text( <cText>,<nRow>,<nCol>,<cFont>,<nSize>, <nRed>,<nGreen>,<nBlue>, <nAngle>, <nBottom>,<nRight>, <nAlign> )
 
 #xcommand ISEPARATOR [ <nSpace> ] [<lBody: BODY>];
          =>;
