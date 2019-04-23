@@ -1292,7 +1292,7 @@ METHOD Refresh(lQuery, lExtend, lRecurr, cSchema) CLASS TPQquery
                 
                 if 'char' $ cType
                     cType := 'C'
-                    nSize := nSize - VARHDRSZ
+                    //nSize := nSize - VARHDRSZ
         
                 elseif 'text' $ cType                 
                     cType := 'M'
@@ -1314,23 +1314,20 @@ METHOD Refresh(lQuery, lExtend, lRecurr, cSchema) CLASS TPQquery
                     nSize := 19
                 
                 elseif 'decimal' $ cType .or. 'numeric' $ cType
-                    cType := 'N'
-                    
-                    // Postgres don't store ".", but .dbf does, it can cause data width problem
-                    if ! Empty(nDec)
-                        nSize++
-                    endif                        
+                    cType := "N"
 
-                    // Numeric/Decimal without scale/precision can genarete big values, so, i limit this to 10,5
-                    if nDec > 100
-                        nDec := 5
-                    endif
+                    /* Postgres don't store ".", but .dbf does, it can cause data width problem */
+                    IF nDec > 0
+                       nSize++
+                       /* Numeric/Decimal without scale/precision can genarete big values, so, i limit this to 10,5 */
+                       IF nDec > 100
+                          nDec := 5
+                       ENDIF
+                    ENDIF
 
-                    nSize := nSize - VARHDRSZ
-                
-                    if nSize > 100
-                        nSize := 15
-                    endif        
+                    IF nSize > 100
+                       nSize := 15
+                    ENDIF
         
                 elseif 'real' $ cType .or. 'float4' $ cType
                     cType := 'N'

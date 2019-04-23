@@ -65,6 +65,9 @@ Function FileChooser(nMode, cType )
 Return .T.
 
 
+/*
+ Proxima para eliminar... en desuso  (RIGC 20181017)
+*/
 Function ChooserExec(nMode, cType )
 
    Local oFileChooser, cFile, cDialog

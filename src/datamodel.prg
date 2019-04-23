@@ -222,7 +222,14 @@ METHOD New( oConn, xQuery, aStruct, aItems, aActions, aValiders, aDMStru ) CLASS
              Case aField[ 2 ] = "N" 
 //View( aField )
                 //cPicture := iif( aField[ 4 ] > 0, P_92, P_60 )
-                cPicture := __FORMAT( aLin[3], aLin[4] )
+                // En MySQL posiblemente un dato numerico de 1 digito y sin decimales
+                // muy posiblemente es un dato lógico
+                if aField[3]=1 .and. aField[4]=0
+                   aField[2]:= "L"
+                   cPicture := "BOOLEAN"
+                else
+                   cPicture := __FORMAT( aField[3], aField[4] )
+                endif
              Other
                 cPicture := "X"
              EndCase
@@ -860,7 +867,7 @@ METHOD LISTORE( oBox, oListBox ) CLASS TPY_DATA_MODEL
              SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE oColumn
           else
 //             if len(cValTmp)>1 ; cValTmp:= ALLTRIM( cValTmp ) ; endif
-             SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE UTF_8(cValTmp)
+             SET LIST_STORE ::oLbx ITER ::aIter POS n VALUE cValTmp //UTF_8(cValTmp)
           endif
           //SET VALUES LIST_STORE ::oLbx ITER ::aIter VALUES aItems[nColumn]
        next

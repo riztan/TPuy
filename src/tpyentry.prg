@@ -147,7 +147,9 @@ METHOD New( nType, bSet, cRegExFilter, oMsgWidget, cPicture, bValid,;
       if lCalendar //.and. hb_IsObject( oForm )
          if hb_ISNIL( ulButton ) .and. hb_ISNIL( urButton )
             if !File( cImage ) 
-               uImg := "gtk-find"
+               if uGlade=NIL
+                  uImg := "gtk-find"
+               endif
             else
                DEFINE IMAGE uImg FILE cImage
             endif
