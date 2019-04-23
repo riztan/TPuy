@@ -52,13 +52,17 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)model_abm.prg     \
            $(SRCPATH)tpyentry.prg      \
            $(SRCPATH)tdocument.prg     \
-           $(SRCPATH)tcursor.prg
+           $(SRCPATH)tcursor.prg       \
+           $(SRCPATH)gmail.prg        #\
+#           $(SRCPATH)dbfs.prg          \
+#           $(SRCPATH)dbf_indexar.prg     
 
 LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lhbzebra
 
 ifeq ($(HB_MAKE_PLAT),win)
    LIBS  +=-lhbcplr -lhbpp -lhbcommon -lhbnetio -lhbrtl -lhbtip \
-	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbcurl -lhbwin
+	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbcurl -lhbwin \
+	   -lrddsql -lsddodbc -lodbc32
 else
    # temporalmente se suspende el uso de libhbtfhka por un problema de incompatibilidad
    LIBS +=-lmysqlclient -lpq #-lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
