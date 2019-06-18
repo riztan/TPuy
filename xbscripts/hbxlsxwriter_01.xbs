@@ -4,7 +4,7 @@
  */
 
 #include "tpy_xbs.ch"
-#include "hblibxlsxwriter.ch"
+#include "hbxlsxwriter.ch"
 
 procedure hbxlsxwriter_01() 
 
