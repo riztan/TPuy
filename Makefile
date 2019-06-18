@@ -57,18 +57,19 @@ SOURCES  = $(SRCPATH)main.prg          \
 #           $(SRCPATH)dbfs.prg          \
 #           $(SRCPATH)dbf_indexar.prg     
 
-LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lhbzebra
+LIBS =-L$(LIBDIR_TGTK) -ltdolphin -lhbct -lhbpg -lhbzebra -lhbxlsxwriter
 
 ifeq ($(HB_MAKE_PLAT),win)
    LIBS  +=-lhbcplr -lhbpp -lhbcommon -lhbnetio -lhbrtl -lhbtip \
 	   -lhbmxml -lmxml -lhbtfhka -lhbtpathy -lhbct -lhbcurl -lhbwin \
-	   -lrddsql -lsddodbc -lodbc32
+	   -lrddsql -lsddodbc -lodbc32 -lz #-lxlsxwriter
 else
    # temporalmente se suspende el uso de libhbtfhka por un problema de incompatibilidad
    LIBS +=-lmysqlclient -lpq #-lhbtfhka -lhbtpathy -lhbct -lhbmxml -lmxml
 endif
 
 LIBS +=-lhbct -lhbmxml -lmxml 
+LIBS += -lxlsxwriter -lz 
 
 
 ifeq ($(XBASE_COMPILER),HARBOUR)

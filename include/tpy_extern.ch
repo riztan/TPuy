@@ -8,3 +8,5 @@ EXTERNAL TPY_PDFOPEN
 
 EXTERNAL HB_JSONENCODE
 EXTERNAL HB_JSONDECODE
+
+#include "hbxlsxwriter_extern.ch"

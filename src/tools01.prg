@@ -808,7 +808,7 @@ FUNCTION Check_Version( cRuta )
          cOS := "ubuntu"  // ya se cambiara cuando se trabaje otra distribucion.
          default cRuta to "/"+CurDir()+"/bin"
 
-         cFile := "tpuy_Ubuntu_14041_x86_64_hb32"
+         cFile := "tpuy_Ubuntu_16041_x86_64_hb32"
          cFilePath := cRuta + "/" + cFile
 #endif
          if FILE( cFilePath )
@@ -1025,7 +1025,6 @@ FUNCTION sql_Sanitize( cString )
    LOCAL cRegex2 := "(exec|execute|select|insert|update|delete|create|alter|drop|rename|truncate|backup|restore)\s"
 
    hb_DefaultValue( cString, "")
-   hb_DefaultValue( cError, "")
 
    if hb_RegExHas( cRegEx1, cString ) .or. ( hb_RegExHas( cRegex1, cString ) .and. ;
                                              hb_RegExHas( cRegex2, cString ) )
