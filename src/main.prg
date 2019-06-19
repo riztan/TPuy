@@ -109,11 +109,11 @@ memvar oTpuy
 Function Main( ... )
 
    Local oError, uReturn
-   Local cVersion:="0.4 (Alfa)"
+   Local cVersion:=TPUY_VERSION //"0.4 (Alfa)"
    Local cSystem_Name:=TPUY_NAME+" v"+cVersion
 
    Local tValor := hb_DateTime() //ROUND(SECONDS()+50,0)
-
+ 
 //   Default uPar1 := "", uPar2 := "", uPar3 := "", uPar4 := ""
 
    SetGtkBuilder( .t. )
