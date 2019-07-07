@@ -84,10 +84,5 @@
             hb_deserialize(netio_funcexec( #<func> [,<params>] ))
              
 
-#xtranslate ~~RunXBS(<cScript>[,<params,...>] [<lMute: MUTE>] ;
-                    [SCHEMA <cSchema>] ) => ;
-              oTpuy:rRunXBS( <cScript>,[<.lMute.>],[<cSchema>][,<params>] )
-
-
 //eof
 

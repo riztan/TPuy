@@ -35,7 +35,7 @@ CLASS TApp FROM TObject
    METHOD SetAppName(cName)
    METHOD About()
    METHOD RunXBS( cFile, ... )
-   METHOD RRunXBS( cScript, ... )
+//   METHOD RRunXBS( cScript, ... )
    METHOD RunText( cText, ... )  
    METHOD OpenXBS( cFile, p1,p2,p3,p4,p5,p6,p7,p8,p9,p10 )  
    METHOD SaveScript( cFile )  
@@ -91,6 +91,11 @@ RETURN NIL
 /** RRunXBS() (Remote RunXBS)
  *
  */
+/*
+
+ESTO YA NO DEBE FORMAR PARTE DE TPUY (RIGC - 2019-07-07)
+#TODO: ELIMINAR ESTO PRONTAMENTE
+
 #include "tpy_netio.ch"
 METHOD RRunXBS( cScript,lMute,cSchema, ... ) CLASS TApp
    local uResult 
@@ -127,7 +132,7 @@ METHOD RRunXBS( cScript,lMute,cSchema, ... ) CLASS TApp
    endif
 
 Return uResult
-
+*/
 
 
 /** RunXBS()
