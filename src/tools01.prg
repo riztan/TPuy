@@ -785,46 +785,58 @@ RETURN cFileName
 
 FUNCTION Check_Version( cRuta )
    local cHash
-   local cFile, cOS := lower( OS() )
+   local cOS := lower( OS() )
    local aFiles, cPath := GetEnv("TMP")
-   local cBat,cBatFile:="tl.bat"
-   local uTpyVersion, cFilePath
+   //local cBat,cBatFile:="tl.bat"
+   local uTpyVersion, cFilePath, aPath, cBinName, cDirSep
 
    if oTPuy:lNetIO 
 #ifdef __PLATFORM__WINDOWS
       if "windows" $ cOS
          cOS := "windows"
-         default cRuta to CurDrive()+":\"+CurDir()+"\bin"
+         cDirSep := "\"
+         default cRuta to CurDrive()+":"+cDirSep+CurDir()+cDirSep+"bin"
 
-         cBat := '@start /B tasklist | find "tpuy" > %TMP%\tl.log'
-         hb_MemoWrit( cPath+"\"+cBatFile, cBat ) 
-         wapi_shellexecute(,"open", cPath+"\"+cBatFile,,,0 )
-         cFile := MemoRead( cPath + "/" + "tl.log" )
-         cFile := LEFT( cFile, AT( " ", cFile )-1 )
-         cFilePath := cRuta + "/" +cFile
-
+         //cBat := '@start /B tasklist | find "tpuy" > %TMP%\tl.log'
+         //hb_MemoWrit( cPath+"\"+cBatFile, cBat ) 
+         //wapi_shellexecute(,"open", cPath+"\"+cBatFile,,,0 )
+         //cFile := MemoRead( cPath + "/" + "tl.log" )
+         //cFile := LEFT( cFile, AT( " ", cFile )-1 )
+         //cFilePath := cRuta + "/" +cFile
+        
+         cFilePath := hb_ProgName()
+         aPath := hb_aTokens( cFilePath, cDirSep )
+         cBinName := aPath[ len(aPath) ] 
 #else
       if "linux" $ cOS
+         cDirSep := "/"
          cOS := "ubuntu"  // ya se cambiara cuando se trabaje otra distribucion.
-         default cRuta to "/"+CurDir()+"/bin"
+         default cRuta to cDirSep+CurDir()+cDirSep+"bin"
 
-         cFile := "tpuy_Ubuntu_16041_x86_64_hb32"
-         cFilePath := cRuta + "/" + cFile
+         //cFile := "tpuy_Ubuntu_16041_x86_64_hb32"
+         //cFilePath := cRuta + "/" + cFile
+         cFilePath := hb_ProgName()
+         aPath := hb_aTokens( cFilePath, cDirSep )
+         cBinName := aPath[ len(aPath) ] + "_bin" 
 #endif
+
          if FILE( cFilePath )
             cHash := hb_MD5File( cFilePath )
             if !( cHash == net:tpycli_version( cOS ) )
 
                if MsgYesNo("¿Desea continuar con el proceso de actualización?",;
-                           "Se ha detectado diferencia en la versión del binario TPuy")
+                           "Detectada diferencia en el binario TPuy")
 
                   MsgInfo("Iniciar Descarga. (puede tardar algunos minutos) ",;
                           "Actualización del componente binario.")
                   inkey(.2)
                   uTpyVersion :=  net:tpycli_get_version( cOS ) 
-                  MsgInfo("Finalizado el proceso de descarga!","Descarga completada.")
 
                   if !empty( uTpyVersion )
+
+                     MsgInfo("Finalizado el proceso de descarga!" + hb_eol() + ;
+                             "Se intentará sustituir el archivo ejecutable correspondiente.",;
+                             "Descarga Completada")
 
                      if FILE( cFilePath+"__before" ) ; FERASE( cFilePath+"__before" ) ; endif
 #ifdef __PLATFORM__WINDOWS
@@ -847,9 +859,19 @@ FUNCTION Check_Version( cRuta )
                         gtk_main_quit()
                         QUIT
                      else
-                        MsgAlert("No fue posible reescribir el binario.","Atención")
-                        return "revisar"
+                        MsgAlert("No fue posible reescribir el binario." + hb_eol() +;
+                                 "Posiblemente no hay permisos para realizar este tipo de ajuste.",;
+                                 "Atención")
+                        //return "revisar"
+
+                        if hb_MemoWrit( cBinName, uTpyVersion )
+                           MsgInfo( "Se ha guardado una copia del binario en: " + CurDir() +;
+                                     cDirSep + cBinName )
+                        endif
                      endif
+                  elseif hb_IsNIL( uTpyVersion )
+                     MsgAlert( "No se logró obtener la información de actualización."+hb_eol()+;
+                               "Posiblemente deba comunicarse con su administrador del sistema. " )
                   endif
                else
                   MsgAlert("Posiblemente esté ejecutando una versión desactualizada. "+;
@@ -860,7 +882,7 @@ FUNCTION Check_Version( cRuta )
 
             endif
          else
-View( "No localiza el archivo " + cFilePath + " para verificar version." )
+MsgAlert( "No localiza el archivo " + cFilePath + " para verificar version." )
          endif
       endif
       

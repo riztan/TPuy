@@ -519,7 +519,7 @@ function FromRemote( cFuncName, cObj, ... )
    local cHandle
 
    if hb_pValue(1) = nil ; return nil ; endif
-   if oTpuy:IsDef("oUser")
+   if oTpuy:IsDef("oUser") .and. hb_IsObject(oTPuy:oUser)
 
       cHandle := oTpuy:oUser:cHandle
       default cHandle to ""

@@ -469,7 +469,7 @@ METHOD Exit( lForce ) CLASS TApp
    end
 
 //?? oTpuy:ClassName()
-   if oTpuy:IsDef( "oUser" )
+   if oTpuy:IsDef( "oUser" ) .and. hb_IsObject( oTPuy:oUser )
       oTpuy:oUser:End()
    endif
    oTpuy := NIL
