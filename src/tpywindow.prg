@@ -33,19 +33,34 @@ memvar  oTpuy
 
 CLASS TpyWindow FROM GWindow
 
-   METHOD NEW( cTitle, nType, nWidth, nHeight, ;
+   DATA cWndId
+   DATA bValid
+
+   METHOD NEW( Wnd, cTitle, nType, nWidth, nHeight, ;
                cId, uGlade, nTypeHint, cIconName, cIconFile, oParent )
 
    METHOD SetParent( oParent )    INLINE gtk_window_set_transient_for( ::pWidget, oParent:pWidget  )
    
+   METHOD Activate()
+
 ENDCLASS
 
 
-METHOD NEW( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, cIconFile, oParent )  CLASS TpyWindow
+
+METHOD NEW( cWndId, cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, cIconFile, oParent )  CLASS TpyWindow
 
   local cIconDefault := oTpuy:cImages+oTpuy:cIconMain
 
   default cIconFile to cIconDefault
+
+  if !oTPuy:IsDef( "oWndGestor" )
+     oTPuy:Add( "oWndGestor", TPublic():New() )
+  endif
+
+  if oTPuy:owndGestor:IsDef( cWndId )
+     oTPuy:oWndGestor:Get(cWndId):SetFocus()
+     RETURN oTPuy:oWndGestor:Get( cWndId )
+  endif
 
   if !File( cIconFile ) ; cIconFile := cIconDefault ; endif
 
@@ -55,6 +70,30 @@ METHOD NEW( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, c
      ::Super:New( cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, , oParent )
   endif
 
+  oTPuy:oWndGestor:Add( cWndId, self )
+  ::cWndId := cWndId
+
 RETURN self
+
+
+
+
+METHOD Activate( bValid, lCenter, lMaximize, lModal, lInitiate ) CLASS TpyWindow
+
+   local bEnd
+
+   if !hb_IsBlock( bValid )
+      bEnd := {|| oTPuy:oWndGestor:Del(::cWndId), ;
+                  .t. }
+   else
+      ::bValid := bValid
+      bEnd := {|| oTPuy:oWndGestor:Del(::cWndId), ;
+                  EVAL( ::bValid ) }
+   endif
+
+   ::Super:Activate( bEnd, lCenter, lMaximize, lModal, lInitiate )
+
+RETURN
+
 
 //eof
