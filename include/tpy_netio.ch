@@ -44,10 +44,10 @@
 */
 
 #xtranslate ~<!msg!>[(<params,...>)] => ;
-            FromRemote( "__object", "oApp", #<msg>[, <params>] )
+            FromRemote( "__object", "oAcc", #<msg>[, <params>] )
 
 #xtranslate ~<!method!>([<params,...>]) => ;
-            FromRemote( "__objmethod", "oApp", #<method>[, <params>] )
+            FromRemote( "__objmethod", "oAcc", #<method>[, <params>] )
 
 
 #xtranslate ~<!object!>:<!msg!>[(<params,...>)] => ;

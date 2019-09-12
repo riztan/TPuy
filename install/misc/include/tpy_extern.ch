@@ -10,3 +10,7 @@ EXTERNAL HB_JSONENCODE
 EXTERNAL HB_JSONDECODE
 
 #include "hbxlsxwriter_extern.ch"
+
+
+//-- Instrucciones en fuentes de TPuy
+EXTERNAL TSTATUSBAR

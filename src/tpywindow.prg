@@ -25,11 +25,10 @@
 */
 
 
+#include "tepuy.ch"
 #include "hbclass.ch"
-#include "common.ch"
 
 memvar  oTpuy
-
 
 CLASS TpyWindow FROM GWindow
 
@@ -57,7 +56,7 @@ METHOD NEW( cWndId, cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIco
      oTPuy:Add( "oWndGestor", TPublic():New() )
   endif
 
-  if oTPuy:owndGestor:IsDef( cWndId )
+  if oTPuy:oWndGestor:IsDef( cWndId )
      oTPuy:oWndGestor:Get(cWndId):SetFocus()
      RETURN oTPuy:oWndGestor:Get( cWndId )
   endif

@@ -4,7 +4,10 @@
  *
  */
 
-#include "tpy_class.ch"
+memvar oTPuy
+
+#include "tepuy.ch"
+#include "hbclass.ch"
 
 //#define  ORSEIT_ICON  oTPuy:cImages+"orseit.ico"
 
@@ -182,10 +185,9 @@ METHOD CreaVentana() CLASS TDocument
       ACTION ::oWnd:End()      ;
       ID "btn_salir" RESOURCE ::oRes
 
-
    //::oWnd:bEnd := {| ... | ::Exit( ... ) }
 
-RETURN 
+RETURN .T.
 
 /*
 METHOD Exit( lWnd )  CLass TDocument
@@ -230,7 +232,7 @@ METHOD Show()  Class TDocument
 
    ACTIVATE WINDOW ::oWnd CENTER VALID ::Exit( .t. )
 
-Return 
+Return .t.
 
 
 
@@ -238,7 +240,7 @@ METHOD Refresh( )  Class TDocument
    if hb_IsBlock( ::bPreRefresh ) ; EVAL( ::bPreRefresh, self ) ; endif
    if hb_IsBlock( ::bRefresh    ) ; EVAL( ::bRefresh   , self ) ; endif
    if hb_IsBlock( ::bPosRefresh ) ; EVAL( ::bPosRefresh, self ) ; endif
-RETURN 
+RETURN .t.
 
 
 
@@ -246,7 +248,7 @@ METHOD TRAZA( cCadena )  CLASS TDocument
   if ::lDebug .and. hb_IsObject( ::oLog )
      ::oLog:Set( cCadena )
   endif
-Return
+Return .t.
 
 
 // Verificar que el contenido sea compatible para un numero de documento.
@@ -401,7 +403,7 @@ Method SetTheme( cTema )  Class TDocument
 
    if !File( cFile ) 
       ::Traza( procname() + ": " + "El tema de interfaz " + cTema + "no existe. " ) 
-      return
+      return .f.
    endif
 
    gtk_rc_parse( cFile )

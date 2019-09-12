@@ -57,6 +57,37 @@
 
 //Fin
 
+/* Redefinicion del comando de creacion de ventanas. */
+
+#xuncommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
+                               [ ICON_NAME <cIconName>];
+                               [ ICON_FILE <cIconFile>];
+                               [ TYPE <nType> ];
+                               [ TYPE_HINT <nType_Hint> ];
+                               [ SIZE <nWidth>, <nHeight> ] ;
+                               [ OF <oParent> ];
+                               [ ID <cId> ;
+                               [ RESOURCE <uGlade> ] ];
+      => ;
+      <oWnd> := GWindow():New( <cTitle>, <nType>, <nWidth>, <nHeight>, [<cId>],;
+                              [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
+
+
+#xcommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
+                               [ ICON_NAME <cIconName>];
+                               [ ICON_FILE <cIconFile>];
+                               [ TYPE <nType> ];
+                               [ TYPE_HINT <nType_Hint> ];
+                               [ SIZE <nWidth>, <nHeight> ] ;
+                               [ OF <oParent> ];
+                               [ ID <cId> ;
+                               [ RESOURCE <uGlade> ] ];
+      => ;
+      <oWnd> := TpyWindow():New( #<oWnd>, <cTitle>, <nType>, <nWidth>, <nHeight>, [<cId>],;
+                              [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
+
+
+
 #xtranslate tracelog( <uValue> )  => tpyLog( <uValue>, ProcName() )
 
 
