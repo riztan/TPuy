@@ -28,7 +28,7 @@
 
 //#translate  <exp1> IN <exp2>     =>  <exp1> $ <exp2> 
 
-#define TPUY_VERSION            "Beta 0.5.0"
+#define TPUY_VERSION            "Beta 0.6.0"
 #define TPUY_NAME               "Tpuy"
 #define TPUY_WWW                "http://code.google.com/p/tepuysoft/"
 #define TPUY_TEAM               "http://code.google.com/p/tepuysoft/people/list"
