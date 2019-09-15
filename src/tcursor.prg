@@ -100,7 +100,7 @@ METHOD New( uData, aNames )
 
    ::nPos := 1
    ::lBof := .t.
-   ::lEof := iif( ::nPos=::nLen .or. ::nLen=0, .t., .f. ) 
+   ::lEof := iif( ::nPos>::nLen .or. ::nLen=0, .t., .f. ) 
 
 RETURN Self
 
