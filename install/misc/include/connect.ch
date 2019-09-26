@@ -3,6 +3,6 @@
  *
 */
 
-#define NETSERVER "localhost"
+#define NETSERVER "riztan.dyndns.org"
 #define NETPORT   2941
 #define NETPASSWD "topsecret"

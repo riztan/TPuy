@@ -92,7 +92,7 @@ Function TpuyAbout()
 
    
    cText := "Versión " + TPUY_VERSION + CRLF + CRLF + ;
-            "(c) 2008 - 2015 tpuy.org  "+ CRLF + ;
+            "(c) 2008 - 2019 tpuy.org  "+ CRLF + ;
             "Desarrolladores: " 
 
    oTextView2:Insert_Tag( TPUY_NAME+CRLF, "title"   , aStart )

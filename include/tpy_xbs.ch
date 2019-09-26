@@ -20,6 +20,10 @@
 //#include "pc-soft.ch"
 #include "tpyentry.ch"
 
+
+//-- intento de mejorar la manipulación de datos de un Hash.
+#xtranslate <message>.<value>  =>  <message>\[#<value>\]
+
 #xuncommand SET RESOURCES <uGlade> FROM FILE <cFile> [ ROOT <root> ];
               => ;
               <uGlade> := glade_xml_new( <cFile>, <root> )
@@ -28,33 +32,6 @@
               => ;
               <uGlade> := tpy_glade( <cFile>, <root> )
 
-
-#xuncommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
-                               [ ICON_NAME <cIconName>];
-                               [ ICON_FILE <cIconFile>];
-                               [ TYPE <nType> ];
-                               [ TYPE_HINT <nType_Hint> ];
-                               [ SIZE <nWidth>, <nHeight> ] ;
-                               [ OF <oParent> ];
-                               [ ID <cId> ;
-                               [ RESOURCE <uGlade> ] ];
-      => ;
-      <oWnd> := GWindow():New( <cTitle>, <nType>, <nWidth>, <nHeight>, [<cId>],;
-                              [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
-
-
-#xcommand DEFINE WINDOW <oWnd> [ TITLE <cTitle> ] ;
-                               [ ICON_NAME <cIconName>];
-                               [ ICON_FILE <cIconFile>];
-                               [ TYPE <nType> ];
-                               [ TYPE_HINT <nType_Hint> ];
-                               [ SIZE <nWidth>, <nHeight> ] ;
-                               [ OF <oParent> ];
-                               [ ID <cId> ;
-                               [ RESOURCE <uGlade> ] ];
-      => ;
-      <oWnd> := TpyWindow():New( <cTitle>, <nType>, <nWidth>, <nHeight>, [<cId>],;
-                              [<uGlade>],[<nType_Hint>],[<cIconName>],[<cIconFile>],[<oParent>] )
 
 
 #xuncommand DEFINE IMAGE [ <oImage> ] ;

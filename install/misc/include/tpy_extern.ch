@@ -9,8 +9,6 @@ EXTERNAL TPY_PDFOPEN
 EXTERNAL HB_JSONENCODE
 EXTERNAL HB_JSONDECODE
 
+EXTERNAL HB_RANDOMINT
+
 #include "hbxlsxwriter_extern.ch"
-
-
-//-- Instrucciones en fuentes de TPuy
-EXTERNAL TSTATUSBAR

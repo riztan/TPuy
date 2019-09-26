@@ -11,12 +11,12 @@ BLOCK "040904E4"
 { 
 VALUE "CompanyName", "www.gtxbase.org" 
 VALUE "FileDescription", "Tepuy. Base para Sistemas de Gestión" 
-VALUE "FileVersion", "11/09/2019 " 
+VALUE "FileVersion", "24/09/2019 " 
 VALUE "InternalName", "tpuy" 
 VALUE "LegalCopyright", "GNU Public License" 
 VALUE "OriginalFilename", "tpuy_win_x86_hb32.exe" 
 VALUE "ProductName", "TPuy" 
-VALUE "ProductVersion", "0.6.0(b)" 
+VALUE "ProductVersion", "0.6.1(b)" 
 VALUE "Comments", "Compilado por Orseit,c.a. " 
 } 
 } 
