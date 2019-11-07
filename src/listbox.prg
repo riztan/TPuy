@@ -88,6 +88,11 @@ CLASS TPY_LISTBOX // FROM TPUBLIC // FROM TPY_DATA_MODEL
    //METHOD SetAlign( nCol, nXAlign, nYAlign )  INLINE gtk_cell_renderer_set_alignment( ::oModel:aCol[nCol]:oRenderer:pWidget, nXAlign, nYAlign ) 
    METHOD SetAlign( nCol, nXAlign, nYAlign )  INLINE ::oModel:aCol[nCol]:SetAlign( nXAlign, nYAlign ) 
 
+   METHOD GetCol( nCol )                      INLINE ::oModel:aCol[ nCol ]
+   METHOD SetColVisible( nCol, lVisible )     INLINE ::oModel:aCol[ nCol ]:SetVisible( lVisible )
+   METHOD SetColTitle( nCol, cTitle )         INLINE ::oModel:aCol[ nCol ]:SetTitle( cTitle )
+   METHOD SetColClickable( nCol, lClickable ) INLINE ::oModel:aCol[ nCol ]:SetClickable( lClickable )
+
    METHOD HeadersVisible( lSet )  INLINE gtk_tree_view_set_headers_visible( ::oModel:oTreeView:pWidget , lSet )
 
    METHOD ForEach( bCode )  INLINE ::oModel:oTreeView:ForEach( bCode )
