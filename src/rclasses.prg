@@ -75,6 +75,9 @@ METHOD GET( cMessage, ... )  CLASS RSESSION
          MsgAlert( uResp["message"] )
          uResp := nil
 
+      Case uResp["ok"] .and. uResp["type"] = "boolean"
+         uResp := uResp["content"]
+
       Case uResp["type"] = "query"
          uResp := RCursor():New( uResp ) 
 
@@ -167,6 +170,9 @@ METHOD GET( cMessage, ... )  CLASS RObject
       Case !uResp["ok"]
          MsgAlert( uResp["message"] )
          uResp := nil
+      
+      Case uResp["ok"] .and. uResp["type"]="boolean"
+         uResp := uResp["content"]
 
       Case uResp["type"] = "query"
          uResp := RCursor():New( uResp ) 
@@ -188,6 +194,8 @@ RETURN uResp
 CLASS RCursor FROM TCURSOR
    DATA aStruct
    METHOD New( hMsg )
+
+   METHOD Struct()  INLINE  ::aStruct
    
    ERROR HANDLER OnError( ... )
 ENDCLASS
@@ -210,6 +218,7 @@ METHOD New( hMsg )  CLASS RCURSOR
    ::aStruct := hMsg["content"]["struct"]
 
 RETURN Self
+
 
 
 METHOD OnError( ... )
