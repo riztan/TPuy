@@ -114,6 +114,9 @@ Function Main( ... )
 
    Local tValor := hb_DateTime() //ROUND(SECONDS()+50,0)
  
+   Private cTest := "prueba"
+   RELEASE cTest // --  Esto para forzar incluir la función __vmXRelease() ya que con EXTERNAL o REQUEST no funciona. 
+
 //   Default uPar1 := "", uPar2 := "", uPar3 := "", uPar4 := ""
 
    SetGtkBuilder( .t. )
