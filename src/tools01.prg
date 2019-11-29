@@ -1077,4 +1077,29 @@ FUNCTION tpy_PDFOpen( cFilePDF )
 #endif  
 RETURN uRes
 */
+
+
+/** Descarga archivo desde url en la ubicación dada.
+ */
+#include "hbcurl.ch"
+FUNCTION tpy_download( cUrl, cTo, cError )
+   local nRes, pCurl
+  
+   pCurl = curl_easy_init()    // Initialize a CURL session.
+   curl_easy_setopt(pCurl, HB_CURLOPT_DOWNLOAD )
+   curl_easy_setopt(pCurl, HB_CURLOPT_URL, cURL)  // Pass URL as parameter.
+   curl_easy_setopt(pCurl, HB_CURLOPT_DL_FILE_SETUP, cTo )
+
+   nRes := curl_easy_perform( pCurl )
+   If nRes != HB_CURLE_OK
+      //MsgStop( curl_easy_strerror(nRes) )
+      cError := curl_easy_strerror(nRes)
+      curl_easy_cleanup( pCurl )
+      RETURN nRes
+   EndIf
+  
+   curl_easy_cleanup( pCurl )
+
+RETURN nRes
+
 //EOF
