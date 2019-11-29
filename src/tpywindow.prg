@@ -48,7 +48,11 @@ ENDCLASS
 
 METHOD NEW( cWndId, cTitle, nType, nWidth, nHeight, cId, uGlade, nTypeHint, cIconName, cIconFile, oParent )  CLASS TpyWindow
 
-  local cIconDefault := oTpuy:cImages+oTpuy:cIconMain
+  local cIconDefault 
+
+  if VALTYPE(oTPuy:cIconMain)="C" .and. FILE(oTpuy:cImages+oTpuy:cIconMain)
+     cIconDefault := oTPuy:cImages+oTPuy:cIconMain
+  endif
 
   default cIconFile to cIconDefault
 
