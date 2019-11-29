@@ -36,11 +36,12 @@ CLASS TCURSOR
    METHOD New( uData, aNames )
    METHOD Columns()               INLINE  HGetKeys( ::hHeaders )
    METHOD GetData()               INLINE  ::aData
+   METHOD Data()                  INLINE  ::aData
    METHOD Get( cColumn )
    METHOD GetRec( nPos )
    METHOD ForEach( bCode, ... )
 
-   METHOD GoTop()                 INLINE ::nPos := 1
+   METHOD GoTop()                 INLINE (::nPos := 1, ::lEof := iif(::nLen=0,.t.,.f.), ::lBof := .t.)
    METHOD GoBottom()              INLINE ::nPos := ::nLen
 
    METHOD RecCount()              INLINE ::nLen
@@ -70,14 +71,13 @@ ENDCLASS
 
 
 
-METHOD New( uData, aNames )
+METHOD New( uData, aNames )  CLASS TCURSOR
 
    HSetCaseMatch( ::hHeaders, .f. )
 
    if hb_IsArray( uData )
       if Empty( aNames ) ; return uData ; endif
 
-      ::nLen := LEN(uData)
       ::aData := uData
       ::nLen  := LEN(uData)
       AEVAL( aNames, {|a,n| hb_HSet( ::hHeaders, ALLTRIM(a), n ) } )
@@ -100,7 +100,8 @@ METHOD New( uData, aNames )
 
    ::nPos := 1
    ::lBof := .t.
-   ::lEof := iif( ::nPos>::nLen .or. ::nLen=0, .t., .f. ) 
+//   ::lEof := iif( ::nPos=::nLen .or. ::nLen=0, .t., .f. ) 
+   ::lEof := iif( ::nLen <= 0, .t., .f. )
 
 RETURN Self
 
@@ -111,7 +112,7 @@ RETURN Self
 /** Retorna el valor de la columna solicitada en la posicion ::nPos.
  *
  */
-METHOD Get( cColumn )
+METHOD Get( cColumn )  CLASS TCURSOR
    local uValue
    default cColumn to ""
 
@@ -131,7 +132,7 @@ Return uValue
 /** Retorna Hash con el contenido del cursor en la posicion
  *  ::nPos o la posición solicitada.
  */
-METHOD GetRec( nPos )
+METHOD GetRec( nPos )   CLASS TCURSOR
    local aNames := HGetKeys( ::hHeaders )
    local hResult := Hash()
    local uValue
@@ -150,7 +151,7 @@ RETURN hResult
 /** Ejecuta Bloque de Codigo mientras recorre 
  *  los datos del cursor.
  */
-METHOD ForEach( bCode, ... )
+METHOD ForEach( bCode, ... )   CLASS TCURSOR
    local aItem, hData
    local uValue
    FOR EACH aItem IN ::aData
@@ -170,7 +171,7 @@ RETURN
 /** Cambia el valor de la posición del cursor
  * 
  */
-METHOD Skip(nSkip)
+METHOD Skip(nSkip)   CLASS TCURSOR
    default nSkip to 1
 
    if VALTYPE( nSkip ) != "N" ; return .f. ; endif
@@ -194,7 +195,7 @@ RETURN .t.
 /**
  *
  */
-METHOD GoTo( nPos )
+METHOD GoTo( nPos )   CLASS TCURSOR
    default nPos to 0
 
    if VALTYPE( nPos ) != "N" ; return .f. ; endif
@@ -220,7 +221,7 @@ RETURN .T.
  *  si de un DATA se tratara.
  *
  */
-METHOD OnError( uValue ) 
+METHOD OnError( uValue )   CLASS TCURSOR
 
   Local cMsg   := __GetMessage() //UPPE(ALLTRIM(__GetMessage()))
 
