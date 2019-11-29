@@ -89,7 +89,7 @@
                  [ MSGWIDGET <oMsgWidget> ];
                  [ PICTURE <cPicture> ];
                  [ VALID <bValid> ];
-                 [ LENGHT <nLen> [ <lZero: ZERO> ] ];
+                 [ LENGTH <nLen> [ <lZero: ZERO> ] ];
                  [ COMPLETION <aCompletion> ];
                  [ FONT <oFont> ];
                  [ <lExpand: EXPAND> ] ;
