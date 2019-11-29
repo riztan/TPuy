@@ -221,7 +221,7 @@ RETURN Self
 
 
 
-METHOD OnError( ... )
+METHOD OnError( ... )  CLASS RCURSOR
 RETURN ::Get( ALLTRIM(__GetMessage()), ... )
 
 //eof
