@@ -981,7 +981,7 @@ FUNCTION ToSql( uValue, nDbType )
             if AT( "#", cResult ) > 0
                cResult := StrTran(uValue, '#', '\#')
             endif
-            cResult := "'"+ uValue + "'"
+            cResult := "'"+ cResult + "'"
          else
             // aun por revisar como escapar caracteres especiales en pgsql
             cResult := "'"+ StrTran(uValue, "'", ' ') + "'"
