@@ -589,9 +589,8 @@ Return .F.
  *  \ret Arreglo con el contenido del CSV.
  */ 
 FUNCTION CSV2Array(cFile,cDelimiter,lRemComillas)
-
    Local aItems 
-   Local aLines  
+   Local aLines, cLine  
    Local cText, nItems
    Local myDelimiter := "|"
 
@@ -599,15 +598,13 @@ FUNCTION CSV2Array(cFile,cDelimiter,lRemComillas)
    Default cDelimiter := ","
    Default lRemComillas   := .T.
 
-   cDelimiter := '"'+cDelimiter+'"'
-
    IF Empty(cFile) .OR. !File(cFile)
       Return {}   
    ENDIF
 
    cText := MEMOREAD(cFile)
 
-   cText := STRTRAN( cText, cDelimiter,'"'+myDelimiter+'"' )   //--  Coloco mi delimitador "|"
+   cText := STRTRAN( cText, cDelimiter,myDelimiter )   //--  Coloco mi delimitador "|"
 
    IF lRemComillas
       cText := STRTRAN( cText,'"',"" )   // ---  Eliminamos las comillas
@@ -621,11 +618,14 @@ FUNCTION CSV2Array(cFile,cDelimiter,lRemComillas)
 
    nItems := NumToken( aLines[1], myDelimiter )
    
-   aItems := ARRAY(LEN(aLines),nItems)
+   aItems := {} 
+   FOR EACH cLine IN aLines
+      if !Empty( cLine )
+         AADD( aItems, hb_aTokens( cLine, myDelimiter ) )
+      endif
+   NEXT
 
-   AEVAL(aLines, { |Lin,n| aItems[n]:= HB_aTokens( Lin, myDelimiter ) } )
-
-Return aItems
+Return aItemsReturn aItems
 
 
 
