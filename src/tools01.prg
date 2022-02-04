@@ -625,7 +625,7 @@ FUNCTION CSV2Array(cFile,cDelimiter,lRemComillas)
       endif
    NEXT
 
-Return aItems
+Return aItemsReturn aItems
 
 
 
