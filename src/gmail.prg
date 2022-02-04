@@ -16,7 +16,7 @@
 #require "hbssl"
 #require "hbtip"
 
-//REQUEST __HBEXTERN__HBSSL__
+REQUEST __HBEXTERN__HBSSL__
 
 #include "simpleio.ch"
 

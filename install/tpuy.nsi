@@ -19,7 +19,7 @@
 
   !define NOMBRE "TPuy"
   !define TPUY_EXE "tpuy_win_x86_hb32.exe"
-  !define VERSION "0.6.0(b)"
+  !define VERSION "0.6.2"
   !define FOLDER "TPuy"
 
   !define DRIVE  "C:"
@@ -56,7 +56,7 @@ Function .onInit
 
 ;        StrCpy $THEME "MS-Windows"
 
-        StrCpy $1 "Junio 2019"
+        StrCpy $1 "Enero 2022"
 
         # the plugins dir is automatically deleted when the installer exits
         InitPluginsDir

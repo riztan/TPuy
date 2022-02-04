@@ -1,5 +1,5 @@
-TPuy Versión 0.6.1 (Beta)
-Copyright (c) 2008 - 2019 gtxbase.org
+TPuy Versión 0.6.2
+Copyright (c) 2008 - 2022 gtxbase.org
 
 Desarrolladores:
        Riztan Gutierrez.

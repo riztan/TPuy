@@ -56,7 +56,7 @@ SOURCES  = $(SRCPATH)main.prg          \
            $(SRCPATH)tcursor.prg       \
            $(SRCPATH)tstatusbar.prg    \
            $(SRCPATH)rclasses.prg      \
-           $(SRCPATH)gmail.prg        #\
+           $(SRCPATH)gmail.prg         #\
 #           $(SRCPATH)dbfs.prg          \
 #           $(SRCPATH)dbf_indexar.prg     
 
@@ -85,6 +85,7 @@ PRGFLAGS=-I./include
 PRGFLAGS+=-I/harbour-project/contrib/xhb
 PRGFLAGS+=-I/harbour-project/contrib/hbtip
 PRGFLAGS+=-I$(HB_INC_3RD_PATH)/hbmxml
+PRGFLAGS+=-I/harbour-project/contrib/hbcurl
 
 include $(ROOT)Rules.make
 
